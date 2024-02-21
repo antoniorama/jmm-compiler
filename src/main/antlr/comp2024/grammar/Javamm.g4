@@ -18,6 +18,7 @@ INT : 'int' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 IMPORT : 'import' ;
+EXTENDS : 'extends' ;
 
 INTEGER : [0-9] ;
 ID : [a-zA-Z]+ ;
@@ -31,7 +32,7 @@ program
 
 
 classDecl
-    : CLASS name=ID
+    : CLASS name=ID classExtends?
         LCURLY
         methodDecl*
         RCURLY
@@ -39,6 +40,10 @@ classDecl
 
 importDecl
     : IMPORT name=dottedStrings SEMI
+    ;
+
+classExtends
+    : EXTENDS name=ID
     ;
 
 varDecl

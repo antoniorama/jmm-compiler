@@ -21,6 +21,7 @@ IMPORT : 'import' ;
 
 INTEGER : [0-9] ;
 ID : [a-zA-Z]+ ;
+DOT : '.' ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -37,7 +38,7 @@ classDecl
     ;
 
 importDecl
-    : IMPORT name=ID SEMI
+    : IMPORT name=dottedStrings SEMI
     ;
 
 varDecl
@@ -45,7 +46,12 @@ varDecl
     ;
 
 type
-    : name= INT ;
+    : name= INT
+    ;
+
+dottedStrings
+    : ID (DOT ID)*
+    ;
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?

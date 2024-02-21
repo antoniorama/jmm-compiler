@@ -17,6 +17,7 @@ CLASS : 'class' ;
 INT : 'int' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
+IMPORT : 'import' ;
 
 INTEGER : [0-9] ;
 ID : [a-zA-Z]+ ;
@@ -24,7 +25,7 @@ ID : [a-zA-Z]+ ;
 WS : [ \t\n\r\f]+ -> skip ;
 
 program
-    : classDecl EOF
+    : importDecl* classDecl EOF
     ;
 
 
@@ -33,6 +34,10 @@ classDecl
         LCURLY
         methodDecl*
         RCURLY
+    ;
+
+importDecl
+    : IMPORT name=ID SEMI
     ;
 
 varDecl

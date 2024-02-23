@@ -80,7 +80,7 @@ mainMethodDecl
     ;
 
 param
-    : type (LRECT RRECT)? name=ID
+    : type (LRECT RRECT | '...')? name=ID
     ;
 
 stmt

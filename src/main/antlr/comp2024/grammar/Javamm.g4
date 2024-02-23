@@ -113,6 +113,7 @@ expr
     | expr op= ADD expr #BinaryExpr //
     | value=INTEGER #IntegerLiteral //
     | name=ID #VarRefExpr //
+    | ID LRECT expr RRECT #ArrayAccessExpr
     ;
 
 

@@ -29,6 +29,7 @@ STATIC : 'static' ;
 
 IF : 'if' ;
 ELSE : 'else' ;
+WHILE : 'while' ;
 
 INTEGER : [0-9]+ ;
 ID : [a-zA-Z] [a-zA-Z0-9]* ;
@@ -96,10 +97,15 @@ stmt
     | ID SEMI #SimpleStmt
     | block #BlockStmt
     | ifStmt #IfElseStmt
+    | whileStmt #WhileLoopStmt
     ;
 
 ifStmt
    : IF LPAREN expr RPAREN stmt* (ELSE block)?
+   ;
+
+whileStmt
+   : WHILE LPAREN expr RPAREN stmt*
    ;
 
 expr

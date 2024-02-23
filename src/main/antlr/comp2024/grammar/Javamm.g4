@@ -27,8 +27,11 @@ IMPORT : 'import' ;
 EXTENDS : 'extends' ;
 STATIC : 'static' ;
 
+IF : 'if' ;
+ELSE : 'else' ;
+
 INTEGER : [0-9]+ ;
-ID : [a-zA-Z]+ ;
+ID : [a-zA-Z] [a-zA-Z0-9]* ;
 DOT : '.' ;
 
 WS : [ \t\n\r\f]+ -> skip ;
@@ -92,7 +95,12 @@ stmt
     | RETURN expr SEMI #ReturnStmt
     | ID SEMI #SimpleStmt
     | block #BlockStmt
+    | ifStmt #IfElseStmt
     ;
+
+ifStmt
+   : IF LPAREN expr RPAREN block (ELSE block)?
+   ;
 
 expr
     : expr op= MUL expr #BinaryExpr //

@@ -101,20 +101,22 @@ stmt
     ;
 
 ifStmt
-   : IF LPAREN expr RPAREN stmt* (ELSE block)?
-   ;
+    : IF LPAREN expr RPAREN stmt* (ELSE block)?
+    ;
 
 whileStmt
-   : WHILE LPAREN expr RPAREN stmt*
-   ;
+    : WHILE LPAREN expr RPAREN stmt*
+    ;
 
 expr
-    : expr op= MUL expr #BinaryExpr //
-    | expr op= ADD expr #BinaryExpr //
-    | value=INTEGER #IntegerLiteral //
-    | name=ID #VarRefExpr //
+    : expr op=MUL expr #BinaryExpr
+    | expr op=ADD expr #BinaryExpr
+    | LPAREN expr RPAREN #ParenExpr
+    | value=INTEGER #IntegerLiteral
+    | name=ID #VarRefExpr
     | ID LRECT expr RRECT #ArrayAccessExpr
     ;
+
 
 
 

@@ -5,6 +5,7 @@ grammar Javamm;
 }
 
 EQUALS : '=';
+COMMA : ',' ;
 SEMI : ';' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
@@ -53,12 +54,13 @@ classExtends
     ;
 
 varDecl
-    : type (LRECT RRECT)? name=ID SEMI
+    : param SEMI
     ;
 
 type
     : INT
     | BOOLEAN
+    | STRING
     | ID
     ;
 
@@ -69,7 +71,7 @@ dottedStrings
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
-        LPAREN param RPAREN
+        LPAREN param (COMMA param)* RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
@@ -78,7 +80,7 @@ mainMethodDecl
     ;
 
 param
-    : type name=ID
+    : type (LRECT RRECT)? name=ID
     ;
 
 stmt

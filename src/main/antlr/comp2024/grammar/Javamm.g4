@@ -83,9 +83,15 @@ param
     : type (LRECT RRECT | '...')? name=ID
     ;
 
+block
+    : LCURLY stmt* RCURLY
+    ;
+
 stmt
-    : expr EQUALS expr SEMI #AssignStmt //
+    : expr EQUALS expr SEMI #AssignStmt
     | RETURN expr SEMI #ReturnStmt
+    | ID SEMI #SimpleStmt
+    | block #BlockStmt
     ;
 
 expr

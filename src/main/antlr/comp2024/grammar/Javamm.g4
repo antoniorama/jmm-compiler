@@ -8,6 +8,8 @@ EQUALS : '=';
 SEMI : ';' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
+LRECT : '[';
+RRECT : ']';
 LPAREN : '(' ;
 RPAREN : ')' ;
 MUL : '*' ;
@@ -15,12 +17,13 @@ ADD : '+' ;
 
 CLASS : 'class' ;
 INT : 'int' ;
+BOOLEAN : 'boolean';
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 IMPORT : 'import' ;
 EXTENDS : 'extends' ;
 
-INTEGER : [0-9] ;
+INTEGER : [0-9]+ ;
 ID : [a-zA-Z]+ ;
 DOT : '.' ;
 
@@ -34,6 +37,7 @@ program
 classDecl
     : CLASS name=ID classExtends?
         LCURLY
+        varDecl*
         methodDecl*
         RCURLY
     ;
@@ -47,11 +51,13 @@ classExtends
     ;
 
 varDecl
-    : type name=ID SEMI
+    : type (LRECT RRECT)? name=ID SEMI
     ;
 
 type
-    : name= INT
+    : INT
+    | BOOLEAN
+    | ID
     ;
 
 dottedStrings

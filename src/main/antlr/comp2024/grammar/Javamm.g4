@@ -119,7 +119,7 @@ expr
     ;
 
 memberCallExpr_
-    : ID DOT ID LPAREN exprList? RPAREN
+    : ID (DOT ID LPAREN exprList? RPAREN)+
     ;
 
 exprList

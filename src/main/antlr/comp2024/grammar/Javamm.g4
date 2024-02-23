@@ -18,10 +18,13 @@ ADD : '+' ;
 CLASS : 'class' ;
 INT : 'int' ;
 BOOLEAN : 'boolean';
+VOID : 'void' ;
+STRING : 'String' ;
 PUBLIC : 'public' ;
 RETURN : 'return' ;
 IMPORT : 'import' ;
 EXTENDS : 'extends' ;
+STATIC : 'static' ;
 
 INTEGER : [0-9]+ ;
 ID : [a-zA-Z]+ ;
@@ -37,8 +40,7 @@ program
 classDecl
     : CLASS name=ID classExtends?
         LCURLY
-        varDecl*
-        methodDecl*
+        (varDecl | methodDecl | mainMethodDecl)*
         RCURLY
     ;
 
@@ -69,6 +71,10 @@ methodDecl locals[boolean isPublic=false]
         type name=ID
         LPAREN param RPAREN
         LCURLY varDecl* stmt* RCURLY
+    ;
+
+mainMethodDecl
+    : STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
     ;
 
 param

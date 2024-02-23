@@ -99,7 +99,7 @@ stmt
     ;
 
 ifStmt
-   : IF LPAREN expr RPAREN block (ELSE block)?
+   : IF LPAREN expr RPAREN stmt* (ELSE block)?
    ;
 
 expr

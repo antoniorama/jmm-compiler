@@ -115,8 +115,13 @@ expr
     | value=INTEGER #IntegerLiteral
     | name=ID #VarRefExpr
     | ID LRECT expr RRECT #ArrayAccessExpr
+    | memberCallExpr_ #MemberCallExpr
     ;
 
+memberCallExpr_
+    : ID DOT ID LPAREN exprList? RPAREN
+    ;
 
-
-
+exprList
+    : expr (COMMA expr)*
+    ;

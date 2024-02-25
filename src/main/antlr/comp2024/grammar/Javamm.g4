@@ -119,7 +119,7 @@ atom
     : LPAREN expr RPAREN #ParenExpr
     | value=INTEGER #IntegerLiteral
     | name=ID #VarRefExpr
-    | ID (LRECT expr RRECT)+ #ArrayAccessExpr
+    | LPAREN? ID RPAREN? (LRECT expr RRECT)+ #ArrayAccessExpr
     | memberCallExpr_ #MemberCallExpr
     | ID (DOT LENGTH)+ #LengthExpr
     ;

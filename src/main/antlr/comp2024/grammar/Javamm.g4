@@ -4,6 +4,10 @@ grammar Javamm;
     package pt.up.fe.comp2024;
 }
 
+// ---------------
+// - LEXER RULES -
+// ---------------
+
 EQUALS : '=';
 COMMA : ',' ;
 SEMI : ';' ;
@@ -36,6 +40,9 @@ EXTENDS : 'extends' ;
 STATIC : 'static' ;
 LENGTH : 'length' ;
 NEW : 'new' ;
+TRUE : 'true' ;
+FALSE : 'false' ;
+THIS : 'this' ;
 
 IF : 'if' ;
 ELSE : 'else' ;
@@ -46,6 +53,9 @@ ID : [a-zA-Z][a-zA-Z0-9]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
+// ----------------
+// - PARSER RULES -
+// ----------------
 program
     : importDecl* classDecl EOF
     ;
@@ -54,26 +64,27 @@ classDecl
     : CLASS name=ID classExtends?
         LCURLY
         (varDecl | methodDecl | mainMethodDecl)*
-        RCURLY
+        RCURLY #ClassDeclaration
     ;
 
+// name variable not capturing full import path
 importDecl
-    : IMPORT name=dottedStrings SEMI
+    : IMPORT name=ID (DOT ID)* SEMI #ImportDeclaration
     ;
 
 classExtends
-    : EXTENDS name=ID
+    : EXTENDS name=ID #ExtendClass
     ;
 
 varDecl
-    : param SEMI
+    : param SEMI #VariableDeclaration
     ;
 
 type
-    : INT
-    | BOOLEAN
-    | STRING
-    | ID
+    : INT #IntegerType
+    | BOOLEAN #BooleanType
+    | STRING #StringType
+    | ID #OtherType
     ;
 
 dottedStrings
@@ -84,36 +95,24 @@ methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
         LPAREN param (COMMA param)* RPAREN
-        LCURLY varDecl* stmt* RCURLY
+        LCURLY varDecl* stmt* RCURLY #MethodDeclaration
     ;
 
 mainMethodDecl
-    : STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
+    : STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY #MainMethodDeclaration
     ;
 
 param
-    : type (LRECT RRECT | '...')? name=ID
+    : type (LRECT RRECT | '...')? name=ID #Parameter
     ;
 
 stmt
-    : block
-    | ifStmt
-    | whileStmt
-    | expr EQUALS expr SEMI
-    | RETURN expr SEMI
-    | ID SEMI
-    ;
-
-block
-    : LCURLY stmt* RCURLY
-    ;
-
-ifStmt
-    : IF LPAREN expr RPAREN stmt (ELSE stmt)?
-    ;
-
-whileStmt
-    : WHILE LPAREN expr RPAREN stmt
+    : LCURLY stmt* RCURLY #BlockStatement
+    | IF LPAREN expr RPAREN stmt (ELSE stmt)? #IfStatement
+    | WHILE LPAREN expr RPAREN stmt #WhileStatement
+    | expr EQUALS expr SEMI #AssignmentStatement
+    | RETURN expr SEMI #ReturnStatement
+    | name=ID SEMI #ExpressionStatement
     ;
 
 expr
@@ -121,19 +120,21 @@ expr
     | expr DOT ID #PropertyAccess
     | expr DOT LENGTH #LengthAccess
     | expr LPAREN exprList? RPAREN #MethodCall
-    | ID #Variable
-    | INTEGER #IntegerLiteral
-    | LPAREN expr RPAREN #ParenExpr
-    | expr (MUL | DIVISION) expr #BinaryOp
-    | expr (ADD | SUB) expr #BinaryOp
-    | expr (GREATER | LESS) expr #RelationalExpr
-    | expr (AND | OR) expr #LogicalExpr
-    | NOT expr #NotExpr
+    | value=(TRUE | FALSE) #BooleanValue
+    | THIS #This
+    | name=ID #Variable
+    | value=INTEGER #IntegerLiteral
+    | LPAREN expr RPAREN #ParenthesesExpression
+    | expr op=(MUL | DIVISION) expr #BinaryOp
+    | expr op=(ADD | SUB) expr #BinaryOp
+    | expr op=(GREATER | LESS) expr #RelationalExpression
+    | expr op=(AND | OR) expr #LogicalExpression
+    | NOT expr #NotExpression
     | NEW type LRECT expr RRECT #NewArray
     | LRECT exprList? RRECT #ArrayInit
-    | NEW ID LPAREN exprList? RPAREN #NewClassInstance
+    | NEW className=ID LPAREN exprList? RPAREN #NewClassInstance
     ;
 
 exprList
-    : expr (COMMA expr)*
+    : expr (COMMA expr)* #ExpressionList
     ;

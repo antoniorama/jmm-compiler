@@ -16,6 +16,7 @@ RPAREN : ')' ;
 MUL : '*' ;
 ADD : '+' ;
 DOT : '.' ;
+NOT : '!' ;
 
 CLASS : 'class' ;
 INT : 'int' ;
@@ -28,6 +29,7 @@ IMPORT : 'import' ;
 EXTENDS : 'extends' ;
 STATIC : 'static' ;
 LENGTH : 'length' ;
+NEW : 'new' ;
 
 IF : 'if' ;
 ELSE : 'else' ;
@@ -118,6 +120,8 @@ expr
     | '(' expr ')' #ParenExpr
     | expr MUL expr #MulExpr
     | expr ADD expr #AddExpr
+    | NOT expr #NotExpr
+    | NEW type '[' expr ']' #NewArray
     ;
 
 exprList

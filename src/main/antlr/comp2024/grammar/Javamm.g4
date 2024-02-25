@@ -110,9 +110,13 @@ whileStmt
     ;
 
 expr
-    : expr op=MUL expr #BinaryExpr
-    | expr op=ADD expr #BinaryExpr
-    | LPAREN expr RPAREN #ParenExpr
+    : expr op=ADD expr #AddExpr
+    | expr op=MUL expr #MulExpr
+    | atom #AtomicExpr
+    ;
+
+atom
+    : LPAREN expr RPAREN #ParenExpr
     | value=INTEGER #IntegerLiteral
     | name=ID #VarRefExpr
     | ID LRECT expr RRECT #ArrayAccessExpr

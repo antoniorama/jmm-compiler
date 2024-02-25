@@ -15,6 +15,7 @@ LPAREN : '(' ;
 RPAREN : ')' ;
 MUL : '*' ;
 ADD : '+' ;
+DOT : '.' ;
 
 CLASS : 'class' ;
 INT : 'int' ;
@@ -33,15 +34,13 @@ ELSE : 'else' ;
 WHILE : 'while' ;
 
 INTEGER : [0-9]+ ;
-ID : [a-zA-Z] [a-zA-Z0-9]* ;
-DOT : '.' ;
+ID : [a-zA-Z][a-zA-Z0-9]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
 program
     : importDecl* classDecl EOF
     ;
-
 
 classDecl
     : CLASS name=ID classExtends?
@@ -88,44 +87,37 @@ param
     : type (LRECT RRECT | '...')? name=ID
     ;
 
+stmt
+    : block
+    | ifStmt
+    | whileStmt
+    | expr EQUALS expr SEMI
+    | RETURN expr SEMI
+    | ID SEMI
+    ;
+
 block
     : LCURLY stmt* RCURLY
     ;
 
-stmt
-    : expr EQUALS expr SEMI #AssignStmt
-    | RETURN expr SEMI #ReturnStmt
-    | ID SEMI #SimpleStmt
-    | block #BlockStmt
-    | ifStmt #IfElseStmt
-    | whileStmt #WhileLoopStmt
-    ;
-
 ifStmt
-    : IF LPAREN expr RPAREN stmt* (ELSE block)?
+    : IF LPAREN expr RPAREN stmt (ELSE stmt)?
     ;
 
 whileStmt
-    : WHILE LPAREN expr RPAREN stmt*
+    : WHILE LPAREN expr RPAREN stmt
     ;
 
 expr
-    : expr op=ADD expr #AddExpr
-    | expr op=MUL expr #MulExpr
-    | atom #AtomicExpr
-    ;
-
-atom
-    : LPAREN expr RPAREN #ParenExpr
-    | value=INTEGER #IntegerLiteral
-    | name=ID #VarRefExpr
-    | LPAREN? ID RPAREN? (LRECT expr RRECT)+ #ArrayAccessExpr
-    | memberCallExpr_ #MemberCallExpr
-    | ID (DOT LENGTH)+ #LengthExpr
-    ;
-
-memberCallExpr_
-    : ID (DOT ID LPAREN exprList? RPAREN)+
+    : expr '[' expr ']' #ArrayAccess
+    | expr '.' ID #PropertyAccess
+    | expr '.' LENGTH #LengthAccess
+    | expr '(' exprList? ')' #MethodCall
+    | ID #Variable
+    | INTEGER #IntegerLiteral
+    | '(' expr ')' #ParenExpr
+    | expr MUL expr #MulExpr
+    | expr ADD expr #AddExpr
     ;
 
 exprList

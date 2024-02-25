@@ -14,7 +14,9 @@ RRECT : ']';
 LPAREN : '(' ;
 RPAREN : ')' ;
 MUL : '*' ;
+DIVISION : '/' ;
 ADD : '+' ;
+SUB : '-';
 DOT : '.' ;
 NOT : '!' ;
 
@@ -118,8 +120,8 @@ expr
     | ID #Variable
     | INTEGER #IntegerLiteral
     | LPAREN expr RPAREN #ParenExpr
-    | expr MUL expr #MulExpr
-    | expr ADD expr #AddExpr
+    | expr (MUL | DIVISION) expr #BinaryOp
+    | expr (ADD | SUB) expr #BinaryOp
     | NOT expr #NotExpr
     | NEW type LRECT expr RRECT #NewArray
     | NEW ID LPAREN exprList? RPAREN #NewClassInstance

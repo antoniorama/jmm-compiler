@@ -130,6 +130,7 @@ expr
     | expr (AND | OR) expr #LogicalExpr
     | NOT expr #NotExpr
     | NEW type LRECT expr RRECT #NewArray
+    | LRECT exprList? RRECT #ArrayInit
     | NEW ID LPAREN exprList? RPAREN #NewClassInstance
     ;
 

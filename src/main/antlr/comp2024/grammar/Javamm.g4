@@ -111,17 +111,18 @@ whileStmt
     ;
 
 expr
-    : expr '[' expr ']' #ArrayAccess
-    | expr '.' ID #PropertyAccess
-    | expr '.' LENGTH #LengthAccess
-    | expr '(' exprList? ')' #MethodCall
+    : expr LRECT expr RRECT #ArrayAccess
+    | expr DOT ID #PropertyAccess
+    | expr DOT LENGTH #LengthAccess
+    | expr LPAREN exprList? RPAREN #MethodCall
     | ID #Variable
     | INTEGER #IntegerLiteral
-    | '(' expr ')' #ParenExpr
+    | LPAREN expr RPAREN #ParenExpr
     | expr MUL expr #MulExpr
     | expr ADD expr #AddExpr
     | NOT expr #NotExpr
-    | NEW type '[' expr ']' #NewArray
+    | NEW type LRECT expr RRECT #NewArray
+    | NEW ID LPAREN exprList? RPAREN #NewClassInstance
     ;
 
 exprList

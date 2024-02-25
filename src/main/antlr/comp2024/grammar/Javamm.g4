@@ -19,6 +19,10 @@ ADD : '+' ;
 SUB : '-';
 DOT : '.' ;
 NOT : '!' ;
+LESS : '<' ;
+GREATER : '>' ;
+AND : '&&' ;
+OR : '||' ;
 
 CLASS : 'class' ;
 INT : 'int' ;
@@ -122,6 +126,8 @@ expr
     | LPAREN expr RPAREN #ParenExpr
     | expr (MUL | DIVISION) expr #BinaryOp
     | expr (ADD | SUB) expr #BinaryOp
+    | expr (GREATER | LESS) expr #RelationalExpr
+    | expr (AND | OR) expr #LogicalExpr
     | NOT expr #NotExpr
     | NEW type LRECT expr RRECT #NewArray
     | NEW ID LPAREN exprList? RPAREN #NewClassInstance

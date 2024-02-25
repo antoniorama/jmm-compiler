@@ -26,6 +26,7 @@ RETURN : 'return' ;
 IMPORT : 'import' ;
 EXTENDS : 'extends' ;
 STATIC : 'static' ;
+LENGTH : 'length' ;
 
 IF : 'if' ;
 ELSE : 'else' ;
@@ -116,6 +117,7 @@ expr
     | name=ID #VarRefExpr
     | ID LRECT expr RRECT #ArrayAccessExpr
     | memberCallExpr_ #MemberCallExpr
+    | ID (DOT LENGTH)+ #LengthExpr
     ;
 
 memberCallExpr_

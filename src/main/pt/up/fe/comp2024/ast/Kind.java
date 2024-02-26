@@ -10,7 +10,7 @@ public enum Kind {
     PROGRAM,
     CLASS_DECL,
     IMPORT_DECL,
-    CLASS_EXTENDS,
+    EXTENDED_CLASS,
     VAR_DECL,
     TYPE,
     DOTTED_STRINGS,

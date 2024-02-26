@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static pt.up.fe.comp2024.JavammParser.EXTENDS;
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
@@ -19,25 +20,31 @@ public class JmmSymbolTableBuilder {
 
     public static JmmSymbolTable build(JmmNode root) {
         var imports = buildImports(root);
+
         var classDecl = root.getJmmChild(root.getNumChildren() - 1);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("name");
 
+        var extendedClass = buildExtendedClass(classDecl);
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
 
 
-        return new JmmSymbolTable(className, methods, returnTypes, params, locals, imports);
+        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, params, locals, imports);
     }
 
-    private static List<String> buildImports(JmmNode root){
-        return root.getChildren(IMPORT_DECL).stream()
+    private static List<String> buildImports(JmmNode node){
+        return node.getChildren(IMPORT_DECL).stream()
                 .map(importDecl -> importDecl.get("name"))
                 .toList();
     }
 
+    private static String buildExtendedClass(JmmNode node){
+        if(node.hasAttribute("extendedClass")) return node.get("extendedClass");
+        return null;
+    }
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
         // TODO: Simple implementation that needs to be expanded
 

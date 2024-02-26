@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.symboltable;
 
+import org.junit.Test;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class JmmSymbolTable implements SymbolTable {
 
     private final String className;
+    private final String extendedClass;
     private final List<String> methods;
     private final Map<String, Type> returnTypes;
     private final Map<String, List<Symbol>> params;
@@ -21,12 +23,14 @@ public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
 
     public JmmSymbolTable(String className,
+                          String extendedClass,
                           List<String> methods,
                           Map<String, Type> returnTypes,
                           Map<String, List<Symbol>> params,
                           Map<String, List<Symbol>> locals,
                           List<String> imports) {
         this.className = className;
+        this.extendedClass = extendedClass;
         this.methods = methods;
         this.returnTypes = returnTypes;
         this.params = params;
@@ -45,13 +49,10 @@ public class JmmSymbolTable implements SymbolTable {
     }
 
     @Override
-    public String getSuper() {
-        throw new NotImplementedException();
-    }
+    public String getSuper() {return extendedClass;}
 
     @Override
-    public List<Symbol> getFields() {
-        throw new NotImplementedException();
+    public List<Symbol> getFields() {return null;
     }
 
     @Override

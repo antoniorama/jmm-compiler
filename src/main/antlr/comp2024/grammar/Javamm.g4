@@ -61,7 +61,7 @@ program
     ;
 
 classDecl
-    : CLASS name=ID classExtends?
+    : CLASS name=ID (EXTENDS extendedClass=ID)?
         LCURLY
         (varDecl | methodDecl | mainMethodDecl)*
         RCURLY
@@ -72,9 +72,7 @@ importDecl
     : IMPORT name=ID (DOT ID)* SEMI
     ;
 
-classExtends
-    : EXTENDS name=ID
-    ;
+
 
 varDecl
     : param SEMI

@@ -18,7 +18,7 @@ public class JmmSymbolTableBuilder {
 
 
     public static JmmSymbolTable build(JmmNode root) {
-
+        var imports = buildImports(root);
         var classDecl = root.getJmmChild(root.getNumChildren() - 1);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("name");
@@ -27,9 +27,15 @@ public class JmmSymbolTableBuilder {
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
-        var imports = buildImports(classDecl);
+
 
         return new JmmSymbolTable(className, methods, returnTypes, params, locals, imports);
+    }
+
+    private static List<String> buildImports(JmmNode root){
+        return root.getChildren(IMPORT_DECL).stream()
+                .map(importDecl -> importDecl.get("name"))
+                .toList();
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
@@ -74,13 +80,6 @@ public class JmmSymbolTableBuilder {
                 .map(method -> method.get("name"))
                 .toList();
     }
-
-    private static List<String> buildImports(JmmNode clasDecl){
-        return clasDecl.getChildren(IMPORT_DECL).stream()
-                .map(method -> method.get("name"))
-                .toList();
-    }
-
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
         // TODO: Simple implementation that needs to be expanded

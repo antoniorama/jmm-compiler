@@ -12,8 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
-import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
@@ -28,8 +27,9 @@ public class JmmSymbolTableBuilder {
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
+        var imports = buildImports(classDecl);
 
-        return new JmmSymbolTable(className, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(className, methods, returnTypes, params, locals, imports);
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
@@ -71,6 +71,12 @@ public class JmmSymbolTableBuilder {
     private static List<String> buildMethods(JmmNode classDecl) {
 
         return classDecl.getChildren(METHOD_DECL).stream()
+                .map(method -> method.get("name"))
+                .toList();
+    }
+
+    private static List<String> buildImports(JmmNode clasDecl){
+        return clasDecl.getChildren(IMPORT_DECL).stream()
                 .map(method -> method.get("name"))
                 .toList();
     }

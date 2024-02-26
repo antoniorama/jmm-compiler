@@ -64,20 +64,20 @@ classDecl
     : CLASS name=ID classExtends?
         LCURLY
         (varDecl | methodDecl | mainMethodDecl)*
-        RCURLY #ClassDeclaration
+        RCURLY
     ;
 
 // name variable not capturing full import path
 importDecl
-    : IMPORT name=ID (DOT ID)* SEMI #ImportDeclaration
+    : IMPORT name=ID (DOT ID)* SEMI
     ;
 
 classExtends
-    : EXTENDS name=ID #ExtendClass
+    : EXTENDS name=ID
     ;
 
 varDecl
-    : param SEMI #VariableDeclaration
+    : param SEMI
     ;
 
 type
@@ -95,24 +95,24 @@ methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
         type name=ID
         LPAREN param (COMMA param)* RPAREN
-        LCURLY varDecl* stmt* RCURLY #MethodDeclaration
+        LCURLY varDecl* stmt* RCURLY
     ;
 
 mainMethodDecl
-    : STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY #MainMethodDeclaration
+    : STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
     ;
 
 param
-    : type (LRECT RRECT | '...')? name=ID #Parameter
+    : type (LRECT RRECT | '...')? name=ID
     ;
 
 stmt
-    : LCURLY stmt* RCURLY #BlockStatement
-    | IF LPAREN expr RPAREN stmt (ELSE stmt)? #IfStatement
-    | WHILE LPAREN expr RPAREN stmt #WhileStatement
-    | expr EQUALS expr SEMI #AssignmentStatement
-    | RETURN expr SEMI #ReturnStatement
-    | name=ID SEMI #ExpressionStatement
+    : LCURLY stmt* RCURLY #BlockStmt
+    | IF LPAREN expr RPAREN stmt (ELSE stmt)? #IfStmt
+    | WHILE LPAREN expr RPAREN stmt #WhileStmt
+    | expr EQUALS expr SEMI #AssignStmt
+    | RETURN expr SEMI #ReturnStmt
+    | name=ID SEMI #ExpressionStmt
     ;
 
 expr
@@ -122,11 +122,11 @@ expr
     | expr LPAREN exprList? RPAREN #MethodCall
     | value=(TRUE | FALSE) #BooleanValue
     | THIS #This
-    | name=ID #Variable
+    | name=ID #VarRefExpr
     | value=INTEGER #IntegerLiteral
     | LPAREN expr RPAREN #ParenthesesExpression
     | expr op=(MUL | DIVISION) expr #BinaryOp
-    | expr op=(ADD | SUB) expr #BinaryOp
+    | expr op=(ADD | SUB) expr #BinaryExpr
     | expr op=(GREATER | LESS) expr #RelationalExpression
     | expr op=(AND | OR) expr #LogicalExpression
     | NOT expr #NotExpression

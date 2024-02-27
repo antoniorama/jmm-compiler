@@ -80,7 +80,7 @@ type
     : INT #IntegerType
     | BOOLEAN #BooleanType
     | STRING #StringType
-    | ID #OtherType
+    | name=ID #OtherType
     ;
 
 arrayType

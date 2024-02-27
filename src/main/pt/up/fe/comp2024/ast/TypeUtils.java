@@ -21,15 +21,14 @@ public class TypeUtils {
      * @return
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
 
         var kind = Kind.fromString(expr.getKind());
 
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
-            case VAR_REF_EXPR -> getVarExprType(expr, table);
-            case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
-            case BOOLEAN_VALUE -> new Type(BOOLEAN_TYPE_NAME, false);
+            case OTHER_TYPE -> getVarExprType(expr, table);
+            case INTEGER_TYPE -> new Type(INT_TYPE_NAME, false);
+            case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -50,22 +49,8 @@ public class TypeUtils {
 
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // Extract the type node from the VarDecl. This assumes the type node is the first child.
-        JmmNode typeNode = varRefExpr.getJmmChild(0);
-
-        // Get the kind of the type node to determine the actual type
-        String typeKind = typeNode.getKind();
-
-        // Check for the type of the node
-        switch (typeKind) {
-            case "IntegerType":
-                return new Type(INT_TYPE_NAME, false); // int is not an array
-            case "BooleanType":
-                return new Type(BOOLEAN_TYPE_NAME, false); // boolean is not an array
-            default:
-                // Assuming custom types are not arrays for simplicity.
-                return new Type(typeKind, false);
-        }
+        String typeName = varRefExpr.get("name");
+        return new Type(typeName, false);
     }
 
 

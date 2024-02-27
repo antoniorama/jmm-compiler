@@ -27,11 +27,13 @@ public class JmmSymbolTableBuilder {
         var extendedClass = buildExtendedClass(classDecl);
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
-        var params = buildParams(classDecl);
-        var locals = buildLocals(classDecl);
+        // var params = buildParams(classDecl);
+        // var locals = buildLocals(classDecl);
         var fields = buildFields(classDecl);
 
-        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, params, locals, imports, fields);
+        Map<String, List<Symbol>> temp = new TreeMap<>();
+
+        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, temp, temp, imports, fields);
     }
 
     private static List<String> buildImports(JmmNode node){
@@ -53,10 +55,9 @@ public class JmmSymbolTableBuilder {
             // Check if the child is a variable declaration
             if (varDecl.getKind().equals("VarDecl")) {
                 // Get the name and type of the variable
-                String fieldName = varDecl.getJmmChild(0).get("name"); // Assuming first child of VarDecl is always Param
-                Type fieldType = TypeUtils.getExprType(varDecl.getJmmChild(0), null);
+                String fieldName = varDecl.getJmmChild(0).get("name");
+                Type fieldType = TypeUtils.getExprType(varDecl.getJmmChild(0).getJmmChild(0), null);
 
-                // Assuming Symbol is a class that takes the field's type and name
                 Symbol fieldSymbol = new Symbol(fieldType, fieldName);
 
                 // Add the constructed Symbol to the fields list

@@ -1,16 +1,15 @@
 package pt.up.fe.comp2024.symboltable;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static pt.up.fe.comp2024.JavammParser.EXTENDS;
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -30,9 +29,9 @@ public class JmmSymbolTableBuilder {
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
+        var fields = buildFields(classDecl);
 
-
-        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, params, locals, imports);
+        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, params, locals, imports, fields);
     }
 
     private static List<String> buildImports(JmmNode node){
@@ -45,6 +44,30 @@ public class JmmSymbolTableBuilder {
         if(node.hasAttribute("extendedClass")) return node.get("extendedClass");
         return null;
     }
+
+    private static List<Symbol> buildFields(JmmNode classDecl) {
+        List<Symbol> fields = new ArrayList<>();
+
+        // Iterate over all children of the class declaration
+        for (JmmNode varDecl : classDecl.getChildren()) {
+            // Check if the child is a variable declaration
+            if (varDecl.getKind().equals("VarDecl")) {
+                // Get the name and type of the variable
+                String fieldName = varDecl.getJmmChild(0).get("name"); // Assuming first child of VarDecl is always Param
+                SymbolTable table;
+                // Type fieldType = TypeUtils.getExprType(varDecl.getJmmChild(0), table);
+
+                // Assuming Symbol is a class that takes the field's type and name
+                // Symbol fieldSymbol = new Symbol(fieldType, fieldName);
+
+                // Add the constructed Symbol to the fields list
+                // fields.add(fieldSymbol);
+            }
+        }
+
+        return fields;
+    }
+
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
         // TODO: Simple implementation that needs to be expanded
 

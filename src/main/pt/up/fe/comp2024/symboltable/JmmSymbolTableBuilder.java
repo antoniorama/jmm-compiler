@@ -54,14 +54,13 @@ public class JmmSymbolTableBuilder {
             if (varDecl.getKind().equals("VarDecl")) {
                 // Get the name and type of the variable
                 String fieldName = varDecl.getJmmChild(0).get("name"); // Assuming first child of VarDecl is always Param
-                SymbolTable table;
-                // Type fieldType = TypeUtils.getExprType(varDecl.getJmmChild(0), table);
+                Type fieldType = TypeUtils.getExprType(varDecl.getJmmChild(0), null);
 
                 // Assuming Symbol is a class that takes the field's type and name
-                // Symbol fieldSymbol = new Symbol(fieldType, fieldName);
+                Symbol fieldSymbol = new Symbol(fieldType, fieldName);
 
                 // Add the constructed Symbol to the fields list
-                // fields.add(fieldSymbol);
+                fields.add(fieldSymbol);
             }
         }
 

@@ -72,8 +72,6 @@ importDecl
     : IMPORT name=ID (DOT ID)* SEMI
     ;
 
-
-
 varDecl
     : param SEMI
     ;
@@ -85,19 +83,23 @@ type
     | ID #OtherType
     ;
 
+arrayType
+    : type LRECT RRECT
+    ;
+
 dottedStrings
     : ID (DOT ID)*
     ;
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        type name=ID
-        LPAREN param (COMMA param)* RPAREN
+        (type | arrayType) name=ID
+        LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;
 
 mainMethodDecl
-    : STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
+    : PUBLIC? STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
     ;
 
 param

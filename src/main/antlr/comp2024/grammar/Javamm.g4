@@ -77,15 +77,12 @@ varDecl
     ;
 
 type
-    : INT #IntegerType
-    | BOOLEAN #BooleanType
-    | STRING #StringType
-    | VOID #VoidType
+    : type LRECT RRECT #ArrayType
+    | value=INT #IntegerType
+    | value=BOOLEAN #BooleanType
+    | value=STRING #StringType
+    | value=VOID #VoidType
     | name=ID #OtherType
-    ;
-
-arrayType
-    : type LRECT RRECT
     ;
 
 dottedStrings
@@ -94,7 +91,7 @@ dottedStrings
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        (type | arrayType) name=ID
+        value=type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;

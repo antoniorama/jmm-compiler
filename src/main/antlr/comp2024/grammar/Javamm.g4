@@ -80,6 +80,7 @@ type
     : INT #IntegerType
     | BOOLEAN #BooleanType
     | STRING #StringType
+    | VOID #VoidType
     | name=ID #OtherType
     ;
 
@@ -99,7 +100,7 @@ methodDecl locals[boolean isPublic=false]
     ;
 
 mainMethodDecl
-    : PUBLIC? STATIC VOID 'main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
+    : PUBLIC? STATIC VOID name='main' LPAREN STRING LRECT RRECT 'args' RPAREN LCURLY stmt* RCURLY
     ;
 
 param

@@ -26,6 +26,7 @@ public class JmmSymbolTable implements SymbolTable {
     public JmmSymbolTable(String className,
                           String extendedClass,
                           List<String> methods,
+                          // methodName : returnType
                           Map<String, Type> returnTypes,
                           Map<String, List<Symbol>> params,
                           Map<String, List<Symbol>> locals,
@@ -63,10 +64,7 @@ public class JmmSymbolTable implements SymbolTable {
     }
 
     @Override
-    public Type getReturnType(String methodSignature) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(TypeUtils.getIntTypeName(), false);
-    }
+    public Type getReturnType(String methodSignature) {return this.returnTypes.get(methodSignature);}
 
     @Override
     public List<Symbol> getParameters(String methodSignature) {

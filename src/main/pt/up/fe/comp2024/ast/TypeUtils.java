@@ -8,6 +8,7 @@ public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
     private static final String BOOLEAN_TYPE_NAME = "boolean";
+    private static final String VOID_TYPE_NAME = "void";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
@@ -29,6 +30,7 @@ public class TypeUtils {
             case OTHER_TYPE -> getVarExprType(expr, table);
             case INTEGER_TYPE -> new Type(INT_TYPE_NAME, false);
             case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, false);
+            case VOID_TYPE -> new Type(VOID_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 

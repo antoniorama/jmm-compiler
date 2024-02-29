@@ -77,6 +77,8 @@ public class SymbolTableTest {
 
     @Test
     public void Methods() {
+        // Original test (not passing)
+        // var semantics = test("symboltable/MethodsAndFields.jmm", false);
         var semantics = test("symboltable/Methods.jmm", false);
         var st = semantics.getSymbolTable();
         var methods = st.getMethods();
@@ -85,11 +87,10 @@ public class SymbolTableTest {
         var checkBool = 0;
         var checkObj = 0;
         var checkAll = 0;
-        System.out.println("METHODS: " + methods);
         for (var m : methods) {
             var ret = st.getReturnType(m);
-            System.out.println("return type" + ret);
             var numParameters = st.getParameters(m).size();
+            System.out.println("method " + m + " retType " + ret + " parameters " + st.getParameters(m));
             switch (ret.getName()) {
                 case "MethodsAndFields":
                     checkObj++;
@@ -105,7 +106,6 @@ public class SymbolTableTest {
                         assertEquals("Method " + m + " parameters", 3, numParameters);
                     } else {
                         checkInt++;
-                        System.out.println("method is" + m);
                         assertEquals("Method " + m + " parameters", 0, numParameters);
                     }
                     break;

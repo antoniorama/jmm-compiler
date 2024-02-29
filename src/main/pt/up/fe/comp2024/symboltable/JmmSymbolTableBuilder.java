@@ -94,16 +94,17 @@ public class JmmSymbolTableBuilder {
 
         for (JmmNode method : classDecl.getChildren()) {
             if (method.getKind().equals("MethodDecl")) {
-                // System.out.println(method);
-                map.put(method.get("name"), Collections.emptyList());
+                String methodName = method.get("name");
+                List<Symbol> paramsList = map.getOrDefault(methodName, new ArrayList<>());
                 for (JmmNode paramDecl : method.getChildren(PARAM)) {
                     Type paramType = TypeUtils.getExprType(paramDecl.getJmmChild(0), null);
-                    map.put(method.get("name"), Arrays.asList(new Symbol(paramType, paramDecl.get("name"))));
+                    paramsList.add(new Symbol(paramType, paramDecl.get("name")));
                 }
+                map.put(methodName, paramsList);
             }
             else if (method.getKind().equals("MainMethodDecl")) {
-                // Main Method can be done hard-coded
-                map.put("main", Collections.emptyList());
+                // Main Method can be done hard-coded, assuming no parameters for main
+                map.put("main", new ArrayList<>());
             }
         }
 

@@ -69,14 +69,13 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
 
         Map<String, Type> map = new HashMap<>();
 
         for (JmmNode method : classDecl.getChildren()) {
             if (method.getKind().equals("MethodDecl")) {
                 // get the last child, assuming that return is always last child
-                Type returnType = TypeUtils.getExprType(method.getChild(method.getChildren().size() - 1), null);
+                Type returnType = TypeUtils.getExprType(method.getChild(0), null);
                 map.put(method.get("name"), returnType);
             }
             else if (method.getKind().equals("MainMethodDecl")) {
@@ -84,6 +83,8 @@ public class JmmSymbolTableBuilder {
             }
         }
 
+        System.out.println("RETURN TYPES");
+        System.out.println(map);
         return map;
     }
 

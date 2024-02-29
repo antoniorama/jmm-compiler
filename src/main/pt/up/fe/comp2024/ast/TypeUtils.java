@@ -23,14 +23,22 @@ public class TypeUtils {
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
 
-        var kind = Kind.fromString(expr.getKind());
+        // Check for Array Kind
+        JmmNode actualExpr = expr;
+        boolean isArray = false;
+        if (expr.getKind().equals("ArrayType")) {
+            actualExpr = expr.getJmmChild(0); // update acutalExpr to correct one
+            isArray = true;
+        }
+
+        var kind = Kind.fromString(actualExpr.getKind());
 
         Type type = switch (kind) {
-            case BINARY_EXPR -> getBinExprType(expr);
-            case OTHER_TYPE -> getVarExprType(expr, table);
-            case INTEGER_TYPE -> new Type(INT_TYPE_NAME, false);
-            case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, false);
-            case VOID_TYPE -> new Type(VOID_TYPE_NAME, false);
+            case BINARY_EXPR -> getBinExprType(actualExpr);
+            case OTHER_TYPE -> getVarExprType(actualExpr, table);
+            case INTEGER_TYPE -> new Type(INT_TYPE_NAME, isArray);
+            case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, isArray);
+            case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 

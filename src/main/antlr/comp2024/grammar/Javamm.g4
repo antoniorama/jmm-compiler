@@ -91,7 +91,7 @@ dottedStrings
 
 methodDecl locals[boolean isPublic=false]
     : (PUBLIC {$isPublic=true;})?
-        value=type name=ID
+        type name=ID
         LPAREN (param (COMMA param)*)? RPAREN
         LCURLY varDecl* stmt* RCURLY
     ;

@@ -27,13 +27,11 @@ public class JmmSymbolTableBuilder {
         var extendedClass = buildExtendedClass(classDecl);
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
-        // var params = buildParams(classDecl);
-        // var locals = buildLocals(classDecl);
+        var params = buildParams(classDecl);
+        var locals = buildLocals(classDecl);
         var fields = buildFields(classDecl);
-
-        Map<String, List<Symbol>> temp = new TreeMap<>();
-
-        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, temp, temp, imports, fields);
+        
+        return new JmmSymbolTable(className, extendedClass, methods, returnTypes, params, locals, imports, fields);
     }
 
     private static List<String> buildImports(JmmNode node){

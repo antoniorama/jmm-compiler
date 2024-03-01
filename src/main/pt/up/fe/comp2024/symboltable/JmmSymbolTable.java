@@ -17,16 +17,15 @@ public class JmmSymbolTable implements SymbolTable {
     private final String className;
     private final String extendedClass;
     private final List<String> methods;
-    private final Map<String, Type> returnTypes;
+    private final Map<String, Type> returnTypes; // methodName : returnType
     private final Map<String, List<Symbol>> params;
-    private final Map<String, List<Symbol>> locals;
+    private final Map<String, List<Symbol>> locals; // methodName : Symbol of variable
     private final List<String> imports;
     private final List<Symbol> fields;
 
     public JmmSymbolTable(String className,
                           String extendedClass,
                           List<String> methods,
-                          // methodName : returnType
                           Map<String, Type> returnTypes,
                           Map<String, List<Symbol>> params,
                           Map<String, List<Symbol>> locals,

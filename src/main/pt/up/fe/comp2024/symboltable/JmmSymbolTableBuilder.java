@@ -8,6 +8,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.awt.desktop.SystemEventListener;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -114,14 +115,18 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, List<Symbol>> buildLocals(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
 
         Map<String, List<Symbol>> map = new HashMap<>();
 
+        List<JmmNode> methodDecls = classDecl.getChildren();
+        for (JmmNode method : methodDecls) {
+            if (method.getKind().equals("MethodDecl") || method.getKind().equals("MainMethodDecl")) {
+                map.put(method.get("name"), getLocalsList(method));
+            }
+        }
 
-        classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), getLocalsList(method)));
-
+        System.out.println("BUILD LOCALS");
+        System.out.println(map);
         return map;
     }
 
@@ -136,14 +141,18 @@ public class JmmSymbolTableBuilder {
     }
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
-        // TODO: Simple implementation that needs to be expanded
-        return Collections.emptyList();
+        List<Symbol> localsList = new ArrayList<>();
+        List<JmmNode> varDecls = methodDecl.getChildren(VAR_DECL);
 
-        /* var intType = new Type(TypeUtils.getIntTypeName(), false);
+        // iterate the var declarations
+        for (JmmNode varDecl : varDecls) {
+            JmmNode param = varDecl.getChild(0);
+            Type paramType = TypeUtils.getExprType(param.getChild(0), null);
+            Symbol varSymbol = new Symbol(paramType, param.get("name"));
+            localsList.add(varSymbol);
+        }
 
-        return methodDecl.getChildren(VAR_DECL).stream()
-                .map(varDecl -> new Symbol(intType, varDecl.get("name")))
-                .toList(); */
+        return localsList;
     }
 
 }

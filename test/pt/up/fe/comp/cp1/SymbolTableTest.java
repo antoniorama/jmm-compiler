@@ -46,9 +46,7 @@ public class SymbolTableTest {
 
     @Test
     public void Fields() {
-        // This is the original test, it doesn't pass if methods are not implemented
-        // var semantics = test("symboltable/MethodsAndFields.jmm", false);
-        var semantics = test("symboltable/Fields.jmm", false);
+        var semantics = test("symboltable/MethodsAndFields.jmm", false);
         var fields = semantics.getSymbolTable().getFields();
         assertEquals(3, fields.size());
         var checkInt = 0;
@@ -77,9 +75,7 @@ public class SymbolTableTest {
 
     @Test
     public void Methods() {
-        // Original test (not passing)
-        // var semantics = test("symboltable/MethodsAndFields.jmm", false);
-        var semantics = test("symboltable/Methods.jmm", false);
+        var semantics = test("symboltable/MethodsAndFields.jmm", false);
         var st = semantics.getSymbolTable();
         var methods = st.getMethods();
         assertEquals(5, methods.size());

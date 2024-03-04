@@ -1,6 +1,9 @@
+// Class
+
 class App {
 
-	int foo(int a) {
+    // This is a comment
+	int foo(int a) { // sjkdhupiasoldashoiçjk
 		int b;
 		int c;
 
@@ -10,4 +13,5 @@ class App {
 		return c;
 	}
 
+    // Comment
 }

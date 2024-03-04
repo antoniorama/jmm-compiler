@@ -31,7 +31,7 @@ SINGLE_COMMENT : '//' .*? '\n' -> skip ;
 MULTI_COMMENT :  '/*' .*? '*/'  '\n' -> skip ;
 
 CLASS : 'class' ;
-INT : 'int' ;
+    INT : 'int' ;
 BOOLEAN : 'boolean';
 VOID : 'void' ;
 STRING : 'String' ;
@@ -51,7 +51,7 @@ ELSE : 'else' ;
 WHILE : 'while' ;
 
 INTEGER : [0-9]+ ;
-ID : [a-zA-Z][a-zA-Z0-9]* ;
+ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS : [ \t\n\r\f]+ -> skip ;
 
@@ -80,11 +80,11 @@ varDecl
 
 type
     : type LRECT RRECT #ArrayType
-    | value=INT #IntegerType
-    | value=BOOLEAN #BooleanType
-    | value=STRING #StringType
-    | value=VOID #VoidType
-    | name=ID #OtherType
+    | INT #IntegerType
+    | BOOLEAN #BooleanType
+    | STRING #StringType
+    | VOID #VoidType
+    | ID #OtherType
     ;
 
 dottedStrings

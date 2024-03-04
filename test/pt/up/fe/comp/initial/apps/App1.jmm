@@ -5,7 +5,7 @@ class App {
     /* Niggga baallllls
         */
 	int foo(int a) { // sjkdhupiasoldashoiçjk
-		int b;
+		int _b;
 		int c;
 
 		b = 9;

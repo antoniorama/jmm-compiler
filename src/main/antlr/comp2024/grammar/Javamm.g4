@@ -112,7 +112,7 @@ stmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
     | expr EQUALS expr SEMI #AssignStmt
     | RETURN expr SEMI #ReturnStmt
-    | name=ID SEMI #ExpressionStmt
+    | expr SEMI #ExpressionStmt
     ;
 
 expr

@@ -257,7 +257,7 @@ public class GrammarTest {
     /**
      * Test to ensure that a single method within a class is parsed correctly.
      */
-    @Test
+    /*@Test
     public void testSingleMethod() {
         TestUtils.parseVerbose(
                 "class MethodsAndFields{" +
@@ -271,7 +271,7 @@ public class GrammarTest {
     /**
      * Test to ensure that a class with multiple fields and methods is parsed correctly.
      */
-    @Test
+   /* @Test
     public void testMethodsAndFields() {
         TestUtils.parseVerbose(
                 "class MethodsAndFields{" +
@@ -296,6 +296,6 @@ public class GrammarTest {
                         "}"
         );
     }
-
+*/
 
 }

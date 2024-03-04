@@ -31,7 +31,7 @@ SINGLE_COMMENT : '//' .*? '\n' -> skip ;
 MULTI_COMMENT :  '/*' .*? '*/'  '\n' -> skip ;
 
 CLASS : 'class' ;
-    INT : 'int' ;
+INT : 'int' ;
 BOOLEAN : 'boolean';
 VOID : 'void' ;
 STRING : 'String' ;

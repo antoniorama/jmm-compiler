@@ -80,11 +80,11 @@ varDecl
 
 type
     : type LRECT RRECT #ArrayType
-    | INT #IntegerType
-    | BOOLEAN #BooleanType
-    | STRING #StringType
-    | VOID #VoidType
-    | ID #OtherType
+    | value=INT #IntegerType
+    | value=BOOLEAN #BooleanType
+    | value=STRING #StringType
+    | value=VOID #VoidType
+    | name=ID #OtherType
     ;
 
 dottedStrings

@@ -28,6 +28,7 @@ GREATER : '>' ;
 AND : '&&' ;
 OR : '||' ;
 SINGLE_COMMENT : '//' .*? '\n' -> skip ;
+MULTI_COMMENT :  '/*' .*? '*/'  '\n' -> skip ;
 
 CLASS : 'class' ;
 INT : 'int' ;

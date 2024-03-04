@@ -19,7 +19,9 @@ import pt.up.fe.comp.TestUtils;
 public class GrammarTest {
 
 
+    // TODO: Set name of imports grammar rule
     private static final String IMPORT = "importDecl";
+    // TODO: Set name of main method grammar rule
     private static final String MAIN_METHOD = "mainMethodDecl";
     private static final String INSTANCE_METHOD = "methodDecl";
     private static final String STATEMENT = "stmt";
@@ -37,7 +39,7 @@ public class GrammarTest {
 
     @Test
     public void testClass() {
-        TestUtils.parseVerbose("class Foo  extends Bar {}");
+        TestUtils.parseVerbose("class Foo extends Bar {}");
     }
 
     @Test
@@ -251,51 +253,5 @@ public class GrammarTest {
     public void testExprArrayInit() {
         TestUtils.parseVerbose("[10, 20, 30]", EXPRESSION);
     }
-
-    // Our own grammar tests
-
-    /**
-     * Test to ensure that a single method within a class is parsed correctly.
-     */
-    /*@Test
-    public void testSingleMethod() {
-        TestUtils.parseVerbose(
-                "class MethodsAndFields{" +
-                        "    public int getField1(){" +
-                        "        return field1;" +
-                        "    }" +
-                        "}"
-        );
-    }
-
-    /**
-     * Test to ensure that a class with multiple fields and methods is parsed correctly.
-     */
-   /* @Test
-    public void testMethodsAndFields() {
-        TestUtils.parseVerbose(
-                "class MethodsAndFields{" +
-                        "int field1;" +
-                        "boolean field2;" +
-                        "MethodsAndFields field3;" +
-                        "public int getField1(){" +
-                        "   return field1;" +
-                        "}" +
-                        "public boolean getField2(){" +
-                        "   return field2;" +
-                        "}" +
-                        "public MethodsAndFields getField3(){" +
-                        "   return field3;" +
-                        "}" +
-                        "public int[] all(int a, boolean b, MethodsAndFields maf){" +
-                        "   int[] c;" +
-                        "   return c;" +
-                        "}" +
-                        "public static void main(String[] args){" +
-                        "}" +
-                        "}"
-        );
-    }
-*/
 
 }

@@ -18,9 +18,9 @@ public class AppTest {
         TestUtils.noErrors(TestUtils.parse(getResource("App1.jmm")));
     }
 
-    /* @Test
+    @Test
     public void testFull() {
         TestUtils.noErrors(TestUtils.backend(getResource("App1.jmm"), Collections.emptyMap()));
-    } */ 
+    }
 
 }

@@ -108,7 +108,7 @@ param
 
 stmt
     : LCURLY stmt* RCURLY #BlockStmt
-    | IF LPAREN expr RPAREN stmt (ELSE stmt)? #IfStmt
+    | IF LPAREN expr RPAREN stmt (ELSE IF LPAREN expr RPAREN stmt)* ELSE stmt #IfStmt
     | WHILE LPAREN expr RPAREN stmt #WhileStmt
     | expr EQUALS expr SEMI #AssignStmt
     | RETURN expr SEMI #ReturnStmt

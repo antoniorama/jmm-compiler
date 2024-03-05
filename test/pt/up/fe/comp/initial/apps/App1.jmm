@@ -2,14 +2,14 @@
 
 class App {
 
-    /* Niggga baallllls
-        */
-	int foo(int a) { // sjkdhupiasoldashoiçjk
+	int foo(int a) {
 		int _b;
 		int c;
 
 		b = 9;
 		c = a + b * 8;
+
+		if (b) c;
 
 		return c;
 	}

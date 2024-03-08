@@ -43,6 +43,8 @@ public enum Kind {
     INTEGER_TYPE,
     BOOLEAN_TYPE,
     STRING_TYPE,
+    ARRAY_TYPE,
+    VAR_ARGS_TYPE,
     OTHER_TYPE,
     VOID_TYPE;
 

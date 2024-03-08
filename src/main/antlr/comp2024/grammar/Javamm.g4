@@ -80,6 +80,7 @@ varDecl
 
 type
     : type LRECT RRECT #ArrayType
+    | type '...' #VarArgsType
     | value=INT #IntegerType
     | value=BOOLEAN #BooleanType
     | value=STRING #StringType

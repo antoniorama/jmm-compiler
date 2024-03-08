@@ -23,12 +23,19 @@ public class TypeUtils {
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
 
-        // Check for Array Kind
+        // Check for Array and VarArgs
         JmmNode actualExpr = expr;
         boolean isArray = false;
+        boolean isVarArgs = false;
         if (expr.getKind().equals("ArrayType")) {
             actualExpr = expr.getJmmChild(0); // update acutalExpr to correct one
             isArray = true;
+        }
+
+        else if (expr.getKind().equals("VarArgsType")) {
+            actualExpr = expr.getJmmChild(0); // update acutalExpr to correct one
+            isArray = true;
+            isVarArgs = true;
         }
 
         var kind = Kind.fromString(actualExpr.getKind());
@@ -41,6 +48,11 @@ public class TypeUtils {
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
+
+        // set custom attribute isVarArgs
+        if (isVarArgs) {
+            type.putObject("isVarArgs", true);
+        }
 
         return type;
     }

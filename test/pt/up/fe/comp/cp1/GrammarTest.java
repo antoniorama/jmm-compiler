@@ -282,4 +282,20 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testIntPlusObject() {
+        TestUtils.parseVerbose(
+                "import A;" +
+                        "class IntPlusObject {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       A a;" +
+                        "       a = new A();" +
+                        "       return 10 + a;" +
+                        "   }" +
+                        "}"
+        );
+    }
 }

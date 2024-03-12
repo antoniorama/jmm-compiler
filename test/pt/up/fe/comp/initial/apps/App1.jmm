@@ -1,18 +1,16 @@
-// Class
+import A;
 
-class App {
+class IntPlusObject {
 
-	int foo(int a) {
-		int _b;
-		int c;
+    public static void main(String[] args) {
 
-		b = 9;
-		c = a + b * 8;
+    }
 
-		if (b) c;
+    public int foo() {
+        A a;
 
-		return c;
-	}
+        a = new A();
 
-    // Comment
+        return 10 + a;
+    }
 }

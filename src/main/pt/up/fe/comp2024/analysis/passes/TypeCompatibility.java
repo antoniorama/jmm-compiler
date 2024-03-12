@@ -31,13 +31,23 @@ public class TypeCompatibility extends AnalysisVisitor {
     private Void verifyTypeCompatibility(JmmNode node, SymbolTable table) {
         String operator = node.get("op");
 
-        Type leftType = TypeUtils.getExprType(node.getChild(0), table);
-        Type rightType = TypeUtils.getExprType(node.getChild(1), table);
+        Type leftType;
+        if (node.getChild(0).getKind().equals("VarRefExpr")) {
+            leftType = getVarType(node.getChild(0).get("name"), table, node);
+        } else {
+            leftType = TypeUtils.getExprType(node.getChild(0), table);
+        }
+
+        Type rightType;
+        if (node.getChild(1).getKind().equals("VarRefExpr")) {
+            rightType = getVarType(node.getChild(1).get("name"), table, node);
+        } else {
+            rightType = TypeUtils.getExprType(node.getChild(1), table);
+        }
 
         // debug
-        System.out.println("here");
-        System.out.println(leftType.getName());
-        System.out.println(rightType.getName());
+        // System.out.println(leftType.getName());
+        // System.out.println(rightType.getName());
 
         // Verify the compatibility of the types and handle the error report
         if (!areTypesCompatible(operator, leftType, rightType)) {
@@ -122,9 +132,5 @@ public class TypeCompatibility extends AnalysisVisitor {
             default:
                 return false;
         }
-    }
-
-    private Void visitVarRefExpr(JmmNode jmmNode, SymbolTable symbolTable) {
-        return null;
     }
 }

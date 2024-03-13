@@ -22,6 +22,7 @@ public class TypeCompatibility extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
+        addVisit(Kind.RETURN_STMT, this::verifyTypeCompatibility);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -111,6 +112,7 @@ public class TypeCompatibility extends AnalysisVisitor {
         return null;
     }
 
+    /*
     private Type determineResultingType(String operator, Type leftType, Type rightType, JmmNode node) {
 
         if (areTypesCompatible(operator, leftType, rightType)) {
@@ -122,6 +124,7 @@ public class TypeCompatibility extends AnalysisVisitor {
 
         return null;
     }
+    */
 
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType) {
         String intTypeName = TypeUtils.getIntTypeName();

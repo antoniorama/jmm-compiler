@@ -128,13 +128,10 @@ public class TypeCompatibility extends AnalysisVisitor {
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType) {
         String intTypeName = TypeUtils.getIntTypeName();
 
-        switch (operator) {
-            case "+":
-                return (leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName));
-            case "*":
-                return (leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName));
-            default:
-                return false;
-        }
+        return switch (operator) {
+            case "+" -> leftType == rightType;
+            case "*" -> leftType == rightType;
+            default -> false;
+        };
     }
 }

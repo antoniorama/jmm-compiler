@@ -316,4 +316,22 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testArrayPlusInt() {
+        TestUtils.parseVerbose(
+                "import ArrayPlusInt;" +
+                        "class TestArrayPlusInt {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       int[] a;" +
+                        "       int b;" +
+                        "       a = new int[2];" +
+                        "       b = 10;" +
+                        "       return a + b;" + // This line is conceptually for the test, assuming handling for array plus int
+                        "   }" +
+                        "}"
+        );
+    }
 }

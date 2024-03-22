@@ -11,10 +11,9 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
-import javax.annotation.processing.SupportedSourceVersion;
 import java.util.List;
 
-public class TypeCompatibility extends AnalysisVisitor {
+public class OtherSemantics extends AnalysisVisitor {
 
     private String currentMethod;
 
@@ -86,39 +85,6 @@ public class TypeCompatibility extends AnalysisVisitor {
         return null;
     }
 
-    /*
-    private Type getTypeFromNode(JmmNode node, SymbolTable table) {
-        Type type = null;
-
-        switch (node.getKind()) {
-            case "BinaryExpr":
-                Type leftType = getTypeFromNode(node.getChild(0), table);
-                Type rightType = getTypeFromNode(node.getChild(1), table);
-                String operator = node.get("op");
-                type = determineResultingType(operator, leftType, rightType, node);
-                break;
-            case "IntegerLiteral":
-                type = new Type();
-                break;
-            case "VarRefExpr":
-                String varName = node.get("name");
-                type = table.getVarType(varName, currentMethod);
-                break;
-            // Add cases for other node types that can be encountered.
-
-            default: // only for debug, to be deleted
-                System.out.println("getTypeFromNode error");
-        }
-
-        // only for debug, to be deleted
-        if (type == null) {
-            System.out.println("getTypeFromNode null type");
-        }
-
-        return type;
-    }
-    */
-
     private Type getVarType(String varName, SymbolTable table, JmmNode node) {
 
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
@@ -137,20 +103,6 @@ public class TypeCompatibility extends AnalysisVisitor {
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
         return null;
     }
-
-    /*
-    private Type determineResultingType(String operator, Type leftType, Type rightType, JmmNode node) {
-
-        if (areTypesCompatible(operator, leftType, rightType)) {
-            return leftType;
-        } else {
-            var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType);
-            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-        }
-
-        return null;
-    }
-    */
 
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType) {
         String intTypeName = TypeUtils.getIntTypeName();

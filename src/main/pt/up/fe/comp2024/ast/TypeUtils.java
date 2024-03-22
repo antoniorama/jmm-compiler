@@ -43,7 +43,7 @@ public class TypeUtils {
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(actualExpr);
             case OTHER_TYPE -> getVarExprType(actualExpr, table);
-            case INTEGER_TYPE -> new Type(INT_TYPE_NAME, isArray);
+            case INTEGER_TYPE, INTEGER_LITERAL -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
@@ -54,6 +54,7 @@ public class TypeUtils {
             type.putObject("isVarArgs", true);
         }
 
+        // System.out.println(type);
         return type;
     }
 

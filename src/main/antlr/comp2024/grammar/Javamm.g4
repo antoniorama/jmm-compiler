@@ -126,7 +126,7 @@ expr
     | name=ID #VarRefExpr
     | value=INTEGER #IntegerLiteral
     | LPAREN expr RPAREN #ParenthesesExpression
-    | expr op=(MUL | DIVISION) expr #BinaryOp
+    | expr op=(MUL | DIVISION) expr #BinaryExpr
     | expr op=(ADD | SUB) expr #BinaryExpr
     | expr op=(GREATER | LESS) expr #RelationalExpression
     | expr op=(AND | OR) expr #LogicalExpression

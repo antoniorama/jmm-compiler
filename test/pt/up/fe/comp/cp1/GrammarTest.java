@@ -254,6 +254,100 @@ public class GrammarTest {
         TestUtils.parseVerbose("[10, 20, 30]", EXPRESSION);
     }
 
+    /**
+     * Test to ensure that a class with multiple fields and methods is parsed correctly.
+     */
+    @Test
+    public void testMethodsAndFields() {
+        TestUtils.parseVerbose(
+                "class MethodsAndFields{" +
+                        "int field1;" +
+                        "boolean field2;" +
+                        "MethodsAndFields field3;" +
+                        "public int getField1(){" +
+                        "   return field1;" +
+                        "}" +
+                        "public boolean getField2(){" +
+                        "   return field2;" +
+                        "}" +
+                        "public MethodsAndFields getField3(){" +
+                        "   return field3;" +
+                        "}" +
+                        "public int[] all(int a, boolean b, MethodsAndFields maf){" +
+                        "   int[] c;" +
+                        "   return c;" +
+                        "}" +
+                        "public static void main(String[] args){" +
+                        "}" +
+                        "}"
+        );
+    }
 
+    @Test
+    public void testIntPlusObject() {
+        TestUtils.parseVerbose(
+                "import A;" +
+                        "class IntPlusObject {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       A a;" +
+                        "       a = new A();" +
+                        "       return 10 + a;" +
+                        "   }" +
+                        "}"
+        );
+    }
 
+    @Test
+    public void testBoolTimesInt() {
+        TestUtils.parseVerbose(
+                "import BoolTimesInt;" +
+                        "class TestBoolTimesInt {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       int a;" +
+                        "       boolean b;" +
+                        "       a = 10;" +
+                        "       b = true;" +
+                        "       return b * a;" +
+                        "   }" +
+                        "}"
+        );
+    }
+
+    @Test
+    public void testArrayPlusInt() {
+        TestUtils.parseVerbose(
+                "import ArrayPlusInt;" +
+                        "class TestArrayPlusInt {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       int[] a;" +
+                        "       int b;" +
+                        "       a = new int[2];" +
+                        "       b = 10;" +
+                        "       return a + b;" + // This line is conceptually for the test, assuming handling for array plus int
+                        "   }" +
+                        "}"
+        );
+    }
+
+    @Test
+    public void testArrayAccessOnInt() {
+        TestUtils.parseVerbose(
+                "import ArrayAccessOnInt;" +
+                        "class TestArrayAccessOnInt {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       int a;" +
+                        "       a = 0;" +
+                        "       return a[10];" + // Conceptually incorrect in Java, assuming interpretation by TestUtils.parseVerbose
+                        "   }" +
+                        "}"
+        );
+    }
 }

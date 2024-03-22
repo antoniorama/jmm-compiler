@@ -84,8 +84,6 @@ public class JmmSymbolTableBuilder {
             }
         }
 
-        System.out.println("RETURN TYPES");
-        System.out.println(map);
         return map;
     }
 
@@ -109,8 +107,6 @@ public class JmmSymbolTableBuilder {
             }
         }
 
-        System.out.println("BUILD PARAMS:");
-        System.out.println(map);
         return map;
     }
 
@@ -125,8 +121,6 @@ public class JmmSymbolTableBuilder {
             }
         }
 
-        System.out.println("BUILD LOCALS");
-        System.out.println(map);
         return map;
     }
 

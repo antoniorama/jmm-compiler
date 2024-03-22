@@ -298,4 +298,22 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testBoolTimesInt() {
+        TestUtils.parseVerbose(
+                "import BoolTimesInt;" +
+                        "class TestBoolTimesInt {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       int a;" +
+                        "       boolean b;" +
+                        "       a = 10;" +
+                        "       b = true;" +
+                        "       return b * a;" +
+                        "   }" +
+                        "}"
+        );
+    }
 }

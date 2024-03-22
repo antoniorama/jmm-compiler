@@ -22,7 +22,6 @@ public class TypeCompatibility extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
-        addVisit(Kind.RETURN_STMT, this::verifyTypeCompatibility);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -131,6 +130,8 @@ public class TypeCompatibility extends AnalysisVisitor {
 
         switch (operator) {
             case "+":
+                return (leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName));
+            case "*":
                 return (leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName));
             default:
                 return false;

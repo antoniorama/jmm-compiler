@@ -334,4 +334,20 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testArrayAccessOnInt() {
+        TestUtils.parseVerbose(
+                "import ArrayAccessOnInt;" +
+                        "class TestArrayAccessOnInt {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int foo() {" +
+                        "       int a;" +
+                        "       a = 0;" +
+                        "       return a[10];" + // Conceptually incorrect in Java, assuming interpretation by TestUtils.parseVerbose
+                        "   }" +
+                        "}"
+        );
+    }
 }

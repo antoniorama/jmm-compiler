@@ -22,6 +22,7 @@ public class TypeCompatibility extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
+        addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -54,6 +55,32 @@ public class TypeCompatibility extends AnalysisVisitor {
             // not sure if Kinds print for Strings?
             var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType);
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        }
+
+        return null;
+    }
+
+    private Void visitArrayAccess(JmmNode arrayAccess, SymbolTable table) {
+        JmmNode arrayVar = arrayAccess.getChild(0);
+        JmmNode arrayIndex = arrayAccess.getChild(1);
+
+        // Error if index is not an integer
+        if (!arrayIndex.getKind().equals(TypeUtils.getIntTypeName())) {
+            var message = String.format("Trying to access array with index that is not an Integer");
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
+        }
+
+        Type arrayVarType;
+        if (arrayVar.getKind().equals("VarRefExpr")) {
+            arrayVarType = getVarType(arrayAccess.getChild(0).get("name"), table, arrayAccess);
+        } else {
+            arrayVarType = TypeUtils.getExprType(arrayAccess.getChild(0), table);
+        }
+
+        // Error if variable isn't an array
+        if (!arrayVarType.isArray()) {
+            var message = String.format("Variable " + arrayVarType.getName() + " is not an array.");
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 
         return null;

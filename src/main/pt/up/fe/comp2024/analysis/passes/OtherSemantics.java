@@ -24,6 +24,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.ARRAY_INIT, this::visitArrayInit);
         addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
+        addVisit(Kind.METHOD_CALL, this::visitMethodCall);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -113,6 +114,23 @@ public class OtherSemantics extends AnalysisVisitor {
                 addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayInit), NodeUtils.getColumn(arrayInit), message, null));
                 break; // Reporting one error for type inconsistency is enough
             }
+        }
+
+        return null;
+    }
+
+    private Void visitMethodCall(JmmNode methodCall, SymbolTable table) {
+        List<String> classMethods = table.getMethods();
+        Type calledType = getVarType(methodCall.getJmmChild(0).get("name"), table, methodCall);
+
+        // if there is an extends, we can just assume that the method is in there
+        if (table.getSuper() != null) {
+            return null;
+        }
+
+        if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
+            var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
         }
 
         return null;

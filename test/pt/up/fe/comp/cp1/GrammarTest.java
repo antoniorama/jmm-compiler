@@ -350,4 +350,20 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testAssignIntToBool() {
+        TestUtils.parseVerbose(
+                "import AssignIntToBool;" +
+                        "class TestAssignIntToBool {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public boolean foo() {" +
+                        "       boolean a;" +
+                        "       a = 10;" +
+                        "       return a;" +
+                        "   }" +
+                        "}"
+        );
+    }
 }

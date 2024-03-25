@@ -133,7 +133,7 @@ expr
     | NOT expr #NotExpression
     | NEW type LRECT expr RRECT #NewArray
     | LRECT exprList? RRECT #ArrayInit
-    | NEW className=ID LPAREN exprList? RPAREN #NewClassInstance
+    | NEW name=ID LPAREN exprList? RPAREN #NewClassInstance
     ;
 
 exprList

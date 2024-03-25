@@ -21,6 +21,7 @@ public class OtherSemantics extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
+        addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
     }
 
@@ -28,8 +29,15 @@ public class OtherSemantics extends AnalysisVisitor {
         currentMethod = method.get("name");
         return null;
     }
+
+    // Verifies type compatibility for BinaryOps and Assigns
     private Void verifyTypeCompatibility(JmmNode node, SymbolTable table) {
-        String operator = node.get("op");
+        String operator = "ASSIGN"; // we will consider "ASSIGN" to be an operator.
+        // this way we don't have to do two separate functions for handling BinaryExpr and AssignStmt
+        // and we can use the same logic for TypeCompatibility
+
+        if (node.getKind().equals("BinaryExpr"))
+            operator = node.get("op");
 
         Type leftType;
         if (node.getChild(0).getKind().equals("VarRefExpr")) {
@@ -107,10 +115,20 @@ public class OtherSemantics extends AnalysisVisitor {
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType) {
         String intTypeName = TypeUtils.getIntTypeName();
 
+        System.out.println(operator);
+
         return switch (operator) {
             case "+" -> leftType == rightType;
             case "*" -> leftType == rightType;
+            case "ASSIGN" -> isAssignValid(leftType, rightType);
             default -> false;
         };
+    }
+
+    private boolean isAssignValid(Type leftType, Type rightType) {
+        // TODO - implement if needed!
+        // System.out.print(leftType);
+        // System.out.print(rightType);
+        return true;
     }
 }

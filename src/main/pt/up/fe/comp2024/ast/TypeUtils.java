@@ -42,7 +42,7 @@ public class TypeUtils {
 
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(actualExpr);
-            case OTHER_TYPE -> getVarExprType(actualExpr, table);
+            case OTHER_TYPE, NEW_CLASS_INSTANCE -> getVarExprType(actualExpr, table);
             case INTEGER_TYPE, INTEGER_LITERAL -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);

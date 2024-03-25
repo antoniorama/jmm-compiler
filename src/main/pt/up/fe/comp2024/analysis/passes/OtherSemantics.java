@@ -28,6 +28,15 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
+        // if there is a varArgs parameter that is not the last one -> error!
+        List<Symbol> methodParameters = table.getParameters(method.get("name"));
+        for (int i = 0; i < methodParameters.size() - 1; i++) {
+            if (methodParameters.get(i).getType().hasAttribute("isVarArgs")) {
+                var message = "Varargs parameter is not the last one!";
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(method), NodeUtils.getColumn(method), message, null));
+            }
+        }
+
         currentMethod = method.get("name");
         return null;
     }
@@ -56,10 +65,10 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         // debug
-        System.out.println("LEFT TYPE:");
-        System.out.println(leftType.getName());
-        System.out.println("RIGHT TYPE:");
-        System.out.println(rightType.getName());
+        // System.out.println("LEFT TYPE:");
+        // System.out.println(leftType.getName());
+        // System.out.println("RIGHT TYPE:");
+        // System.out.println(rightType.getName());
 
         // Verify the compatibility of the types and handle the error report
         if (!areTypesCompatible(operator, leftType, rightType, table)) {

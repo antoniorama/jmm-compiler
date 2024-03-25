@@ -366,4 +366,17 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testArrayInitialization() {
+        TestUtils.parseVerbose(
+                "class ArrayInit {" +
+                        "   public int[] foo() {" +
+                        "       int[] a;" +
+                        "       a = [10, 20, 30];" +
+                        "       return a;" +
+                        "   }" +
+                        "}"
+        );
+    }
 }

@@ -44,6 +44,7 @@ public class TypeUtils {
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(actualExpr);
             case OTHER_TYPE, NEW_CLASS_INSTANCE -> getVarExprType(actualExpr, table);
+            case ARRAY_INIT -> getArrayType(actualExpr, table);
             case INTEGER_TYPE, INTEGER_LITERAL -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
@@ -75,6 +76,17 @@ public class TypeUtils {
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         String typeName = varRefExpr.get("name");
         return new Type(typeName, false);
+    }
+
+    private static Type getArrayType(JmmNode arrayInit, SymbolTable table) {
+        // TODO - possibly need to extend implementation
+        // this function currently assumes that the Type of the array is the first element
+        // if array has multiple elements this is previously treated in semantic analysis
+
+        JmmNode expressionList = arrayInit.getJmmChild(0);
+        JmmNode firstElement = expressionList.getJmmChild(0);
+        Type firstElementType = getExprType(firstElement, table);
+        return new Type(firstElementType.getName(), true);
     }
 
 

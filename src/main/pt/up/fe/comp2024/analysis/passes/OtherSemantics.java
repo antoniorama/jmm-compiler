@@ -21,6 +21,7 @@ public class OtherSemantics extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
+        addVisit(Kind.ARRAY_INIT, this::visitArrayInit);
         addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
     }
@@ -93,6 +94,30 @@ public class OtherSemantics extends AnalysisVisitor {
         return null;
     }
 
+    private Void visitArrayInit(JmmNode arrayInit, SymbolTable table) {
+        JmmNode expressionList = arrayInit.getJmmChild(0);
+        List<JmmNode> elements = expressionList.getChildren();
+
+        // if array has length 0, then it's valid
+        if (elements.isEmpty()) {
+            return null;
+        }
+
+        Type firstElementType = TypeUtils.getExprType(elements.get(0), table);
+
+        for (int i = 1; i < elements.size(); i++) {
+            Type currentElementType = TypeUtils.getExprType(elements.get(i), table);
+
+            if (!firstElementType.equals(currentElementType)) {
+                var message = String.format("Array initialization contains elements of different types: %s and %s.", firstElementType.getName(), currentElementType.getName());
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayInit), NodeUtils.getColumn(arrayInit), message, null));
+                break; // Reporting one error for type inconsistency is enough
+            }
+        }
+
+        return null;
+    }
+
     private Type getVarType(String varName, SymbolTable table, JmmNode node) {
 
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
@@ -126,24 +151,31 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private boolean isAssignValid(Type leftType, Type rightType) {
-        // TODO - doesn't handle all possible cases
+        // TODO - probably isn't handling all possible cases
 
-        // Check if both types are the same, which is always valid
+        // Check for array compatibility first. If one is an array and the other isn't, they can't be assigned regardless of their base type.
+        if (leftType.isArray() != rightType.isArray()) {
+            return false; // Directly return false if one is an array and the other isn't.
+        }
+
+        // If both types have the same name and array status, they are compatible.
+        // This check is sufficient for both primitive types and class types, including arrays, since we already checked array status compatibility.
         if (leftType.getName().equals(rightType.getName())) {
             return true;
         }
 
-        // If both types are class types (i.e., not primitive types), then the assignment is considered valid.
-        // This simplification assumes that all class types are potentially compatible for the purpose of this compiler's semantic analysis.
+        // Beyond this point, the names are different, or we're dealing with class types where name equality isn't required for assignment compatibility.
+
+        // Determine if both types are class types (i.e., not primitive types).
         boolean leftIsClassType = !leftType.getName().equals(TypeUtils.getIntTypeName()) && !leftType.getName().equals(TypeUtils.getBooleanTypeName());
         boolean rightIsClassType = !rightType.getName().equals(TypeUtils.getIntTypeName()) && !rightType.getName().equals(TypeUtils.getBooleanTypeName());
 
-        // If both are class types, assignment is valid.
+        // If both are class types, and neither is a primitive type, the assignment is considered valid.
+        // This approach assumes class type compatibility is broader than exact name matching, which is true for polymorphism in object-oriented languages.
         if (leftIsClassType && rightIsClassType) {
             return true;
         }
 
-        // For all other cases, the assignment is invalid.
         return false;
     }
 

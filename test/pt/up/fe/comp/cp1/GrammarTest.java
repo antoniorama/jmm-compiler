@@ -397,4 +397,20 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testVarargsMethod() {
+        TestUtils.parseVerbose(
+                "class Varargs {\n" +
+                        "   public int foo() {\n" +
+                        "       int a;\n" +
+                        "       a = varargs(10, 20, 30);\n" +
+                        "       return a;\n" +
+                        "   }\n" +
+                        "   public int varargs(int... a) {\n" +
+                        "       return a[0];\n" +
+                        "   }\n" +
+                        "}"
+        );
+    }
 }

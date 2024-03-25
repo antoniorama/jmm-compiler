@@ -120,7 +120,7 @@ expr
     : expr LRECT expr RRECT #ArrayAccess
     | expr DOT ID #PropertyAccess
     | expr DOT LENGTH #LengthAccess
-    | expr DOT methodName=ID LPAREN exprList? RPAREN #MethodCall
+    | expr LPAREN exprList? RPAREN #MethodCall
     | value=(TRUE | FALSE) #BooleanValue
     | THIS #This
     | name=ID #VarRefExpr

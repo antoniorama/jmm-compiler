@@ -56,11 +56,13 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         // debug
-        // System.out.println(leftType.getName());
-        // System.out.println(rightType.getName());
+        System.out.println("LEFT TYPE:");
+        System.out.println(leftType.getName());
+        System.out.println("RIGHT TYPE:");
+        System.out.println(rightType.getName());
 
         // Verify the compatibility of the types and handle the error report
-        if (!areTypesCompatible(operator, leftType, rightType)) {
+        if (!areTypesCompatible(operator, leftType, rightType, table)) {
             // not sure if Kinds print for Strings?
             var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType);
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
@@ -161,7 +163,7 @@ public class OtherSemantics extends AnalysisVisitor {
         return null;
     }
 
-    private boolean areTypesCompatible(String operator, Type leftType, Type rightType) {
+    private boolean areTypesCompatible(String operator, Type leftType, Type rightType, SymbolTable table) {
         String intTypeName = TypeUtils.getIntTypeName();
 
         System.out.println(operator);
@@ -169,12 +171,12 @@ public class OtherSemantics extends AnalysisVisitor {
         return switch (operator) {
             case "+" -> leftType == rightType;
             case "*" -> leftType == rightType;
-            case "ASSIGN" -> isAssignValid(leftType, rightType);
+            case "ASSIGN" -> isAssignValid(leftType, rightType, table);
             default -> false;
         };
     }
 
-    private boolean isAssignValid(Type leftType, Type rightType) {
+    private boolean isAssignValid(Type leftType, Type rightType, SymbolTable table) {
         // TODO - probably isn't handling all possible cases
 
         // Check for array compatibility first. If one is an array and the other isn't, they can't be assigned regardless of their base type.
@@ -188,15 +190,14 @@ public class OtherSemantics extends AnalysisVisitor {
             return true;
         }
 
-        // Beyond this point, the names are different, or we're dealing with class types where name equality isn't required for assignment compatibility.
+        // ObjectAssignmentPassExtends
+        if (rightType.getName().equals(table.getClassName()) && leftType.getName().equals(table.getSuper())) {
+            return true;
+        }
 
-        // Determine if both types are class types (i.e., not primitive types).
-        boolean leftIsClassType = !leftType.getName().equals(TypeUtils.getIntTypeName()) && !leftType.getName().equals(TypeUtils.getBooleanTypeName());
-        boolean rightIsClassType = !rightType.getName().equals(TypeUtils.getIntTypeName()) && !rightType.getName().equals(TypeUtils.getBooleanTypeName());
-
-        // If both are class types, and neither is a primitive type, the assignment is considered valid.
-        // This approach assumes class type compatibility is broader than exact name matching, which is true for polymorphism in object-oriented languages.
-        if (leftIsClassType && rightIsClassType) {
+        // ObjectAssignmentPassImports
+        List<String> importedList = table.getImports();
+        if (importedList.contains(rightType.getName()) && importedList.contains(leftType.getName())) {
             return true;
         }
 

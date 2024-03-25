@@ -73,7 +73,7 @@ public class OtherSemantics extends AnalysisVisitor {
         JmmNode arrayIndex = arrayAccess.getChild(1);
 
         // Error if index is not an integer
-        if (!arrayIndex.getKind().equals(TypeUtils.getIntTypeName())) {
+        if (!arrayIndex.getKind().equals(TypeUtils.getIntTypeName()) && !arrayIndex.getKind().equals("IntegerLiteral")) {
             var message = String.format("Trying to access array with index that is not an Integer");
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
@@ -121,7 +121,7 @@ public class OtherSemantics extends AnalysisVisitor {
     private Type getVarType(String varName, SymbolTable table, JmmNode node) {
 
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
-        List<Symbol> symbolTableOfFieldVariables = table.getFields();
+        List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
 
         for (Symbol symbol : symbolTableOfLocalVars) {
             if (symbol.getName().equals(varName)) {
@@ -130,10 +130,16 @@ public class OtherSemantics extends AnalysisVisitor {
             }
         }
 
-        // TODO -> Code to get field variables
+        for (Symbol symbol : symbolTableOfParameters) {
+            if (symbol.getName().equals(varName)) {
+                // found variable
+                return symbol.getType();
+            }
+        }
 
         var message = String.format("Variable " + varName + " not found.");
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        System.out.println("herehreree");
         return null;
     }
 

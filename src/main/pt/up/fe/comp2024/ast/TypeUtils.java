@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.ast;
 
+import org.junit.internal.runners.SuiteMethod;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -48,6 +49,7 @@ public class TypeUtils {
             case INTEGER_TYPE, INTEGER_LITERAL -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE, BOOLEAN_VALUE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
+            case METHOD_CALL_ON_ASSIGN -> getMethodCallType(actualExpr, table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -87,6 +89,11 @@ public class TypeUtils {
         JmmNode firstElement = expressionList.getJmmChild(0);
         Type firstElementType = getExprType(firstElement, table);
         return new Type(firstElementType.getName(), true);
+    }
+
+    private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
+        System.out.println(table.getReturnType(methodCall.get("methodName")));
+         return table.getReturnType(methodCall.get("methodName"));
     }
 
 

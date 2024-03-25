@@ -126,9 +126,25 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private boolean isAssignValid(Type leftType, Type rightType) {
-        // TODO - implement if needed!
-        // System.out.print(leftType);
-        // System.out.print(rightType);
-        return true;
+        // TODO - doesn't handle all possible cases
+
+        // Check if both types are the same, which is always valid
+        if (leftType.getName().equals(rightType.getName())) {
+            return true;
+        }
+
+        // If both types are class types (i.e., not primitive types), then the assignment is considered valid.
+        // This simplification assumes that all class types are potentially compatible for the purpose of this compiler's semantic analysis.
+        boolean leftIsClassType = !leftType.getName().equals(TypeUtils.getIntTypeName()) && !leftType.getName().equals(TypeUtils.getBooleanTypeName());
+        boolean rightIsClassType = !rightType.getName().equals(TypeUtils.getIntTypeName()) && !rightType.getName().equals(TypeUtils.getBooleanTypeName());
+
+        // If both are class types, assignment is valid.
+        if (leftIsClassType && rightIsClassType) {
+            return true;
+        }
+
+        // For all other cases, the assignment is invalid.
+        return false;
     }
+
 }

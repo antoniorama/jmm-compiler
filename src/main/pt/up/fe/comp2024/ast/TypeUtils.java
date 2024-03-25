@@ -13,6 +13,7 @@ public class TypeUtils {
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
     }
+    public static String getBooleanTypeName() { return BOOLEAN_TYPE_NAME; }
 
     /**
      * Gets the {@link Type} of an arbitrary expression.

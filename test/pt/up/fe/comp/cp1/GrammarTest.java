@@ -379,4 +379,22 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testMethodCallWithArguments() {
+        TestUtils.parseVerbose(
+                "import A;" +
+                        "class AssumeArguments {" +
+                        "   public static void main(String[] args) {" +
+                        "   }" +
+                        "   public int bar() {" +
+                        "       A a;" +
+                        "       boolean b;" +
+                        "       a = new A();" +
+                        "       b = true;" +
+                        "       return a.foo(b);" +
+                        "   }" +
+                        "}"
+        );
+    }
 }

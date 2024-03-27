@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static pt.up.fe.comp2024.ast.Kind.TYPE;
+import static pt.up.fe.comp2024.ast.Kind.INTEGER_TYPE;
+import static pt.up.fe.comp2024.ast.Kind.BOOLEAN_TYPE;
 
 public class OptUtils {
     private static int tempNumber = -1;
@@ -32,9 +34,14 @@ public class OptUtils {
 
     public static String toOllirType(JmmNode typeNode) {
 
-        TYPE.checkOrThrow(typeNode);
+        // This logic had to be changed since we are treating Types in a different way in the Grammar!
 
-        String typeName = typeNode.get("name");
+        // TYPE.checkOrThrow(typeNode);
+        if (typeNode.getKind() == "integerType") INTEGER_TYPE.checkOrThrow(typeNode);
+        else if (typeNode.getKind() == "booleanType") BOOLEAN_TYPE.checkOrThrow(typeNode);
+        // TODO -> add the other types
+
+        String typeName = typeNode.get("value");
 
         return toOllirType(typeName);
     }

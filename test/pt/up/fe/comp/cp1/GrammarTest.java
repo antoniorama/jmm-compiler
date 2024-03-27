@@ -413,4 +413,21 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testCompileArithmeticMethod() {
+        TestUtils.parseVerbose(
+                "class CompileArithmetic {\n" +
+                        "   public static void main(String[] args) {\n" +
+                        "   }\n" +
+                        "   public int foo() {\n" +
+                        "       int a;\n" +
+                        "       int b;\n" +
+                        "       a = 1;\n" +
+                        "       b = 2;\n" +
+                        "       return a + b;\n" +
+                        "   }\n" +
+                        "}"
+        );
+    }
 }

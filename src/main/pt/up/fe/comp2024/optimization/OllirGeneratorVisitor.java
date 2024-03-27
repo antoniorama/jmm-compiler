@@ -131,38 +131,28 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var name = node.get("name");
         code.append(name);
 
-        // param
-
-        // Initialize a StringBuilder for parameters to accumulate parameter representations
+        // params
+        int paramCount = 0;
         StringBuilder paramsCode = new StringBuilder();
 
-        // Flag to indicate whether we've encountered the first parameter, to avoid leading comma
-        boolean firstParam = true;
-
-        // Iterate over all children to find those that are parameters
         for (JmmNode child : node.getChildren()) {
             if (child.getKind().equals("Param")) {
-                if (!firstParam) {
-                    // Add a comma before the next parameter if it's not the first one
+                paramCount++;
+
+                if (paramCount > 1) {
                     paramsCode.append(", ");
-                } else {
-                    firstParam = false; // We've processed the first parameter, subsequent parameters are not the first
                 }
 
-                // Visit the parameter node to get its OLLIR representation
                 var paramCode = visit(child);
                 paramsCode.append(paramCode);
             }
         }
 
-        // Wrap the accumulated parameters with parentheses and append to the method signature
         if (paramsCode.length() > 0) {
             code.append("(").append(paramsCode).append(")");
         } else {
-            // If there are no parameters, just add empty parentheses
             code.append("()");
         }
-
 
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));

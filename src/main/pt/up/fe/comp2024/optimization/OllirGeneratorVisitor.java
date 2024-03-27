@@ -179,6 +179,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(table.getClassName());
+
+        if (node.hasAttribute("extendedClass")) {
+            code.append(" extends ");
+            code.append(node.get("extendedClass"));
+        }
+
         code.append(L_BRACKET);
 
         code.append(NL);

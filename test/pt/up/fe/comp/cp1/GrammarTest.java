@@ -430,4 +430,27 @@ public class GrammarTest {
                         "}"
         );
     }
+
+    @Test
+    public void testCompileBasicMethods() {
+        TestUtils.parseVerbose(
+                "import io;\n" +
+                        "import Quicksort;\n" +
+                        "class CompileBasic extends Quicksort {\n" +
+                        "   int intField;\n" +
+                        "   boolean boolField;\n" +
+                        "   public int method1() {\n" +
+                        "       int intLocal1;\n" +
+                        "       boolean boolLocal1;\n" +
+                        "       return 0;\n" +
+                        "   }\n" +
+                        "   public boolean method2(int intParam1, boolean boolParam1) {\n" +
+                        "       return boolParam1;\n" +
+                        "   }\n" +
+                        "   public static void main(String[] args) {\n" +
+                        "   }\n" +
+                        "}"
+        );
+    }
+
 }

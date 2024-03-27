@@ -1,9 +1,11 @@
 package pt.up.fe.comp2024.ast;
 
-import org.junit.internal.runners.SuiteMethod;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+
+import java.util.List;
 
 public class TypeUtils {
 
@@ -44,12 +46,13 @@ public class TypeUtils {
 
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(actualExpr);
-            case OTHER_TYPE, NEW_CLASS_INSTANCE -> getVarExprType(actualExpr, table);
+            case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(actualExpr);
             case ARRAY_INIT -> getArrayType(actualExpr, table);
             case INTEGER_TYPE, INTEGER_LITERAL -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE, BOOLEAN_VALUE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             case METHOD_CALL_ON_ASSIGN -> getMethodCallType(actualExpr, table);
+            case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -75,9 +78,38 @@ public class TypeUtils {
     }
 
 
-    private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
+    private static Type getNewVarType(JmmNode varRefExpr) {
         String typeName = varRefExpr.get("name");
         return new Type(typeName, false);
+    }
+
+    private static Type getVarRefType(JmmNode varRefExpr, SymbolTable table) {
+        // Get the current method
+        JmmNode parent = varRefExpr.getParent();
+        while (!parent.getKind().equals("MethodDecl")) {
+            parent = parent.getParent();
+        }
+        String methodName = parent.get("name");
+        String varName = varRefExpr.get("name");
+
+        List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(methodName);
+        List<Symbol> symbolTableOfParameters = table.getParameters(methodName);
+
+        for (Symbol symbol : symbolTableOfLocalVars) {
+            if (symbol.getName().equals(varName)) {
+                // found variable
+                return symbol.getType();
+            }
+        }
+
+        for (Symbol symbol : symbolTableOfParameters) {
+            if (symbol.getName().equals(varName)) {
+                // found variable
+                return symbol.getType();
+            }
+        }
+
+        return null;
     }
 
     private static Type getArrayType(JmmNode arrayInit, SymbolTable table) {

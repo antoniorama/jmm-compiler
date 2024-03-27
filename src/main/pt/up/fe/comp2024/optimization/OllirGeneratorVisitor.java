@@ -180,12 +180,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(table.getClassName());
 
+        // class extends
         if (node.hasAttribute("extendedClass")) {
             code.append(" extends ");
             code.append(node.get("extendedClass"));
         }
 
         code.append(L_BRACKET);
+
+        // class fields
+        for (JmmNode child : node.getChildren()) {
+            if (child.getKind().equals("VarDecl")) {
+                code.append(".field public ");
+                var paramCode = visit(child.getChild(0));
+                code.append(paramCode);
+                code.append(END_STMT);
+            }
+        }
 
         code.append(NL);
         var needNl = true;

@@ -43,6 +43,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(EXPRESSION_STMT, this::visitExpressionStmt);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -214,6 +215,25 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(buildConstructor());
         code.append(R_BRACKET);
+
+        return code.toString();
+    }
+
+    private String visitExpressionStmt(JmmNode node, Void unused) {
+
+        StringBuilder code = new StringBuilder();
+
+        for (JmmNode child : node.getChildren()) {
+            if (child.getKind().equals("MethodCall")) {
+                String beforeDotName = child.getChild(0).get("name");
+                String methodName = child.get("methodName");
+                String paramName = exprVisitor.visit(child.getChild(1)).getCode();
+
+                // TODO - doesn't handle calls with multiple parameters
+
+                code.append("invokestatic(" + beforeDotName + ", \"" + methodName + "\", " + paramName + ").V;\n");
+            }
+        }
 
         return code.toString();
     }

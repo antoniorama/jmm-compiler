@@ -453,4 +453,22 @@ public class GrammarTest {
         );
     }
 
+    @Test
+    public void testCompileMethodInvocation() {
+        TestUtils.parseVerbose(
+                "import io;\n" +
+                        "class CompileMethodInvocation {\n" +
+                        "   public static void main(String[] args) {\n" +
+                        "   }\n" +
+                        "   public int foo() {\n" +
+                        "       int a;\n" +
+                        "       a = 1;\n" +
+                        "       io.println(a);\n" +
+                        "       return 0;\n" +
+                        "   }\n" +
+                        "}"
+        );
+    }
+
+
 }

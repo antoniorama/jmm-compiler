@@ -168,7 +168,6 @@ public class OtherSemantics extends AnalysisVisitor {
 
         var message = String.format("Variable " + varName + " not found.");
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-        System.out.println("herehreree");
         return null;
     }
 

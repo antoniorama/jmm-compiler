@@ -74,7 +74,12 @@ public class JasminGenerator {
         code.append(".class ").append(className).append(NL).append(NL);
 
         // TODO: Hardcoded to Object, needs to be expanded
-        code.append(".super java/lang/Object").append(NL);
+        var superName = ollirResult.getSymbolTable().getSuper();
+        if (superName != "") {
+            code.append(".super " + superName).append(NL);
+        } else {
+            code.append(".super java/lang/Object").append(NL);
+        }
 
         // generate a single constructor method
         var defaultConstructor = """
@@ -200,10 +205,15 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // TODO: Hardcoded to int return type, needs to be expanded
+        // TODO: Hardcoded to int return type, needs to be
 
-        code.append(generators.apply(returnInst.getOperand()));
-        code.append("ireturn").append(NL);
+        // If the return is void, then .getOperand() is null, not sure how to handle this
+        if (returnInst.getOperand() == null) {
+            code.append("return").append(NL);
+        } else {
+            code.append(generators.apply(returnInst.getOperand()));
+            code.append("ireturn").append(NL);
+        }
 
         return code.toString();
     }

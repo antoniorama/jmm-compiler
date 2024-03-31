@@ -10,6 +10,7 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -73,12 +74,9 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL).append(NL);
 
-        // TODO: Hardcoded to Object, needs to be expanded
-        var superName = ollirResult.getSymbolTable().getSuper();
-        if (superName != "") {
-            code.append(".super " + superName).append(NL);
-        } else {
-            code.append(".super java/lang/Object").append(NL);
+        var superName = ollirResult.getOllirClass().getSuperClass();
+        if (!Objects.equals(superName, "")) {
+            code.append(".super ").append(superName).append(NL);
         }
 
         // generate a single constructor method
@@ -86,10 +84,11 @@ public class JasminGenerator {
                 ;default constructor
                 .method public <init>()V
                     aload_0
-                    invokespecial java/lang/Object/<init>()V
+                    invokespecial %s/<init>()V
                     return
                 .end method
-                """;
+                """.formatted(superName);
+
         code.append(defaultConstructor);
 
         // generate code for all other methods
@@ -113,7 +112,6 @@ public class JasminGenerator {
 
         // set method
         currentMethod = method;
-
         var code = new StringBuilder();
 
         // calculate modifier
@@ -123,8 +121,20 @@ public class JasminGenerator {
 
         var methodName = method.getMethodName();
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
+        ArrayList<Element> paramList = method.getParams();
+        var params = new StringBuilder();
+        for (Element p : paramList) {
+            params.append(ollirTypeToChar(p.getType()));
+        }
+        String returnType = ollirTypeToChar(method.getReturnType());
+
+        // Add static on main method
+        String staticString = "";
+        if (Objects.equals(method.getMethodName(), "main")) {
+            staticString = "static ";
+        }
+
+        code.append("\n.method ").append(modifier).append(staticString).append(methodName).append("(").append(params).append(")").append(returnType).append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
@@ -143,6 +153,18 @@ public class JasminGenerator {
         currentMethod = null;
 
         return code.toString();
+    }
+
+    private String ollirTypeToChar(Type ollirType) {
+        // TODO - kind of an hardcoded implementation, might be a better way
+        if (ollirType.toString().equals("INT32")) {
+            return "I";
+        } else if (ollirType.toString().equals("BOOLEAN")) {
+            return "Z";
+        } else if (ollirType.toString().equals("STRING[]")) {
+            return "[Ljava/lang/String;";
+        }
+        return "V";
     }
 
     private String generateAssign(AssignInstruction assign) {

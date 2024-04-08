@@ -49,6 +49,8 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(CallInstruction.class, this::generateCall);
+        generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
+        generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(ReturnInstruction.class, this::generateReturn);
     }
 
@@ -126,9 +128,9 @@ public class JasminGenerator {
         ArrayList<Element> paramList = method.getParams();
         var params = new StringBuilder();
         for (Element p : paramList) {
-            params.append(ollirTypeToChar(p.getType()));
+            params.append(ollirTypeToJasminType(p.getType()));
         }
-        String returnType = ollirTypeToChar(method.getReturnType());
+        String returnType = ollirTypeToJasminType(method.getReturnType());
 
         // Add static on main method
         String staticString = "";
@@ -157,16 +159,23 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String ollirTypeToChar(Type ollirType) {
-        // TODO - kind of an hardcoded implementation, might be a better way
-        if (ollirType.toString().equals("INT32")) {
-            return "I";
-        } else if (ollirType.toString().equals("BOOLEAN")) {
-            return "Z";
-        } else if (ollirType.toString().equals("STRING[]")) {
-            return "[Ljava/lang/String;";
-        }
-        return "V";
+    private String ollirTypeToJasminType(Type type) {
+        // This method should map OLLIR types to Jasmin type descriptors
+        return switch (type.toString()) {
+            case "INT32" -> "I";
+            case "BOOLEAN" -> "Z";
+            case "STRING[]" -> "[Ljava/lang/String;";
+            case "VOID" -> "V";
+            default -> {
+                if (type.toString().startsWith("OBJECTREF")) {
+                    // Assuming the format is OBJECTREF(<ClassName>)
+                    var className = type.toString().substring(9, type.toString().length() - 1);
+                    yield "L" + className + ";";
+                } else {
+                    throw new NotImplementedException("Jasmin type not implemented for: " + type);
+                }
+            }
+        };
     }
 
     private String generateAssign(AssignInstruction assign) {
@@ -208,6 +217,39 @@ public class JasminGenerator {
         };
     }
 
+    private String generatePutFieldInstruction(PutFieldInstruction putFieldInst) {
+        var code = new StringBuilder();
+
+        code.append("aload_0").append(NL);
+
+        // Generate code for the value to be assigned to the field
+        // TODO -> generate right part of the code
+        code.append("sipush ");
+
+        // Get field details
+        var fieldName = putFieldInst.getField().getName();
+        var fieldType = ollirTypeToJasminType(putFieldInst.getField().getType());
+
+        // Perform the field assignment
+        code.append("putfield ").append(ollirResult.getOllirClass().getClassName())
+                .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
+
+        return code.toString();
+    }
+
+    private String generateGetFieldInstruction(GetFieldInstruction getFieldInst) {
+        var code = new StringBuilder();
+
+        // Get field details
+        var fieldName = getFieldInst.getField().getName();
+        var fieldType = ollirTypeToJasminType(getFieldInst.getField().getType());
+
+        code.append("aload_0").append(NL);
+        code.append("getfield ").append(ollirResult.getOllirClass().getClassName())
+                .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
+
+        return code.toString();
+    }
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
         return generators.apply(singleOp.getSingleOperand());

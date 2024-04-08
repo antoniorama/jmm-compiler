@@ -102,7 +102,7 @@ public enum Kind {
      * @return
      */
     public boolean check(JmmNode node) {
-        return node.getKind().equals(getNodeName());
+        return node.isInstance(this);
     }
 
     /**

@@ -48,6 +48,7 @@ public class JasminGenerator {
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
+        generators.put(CallInstruction.class, this::generateCall);
         generators.put(ReturnInstruction.class, this::generateReturn);
     }
 
@@ -186,11 +187,27 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        // TODO: Hardcoded for int type, needs to be expanded
-        code.append("istore ").append(reg).append(NL);
+        String storeInstruction = getStoreInstruction(operand.getType());
+        code.append(storeInstruction).append(" ").append(reg).append(NL);
 
         return code.toString();
     }
+
+    private String getStoreInstruction(Type type) {
+        return switch (type.toString()) {
+            case "INT32" -> "istore";
+            case "BOOLEAN" -> "istore";
+            default -> {
+                // Dynamically handle any type starting with "OBJECTREF"
+                if (type.toString().startsWith("OBJECTREF")) {
+                    yield "astore";
+                } else {
+                    throw new NotImplementedException("Store instruction not implemented for type: " + type);
+                }
+            }
+        };
+    }
+
 
     private String generateSingleOp(SingleOpInstruction singleOp) {
         return generators.apply(singleOp.getSingleOperand());
@@ -240,5 +257,23 @@ public class JasminGenerator {
 
         return code.toString();
     }
+
+    private String generateCall(CallInstruction call) {
+        var code = new StringBuilder();
+
+        // Check if it's a constructor call
+        var className = ollirResult.getOllirClass().getClassName();
+        if (call.getInvocationType() == CallType.NEW) {
+            code.append("new ").append(className).append(NL);
+            code.append("dup").append(NL);
+
+            code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
+        }
+
+        // TODO: Expand this section to handle arguments and other call types
+
+        return code.toString();
+    }
+
 
 }

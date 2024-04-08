@@ -74,7 +74,8 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL).append(NL);
 
-        var superName = ollirResult.getOllirClass().getSuperClass();
+        // Check if there is a class extends
+        var superName = Objects.equals(ollirResult.getOllirClass().getSuperClass(), "null") ? ollirResult.getOllirClass().getSuperClass() : "java/lang/Object";
         if (!Objects.equals(superName, "")) {
             code.append(".super ").append(superName).append(NL);
         }

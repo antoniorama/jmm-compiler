@@ -223,8 +223,8 @@ public class JasminGenerator {
         code.append("aload_0").append(NL);
 
         // Generate code for the value to be assigned to the field
-        // TODO -> generate right part of the code
-        code.append("sipush ");
+        String rhsCode = generateCodeForRHS(putFieldInst.getValue());
+        code.append(rhsCode);
 
         // Get field details
         var fieldName = putFieldInst.getField().getName();
@@ -234,6 +234,17 @@ public class JasminGenerator {
         code.append("putfield ").append(ollirResult.getOllirClass().getClassName())
                 .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
 
+        return code.toString();
+    }
+
+    private String generateCodeForRHS(Element value) {
+        var code = new StringBuilder();
+        if (value instanceof LiteralElement literal) {
+            code.append("ldc ").append(literal.getLiteral()).append(NL);
+        } else if (value instanceof Operand operand) {
+            int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+            code.append("iload ").append(reg).append(NL);
+        }
         return code.toString();
     }
 

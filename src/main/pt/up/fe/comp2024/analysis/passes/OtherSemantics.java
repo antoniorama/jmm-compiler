@@ -20,6 +20,7 @@ public class OtherSemantics extends AnalysisVisitor {
     @Override
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
+        addVisit(Kind.MAIN_METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_INIT, this::visitArrayInit);
         addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
@@ -131,14 +132,23 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitMethodCall(JmmNode methodCall, SymbolTable table) {
-        List<String> classMethods = table.getMethods();
-        Type calledType = getVarType(methodCall.getJmmChild(0).get("name"), table, methodCall);
 
         // if there is an extends, we can just assume that the method is in there
         if (table.getSuper() != null) {
             return null;
         }
 
+        String calledName = methodCall.getJmmChild(0).get("name");
+
+        // if the calledName is in imports, return
+        if (table.getImports().contains(calledName)) {
+            return null;
+        }
+
+        List<String> classMethods = table.getMethods();
+        Type calledType = getVarType(calledName, table, methodCall);
+
+        assert calledType != null;
         if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
             var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
@@ -152,6 +162,7 @@ public class OtherSemantics extends AnalysisVisitor {
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
         List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
 
+        // Check if var is in local variables
         for (Symbol symbol : symbolTableOfLocalVars) {
             if (symbol.getName().equals(varName)) {
                 // found variable
@@ -159,6 +170,7 @@ public class OtherSemantics extends AnalysisVisitor {
             }
         }
 
+        // Check if var is in parameters
         for (Symbol symbol : symbolTableOfParameters) {
             if (symbol.getName().equals(varName)) {
                 // found variable

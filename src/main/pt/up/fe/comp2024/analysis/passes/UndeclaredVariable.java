@@ -21,6 +21,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
+        addVisit(Kind.MAIN_METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
     }
 
@@ -57,6 +58,12 @@ public class UndeclaredVariable extends AnalysisVisitor {
         // Var is a method, return
         if (table.getMethods().stream()
                 .anyMatch(method -> method.equals(varRefName))) {
+            return null;
+        }
+
+        // "Var" is an import, return
+        if (table.getImports().stream()
+                .anyMatch(imp -> imp.equals(varRefName))) {
             return null;
         }
 

@@ -470,5 +470,17 @@ public class GrammarTest {
         );
     }
 
+    @Test
+    public void testHelloWorldMethodInvocation() {
+        TestUtils.parseVerbose(
+                """
+                        import ioPlus;
+                        class HelloWorld {
+                           public static void main(String[] args) {
+                               ioPlus.printHelloWorld();
+                           }
+                        }"""
+        );
+    }
 
 }

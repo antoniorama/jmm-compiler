@@ -231,11 +231,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             if (child.getKind().equals("MethodCall")) {
                 String beforeDotName = child.getChild(0).get("name");
                 String methodName = child.get("methodName");
-                String paramName = exprVisitor.visit(child.getChild(1)).getCode();
+                String paramName = "";
+
+                // check if there are parameters
+                // I am not sure if "size > 1" is correct, but it fixed it and didn't miss any of the other tests
+                // This could be a problem in privates
+                if (child.getChildren().size() > 1) {
+                    paramName = exprVisitor.visit(child.getChild(1)).getCode();
+                }
 
                 // TODO - doesn't handle calls with multiple parameters
 
-                code.append("invokestatic(" + beforeDotName + ", \"" + methodName + "\", " + paramName + ").V;\n");
+                code.append("invokestatic(").append(beforeDotName).append(", \"").append(methodName).append("\", ").append(paramName).append(").V;\n");
             }
         }
 

@@ -41,6 +41,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(IMPORT_DECL, this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
+        addVisit(MAIN_METHOD_DECL, this::visitMainMethodDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
@@ -178,6 +179,24 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
+    private String visitMainMethodDecl(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder(".method public static main(args.array.String).V");
+        code.append(L_BRACKET);
+
+        // Assuming your main method might contain statements or expressions
+        for (JmmNode child : node.getChildren()) {
+           var childCode = visit(child);
+           code.append(childCode);
+        }
+
+        code.append("    ret.V;\n");
+        code.append(R_BRACKET);
+        code.append(NL);
+
+        return code.toString();
+    }
+
+
 
     private String visitClass(JmmNode node, Void unused) {
 
@@ -224,25 +243,32 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitExpressionStmt(JmmNode node, Void unused) {
-
         StringBuilder code = new StringBuilder();
 
         for (JmmNode child : node.getChildren()) {
             if (child.getKind().equals("MethodCall")) {
                 String beforeDotName = child.getChild(0).get("name");
                 String methodName = child.get("methodName");
-                String paramName = "";
+                StringBuilder paramBuilder = new StringBuilder();
 
-                // check if there are parameters
-                // I am not sure if "size > 1" is correct, but it fixed it and didn't miss any of the other tests
-                // This could be a problem in privates
-                if (child.getChildren().size() > 1) {
-                    paramName = exprVisitor.visit(child.getChild(1)).getCode();
+                // Iterate over children to find parameters
+                boolean first = true;
+                for (JmmNode grandChild : child.getChildren()) {
+                    if (grandChild.getKind().equals("Param")) {
+                        if (!first) {
+                            paramBuilder.append(", ");
+                        }
+                        paramBuilder.append(exprVisitor.visit(grandChild).getCode());
+                        first = false; // After the first parameter, add commas before the rest
+                    }
                 }
 
-                // TODO - doesn't handle calls with multiple parameters
-
-                code.append("invokestatic(").append(beforeDotName).append(", \"").append(methodName).append("\", ").append(paramName).append(").V;\n");
+                // Append method call
+                code.append("invokestatic(").append(beforeDotName).append(", \"").append(methodName).append("\"");
+                if (paramBuilder.length() > 0) {
+                    code.append(", ").append(paramBuilder);
+                }
+                code.append(").V;\n");
             }
         }
 

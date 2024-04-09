@@ -148,7 +148,6 @@ public class OtherSemantics extends AnalysisVisitor {
         List<String> classMethods = table.getMethods();
         Type calledType = getVarType(calledName, table, methodCall);
 
-        assert calledType != null;
         if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
             var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));

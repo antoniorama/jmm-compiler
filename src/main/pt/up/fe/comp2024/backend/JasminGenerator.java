@@ -322,6 +322,20 @@ public class JasminGenerator {
 
             code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
         }
+        else if (call.getInvocationType() == CallType.invokestatic) {
+            String methodName = call.getMethodName().toString();
+
+            // Collect arguments for the call
+            // StringBuilder args = new StringBuilder();
+            // for (Element arg : call.getListOfOperands()) {
+            //    args.append(generators.apply(arg));
+            // }
+
+            // Generate invokestatic instruction
+            // code.append(args);  // append arguments loading code
+            code.append("invokestatic ").append(className).append("/").append(methodName).append(NL);
+        }
+
 
         // TODO: Expand this section to handle arguments and other call types
 

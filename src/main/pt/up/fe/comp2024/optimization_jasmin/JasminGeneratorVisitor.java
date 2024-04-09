@@ -40,7 +40,7 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit("Program", this::visitProgram);
         addVisit("ClassDecl", this::visitClassDecl);
         addVisit("MethodDecl", this::visitMethodDecl);
-        addVisit("MainMethodDecl", this::visitMethodDecl);
+        // addVisit("MainMethodDecl", this::visitMethodDecl);
         addVisit("AssignStmt", this::visitAssignStmt);
         addVisit("ReturnStmt", this::visitReturnStmt);
     }

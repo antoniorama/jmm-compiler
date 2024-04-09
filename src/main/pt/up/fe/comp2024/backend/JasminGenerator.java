@@ -11,6 +11,8 @@ import pt.up.fe.specs.util.utilities.StringLines;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -323,24 +325,36 @@ public class JasminGenerator {
             code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
         }
         else if (call.getInvocationType() == CallType.invokestatic) {
-            String methodName = call.getMethodName().toString();
+            String callerName = extractClassName(call.getCaller().toElement().toString());
+            String methodName = extractMethodName(call.getMethodName().toElement().toString());
+            String operandString = ollirTypeToJasminType(call.getReturnType());
 
-            // Collect arguments for the call
-            // StringBuilder args = new StringBuilder();
-            // for (Element arg : call.getListOfOperands()) {
-            //    args.append(generators.apply(arg));
-            // }
+            // TODO -> handle arguments
 
-            // Generate invokestatic instruction
-            // code.append(args);  // append arguments loading code
-            code.append("invokestatic ").append(className).append("/").append(methodName).append(NL);
+            code.append("invokestatic ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
         }
-
-
-        // TODO: Expand this section to handle arguments and other call types
 
         return code.toString();
     }
 
+    private String extractClassName(String callRepresentation) {
+        // This method parses the class name from the call representation
+        String classNamePattern = "Operand: (.+?)\\.CLASS";
+        return matchPattern(callRepresentation, classNamePattern);
+    }
 
+    private String extractMethodName(String callRepresentation) {
+        // This method parses the method name from the call representation
+        String methodNamePattern = "LiteralElement: \"(.+?)\"\\.STRING";
+        return matchPattern(callRepresentation, methodNamePattern);
+    }
+
+    private String matchPattern(String input, String regexPattern) {
+        Pattern pattern = Pattern.compile(regexPattern);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1); // Return the first capturing group
+        }
+        return ""; // Return an empty string if no match was found
+    }
 }

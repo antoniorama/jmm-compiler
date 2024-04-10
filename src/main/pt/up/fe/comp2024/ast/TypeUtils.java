@@ -48,7 +48,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(actualExpr);
             case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(actualExpr);
             case ARRAY_INIT -> getArrayType(actualExpr, table);
-            case INTEGER_TYPE, INTEGER_LITERAL -> new Type(INT_TYPE_NAME, isArray);
+            case INTEGER_TYPE, INTEGER_LITERAL, ARRAY_ACCESS -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE, BOOLEAN_VALUE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);

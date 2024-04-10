@@ -17,6 +17,7 @@ public class OtherSemantics extends AnalysisVisitor {
 
     private String currentMethod;
 
+
     @Override
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
@@ -26,6 +27,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
         addVisit(Kind.METHOD_CALL, this::visitMethodCall);
+        addVisit(Kind.RETURN_STMT, this::verifyReturnType);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -73,6 +75,16 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
         }
 
+        return null;
+    }
+
+    private Void verifyReturnType(JmmNode returnNode, SymbolTable table){
+        Type currentMethodReturnType = table.getReturnType(currentMethod);
+        Type returnType = TypeUtils.getExprType(returnNode.getChild(0), table);
+        if(returnType != null && !returnType.equals(currentMethodReturnType)){
+            var message = String.format("The return type '%s' does not match the method's return type '%s'.", returnType, currentMethodReturnType);
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
+        }
         return null;
     }
 

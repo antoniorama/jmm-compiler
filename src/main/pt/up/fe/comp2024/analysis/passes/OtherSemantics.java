@@ -138,7 +138,17 @@ public class OtherSemantics extends AnalysisVisitor {
             return null;
         }
 
-        String calledName = methodCall.getJmmChild(0).get("name");
+        JmmNode methodCaller = methodCall.getJmmChild(0);
+        String calledName = null;
+
+        // Check if the node kind is one that would have a 'name'. If it's 'This', handle specially
+        if (!methodCaller.getKind().equals("This")) {
+            // Only access 'name' if it's safe to do so
+            calledName = methodCaller.get("name");
+        } else {
+            // Handle the case where the method caller is 'this', which might mean accessing a class method
+            calledName = table.getClassName(); // Assuming 'this' implies the current class context
+        }
 
         // if the calledName is in imports, return
         if (table.getImports().contains(calledName)) {
@@ -148,10 +158,13 @@ public class OtherSemantics extends AnalysisVisitor {
         List<String> classMethods = table.getMethods();
         Type calledType = getVarType(calledName, table, methodCall);
 
-        if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
-            var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
-            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+        if (calledType != null){
+            if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
+                var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+            }
         }
+
 
         return null;
     }

@@ -65,16 +65,11 @@ public class OtherSemantics extends AnalysisVisitor {
             rightType = TypeUtils.getExprType(node.getChild(1), table);
         }
 
-        // debug
-        // System.out.println("LEFT TYPE:");
-        // System.out.println(leftType.getName());
-        // System.out.println("RIGHT TYPE:");
-        // System.out.println(rightType.getName());
 
         // Verify the compatibility of the types and handle the error report
         if (!areTypesCompatible(operator, leftType, rightType, table)) {
             // not sure if Kinds print for Strings?
-            var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType);
+            var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType + "'");
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
         }
 
@@ -201,8 +196,7 @@ public class OtherSemantics extends AnalysisVisitor {
         System.out.println(operator);
 
         return switch (operator) {
-            case "+" -> leftType == rightType;
-            case "*" -> leftType == rightType;
+            case "+", "*" -> leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName);
             case "ASSIGN" -> isAssignValid(leftType, rightType, table);
             default -> false;
         };

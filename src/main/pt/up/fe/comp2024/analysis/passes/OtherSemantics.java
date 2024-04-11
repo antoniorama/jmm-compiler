@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.analysis.passes;
 
+import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -11,6 +12,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OtherSemantics extends AnalysisVisitor {
@@ -140,41 +142,112 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitMethodCall(JmmNode methodCall, SymbolTable table) {
-
-        // if there is an extends, we can just assume that the method is in there
-        if (table.getSuper() != null) {
+        if (isMethodFromSuperClass(table)) {
             return null;
         }
 
-        JmmNode methodCaller = methodCall.getJmmChild(0);
-        String calledName = null;
+        String calledName = determineCalledName(methodCall, table);
 
-        // Check if the node kind is one that would have a 'name'. If it's 'This', handle specially
-        if (!methodCaller.getKind().equals("This")) {
-            // Only access 'name' if it's safe to do so
-            calledName = methodCaller.get("name");
-        } else {
-            // Handle the case where the method caller is 'this', which might mean accessing a class method
-            calledName = table.getClassName(); // Assuming 'this' implies the current class context
-        }
-
-        // if the calledName is in imports, return
-        if (table.getImports().contains(calledName)) {
+        if (isImportedMethodName(calledName, table)) {
             return null;
         }
 
-        List<String> classMethods = table.getMethods();
+        if (isMethodNotDefinedInClass(calledName, methodCall, table)) {
+            reportUndefinedMethod(methodCall, table);
+            return null;
+        }
+
+        if (isMethodDefinedInClass(calledName, methodCall, table)) {
+            return null;
+        }
+
         Type calledType = getVarType(calledName, table, methodCall);
 
-        if (calledType != null){
-            if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
-                var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
-                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
-            }
+        if (calledType != null && isImportedMethodVar(calledType, table)) {
+            return null;
         }
 
+        List<JmmNode> argumentNodes = collectArgumentNodes(methodCall);
+        List<Symbol> expectedParameters = table.getParameters(calledName);
+
+        if (!isValidArgumentCount(argumentNodes, expectedParameters)) {
+            reportIncorrectNumberOfArguments(methodCall);
+            return null;
+        }
+
+        if (!areArgumentTypesValid(argumentNodes, expectedParameters, table)) {
+            reportIncorrectArgumentTypes(methodCall);
+            return null;
+        }
 
         return null;
+    }
+
+    private boolean isMethodFromSuperClass(SymbolTable table) {
+        return table.getSuper() != null;
+    }
+
+    private String determineCalledName(JmmNode methodCall, SymbolTable table) {
+        JmmNode methodCaller = methodCall.getJmmChild(0);
+        if (methodCaller.getKind().equals("This")) {
+            return table.getClassName();
+        } else {
+            return methodCaller.get("name");
+        }
+    }
+
+    private boolean isImportedMethodName(String methodName, SymbolTable table) {
+        return table.getImports().contains(methodName);
+    }
+
+    private boolean isImportedMethodVar(Type methodType, SymbolTable table) {
+        return table.getImports().contains(methodType.getName());
+    }
+
+    private boolean isMethodNotDefinedInClass(String calledName, JmmNode methodCall, SymbolTable table) {
+        return calledName.equals(table.getClassName()) &&
+                !table.getMethods().contains(methodCall.get("methodName"));
+    }
+
+    private boolean isMethodDefinedInClass(String calledName, JmmNode methodCall, SymbolTable table) {
+        return calledName.equals(table.getClassName()) &&
+                table.getMethods().contains(methodCall.get("methodName"));
+    }
+
+    private void reportUndefinedMethod(JmmNode methodCall, SymbolTable table) {
+        String message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+    }
+
+    private List<JmmNode> collectArgumentNodes(JmmNode methodCall) {
+        List<JmmNode> arguments = new ArrayList<>();
+        for (int i = 1; i < methodCall.getNumChildren(); i++) {
+            arguments.add(methodCall.getJmmChild(i));
+        }
+        return arguments;
+    }
+
+    private boolean isValidArgumentCount(List<JmmNode> arguments, List<Symbol> expectedParameters) {
+        return arguments.size() == expectedParameters.size();
+    }
+
+    private void reportIncorrectNumberOfArguments(JmmNode methodCall) {
+        String message = "Incorrect number of arguments for method call";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+    }
+
+    private boolean areArgumentTypesValid(List<JmmNode> arguments, List<Symbol> expectedParameters, SymbolTable table) {
+        for (int i = 0; i < arguments.size(); i++) {
+            if (TypeUtils.getExprType(arguments.get(i), table) != expectedParameters.get(i).getType()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void reportIncorrectArgumentTypes(JmmNode methodCall) {
+        String message = "Incorrect types in method call";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
     }
 
     private Type getVarType(String varName, SymbolTable table, JmmNode node) {

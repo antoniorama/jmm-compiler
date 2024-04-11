@@ -28,6 +28,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
         addVisit(Kind.METHOD_CALL, this::visitMethodCall);
         addVisit(Kind.RETURN_STMT, this::verifyReturnType);
+        addVisit(Kind.IF_STMT, this::verifyIfCondition);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -242,4 +243,28 @@ public class OtherSemantics extends AnalysisVisitor {
         return false;
     }
 
+    private Void verifyIfCondition(JmmNode ifNode, SymbolTable table) {
+        System.out.println("IF TYPE " + ifNode.getChild(0).getKind());
+
+        JmmNode conditionNode = ifNode.getChild(0);
+
+        // Check if condition is a boolean variable
+        // TODO -> test this, there are no semantic tests for this
+        if (conditionNode.getKind().equals("VarRefExpr")) {
+            Type conditionType = getVarType(conditionNode.get("name"), table, conditionNode);
+            assert conditionType != null;
+            if (conditionType.getName().equals("boolean")) {
+                return null;
+            }
+        }
+
+        // TODO -> Check if condition is a boolean expression
+
+        // TODO -> Check if condition is Method Call that returns boolean
+
+        // If condition isn't none of the above, add error report
+        var message = "If condition not valid";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(ifNode), NodeUtils.getColumn(ifNode), message, null));
+        return null;
+    }
 }

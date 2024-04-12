@@ -254,7 +254,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 // Iterate over children to find parameters
                 boolean first = true;
                 for (JmmNode grandChild : child.getChildren()) {
-                    if (grandChild.getKind().equals("Param")) {
+                    if (grandChild.getKind().equals("VarRefExpr") && !grandChild.get("name").equals(beforeDotName)) {
                         if (!first) {
                             paramBuilder.append(", ");
                         }
@@ -263,9 +263,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                     }
                 }
 
+                System.out.println("PARAM BUILDER" + paramBuilder);
+
                 // Append method call
                 code.append("invokestatic(").append(beforeDotName).append(", \"").append(methodName).append("\"");
-                if (paramBuilder.length() > 0) {
+                if (!paramBuilder.isEmpty()) {
                     code.append(", ").append(paramBuilder);
                 }
                 code.append(").V;\n");

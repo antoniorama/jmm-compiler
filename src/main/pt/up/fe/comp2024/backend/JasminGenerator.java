@@ -333,9 +333,17 @@ public class JasminGenerator {
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
 
-            // TODO -> handle arguments
+            List<Element> args = call.getArguments();
+            System.out.println("ARGS222" + args);
 
-            code.append("invokestatic ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
+            StringBuilder argTypes = new StringBuilder();
+            for (Element arg : args) {
+                String argType = ollirTypeToJasminType(arg.getType());
+                argTypes.append(argType);
+                code.append(generateArgument(arg));
+            }
+
+            code.append("invokestatic ").append(callerName).append("/").append(methodName).append("(").append(argTypes).append(")").append(operandString).append(NL);
         }
         else if (call.getInvocationType() == CallType.invokevirtual) {
             String callerName = extractClassType(call.getCaller().toElement().toString());

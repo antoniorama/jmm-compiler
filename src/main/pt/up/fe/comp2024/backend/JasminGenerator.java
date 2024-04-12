@@ -276,7 +276,9 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+        var type = operand.getType();
+        String loadInstruction = loadInstructionForType(type);
+        return loadInstruction + reg + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -324,6 +326,7 @@ public class JasminGenerator {
             code.append("dup").append(NL);
 
             code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
+            // code.append("pop").append(NL);
         }
         else if (call.getInvocationType() == CallType.invokestatic) {
             String callerName = extractClassName(call.getCaller().toElement().toString());
@@ -335,8 +338,16 @@ public class JasminGenerator {
             code.append("invokestatic ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
         }
         else if (call.getInvocationType() == CallType.invokevirtual) {
-            code.append("aload 0").append(NL);
             String callerName = extractClassType(call.getCaller().toElement().toString());
+
+            // System.out.println("TESTEST");
+            // System.out.println(callerName);
+            // System.out.println(currentMethod.getVarTable());
+            // var virtualReg = currentMethod.getVarTable().get(callerName).getVirtualReg();
+            // code.append("aload ").append(virtualReg).append(NL);
+
+            code.append("aload 0").append(NL);
+
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
             /*
@@ -397,10 +408,10 @@ public class JasminGenerator {
     private String loadInstructionForType(Type type) {
         switch (type.toString()) {
             case "INT32", "BOOLEAN" -> {
-                return "iload";
+                return "iload ";
             }
             default -> {
-                return "aload";
+                return "aload ";
             }
         }
     }

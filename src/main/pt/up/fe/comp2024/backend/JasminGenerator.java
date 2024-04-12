@@ -341,16 +341,20 @@ public class JasminGenerator {
             String callerName = extractClassType(call.getCaller().toElement().toString());
             String callerName2 = extractClassName(call.getCaller().toElement().toString()); // needed for getting aload
 
+            /*
+            System.out.println("\nDEBUG INVOKEVIRTUAL");
+            System.out.println("CALLERNAME2 : " + callerName2);
+            System.out.println("VAR TABLE : " + currentMethod.getVarTable());
+            System.out.println("\n");
+             */
+
             var virtualReg = currentMethod.getVarTable().get(callerName2).getVirtualReg();
             code.append("aload ").append(virtualReg).append(NL);
 
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
 
-            // NOT WORKING
-            /*
             List<Element> args = call.getArguments();
-            System.out.println("GET ARGUMENTS" + call);
 
             StringBuilder argTypes = new StringBuilder();
             for (Element arg : args) {
@@ -358,10 +362,8 @@ public class JasminGenerator {
                 argTypes.append(argType);
                 code.append(generateArgument(arg));
             }
-            System.out.println("ARGS " + argTypes);
-            */
 
-            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("(").append(")").append(operandString).append(NL);
+            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("(").append(argTypes).append(")").append(operandString).append(NL);
         }
 
         return code.toString();

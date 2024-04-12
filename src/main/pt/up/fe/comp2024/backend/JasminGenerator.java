@@ -339,17 +339,15 @@ public class JasminGenerator {
         }
         else if (call.getInvocationType() == CallType.invokevirtual) {
             String callerName = extractClassType(call.getCaller().toElement().toString());
+            String callerName2 = extractClassName(call.getCaller().toElement().toString()); // needed for getting aload
 
-            // System.out.println("TESTEST");
-            // System.out.println(callerName);
-            // System.out.println(currentMethod.getVarTable());
-            // var virtualReg = currentMethod.getVarTable().get(callerName).getVirtualReg();
-            // code.append("aload ").append(virtualReg).append(NL);
-
-            code.append("aload 0").append(NL);
+            var virtualReg = currentMethod.getVarTable().get(callerName2).getVirtualReg();
+            code.append("aload ").append(virtualReg).append(NL);
 
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
+
+            // NOT WORKING
             /*
             List<Element> args = call.getArguments();
             System.out.println("GET ARGUMENTS" + call);
@@ -371,7 +369,7 @@ public class JasminGenerator {
 
     private String extractClassName(String callRepresentation) {
         // This method parses the class name from the call representation
-        String classNamePattern = "Operand: (.+?)\\.CLASS";
+        String classNamePattern = "Operand: (.+?)\\.";
         return matchPattern(callRepresentation, classNamePattern);
     }
 

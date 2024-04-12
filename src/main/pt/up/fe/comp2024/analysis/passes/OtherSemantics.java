@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.analysis.passes;
 
+import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -11,20 +12,26 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class OtherSemantics extends AnalysisVisitor {
 
     private String currentMethod;
 
+
     @Override
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
+        addVisit(Kind.MAIN_METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_INIT, this::visitArrayInit);
         addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
         addVisit(Kind.METHOD_CALL, this::visitMethodCall);
+        addVisit(Kind.RETURN_STMT, this::verifyReturnType);
+        addVisit(Kind.IF_STMT, this::verifyIfCondition);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -64,19 +71,24 @@ public class OtherSemantics extends AnalysisVisitor {
             rightType = TypeUtils.getExprType(node.getChild(1), table);
         }
 
-        // debug
-        // System.out.println("LEFT TYPE:");
-        // System.out.println(leftType.getName());
-        // System.out.println("RIGHT TYPE:");
-        // System.out.println(rightType.getName());
 
         // Verify the compatibility of the types and handle the error report
         if (!areTypesCompatible(operator, leftType, rightType, table)) {
             // not sure if Kinds print for Strings?
-            var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType);
+            var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType + "'");
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
         }
 
+        return null;
+    }
+
+    private Void verifyReturnType(JmmNode returnNode, SymbolTable table){
+        Type currentMethodReturnType = table.getReturnType(currentMethod);
+        Type returnType = TypeUtils.getExprType(returnNode.getChild(0), table);
+        if(returnType != null && !returnType.equals(currentMethodReturnType)){
+            var message = String.format("The return type '%s' does not match the method's return type '%s'.", returnType, currentMethodReturnType);
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
+        }
         return null;
     }
 
@@ -131,20 +143,104 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitMethodCall(JmmNode methodCall, SymbolTable table) {
-        List<String> classMethods = table.getMethods();
-        Type calledType = getVarType(methodCall.getJmmChild(0).get("name"), table, methodCall);
-
-        // if there is an extends, we can just assume that the method is in there
-        if (table.getSuper() != null) {
+        if (isMethodFromSuperClass(table)) {
             return null;
         }
 
-        if (calledType.getName().equals(table.getClassName()) && !classMethods.contains(methodCall.get("methodName"))) {
-            var message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
-            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+        String calledName = determineCalledName(methodCall, table);
+        Type calledType = getVarTypeNoError(calledName, table, methodCall);
+        String methodName = methodCall.get("methodName");
+
+        if (isImportedMethodName(calledName, table)) {
+            return null;
+        }
+
+        if (calledName.equals(table.getClassName()) || (calledType != null && calledType.getName().equals(table.getClassName()))) {
+            if (isMethodNotDefinedInClass(methodCall, table)) {
+                reportUndefinedMethod(methodCall, table);
+                return null;
+            }
+        }
+
+        if (calledType != null && isImportedMethodVar(calledType, table)) {
+            return null;
+        }
+
+        List<JmmNode> argumentNodes = collectArgumentNodes(methodCall);
+        List<Symbol> expectedParameters = table.getParameters(methodName);
+
+        if (!isValidArgumentCount(argumentNodes, expectedParameters)) {
+            reportIncorrectNumberOfArguments(methodCall);
+            return null;
+        }
+
+        if (!areArgumentTypesValid(argumentNodes, expectedParameters, table, methodCall)) {
+            reportIncorrectArgumentTypes(methodCall);
+            return null;
         }
 
         return null;
+    }
+
+    private boolean isMethodFromSuperClass(SymbolTable table) {
+        return table.getSuper() != null;
+    }
+
+    private String determineCalledName(JmmNode methodCall, SymbolTable table) {
+        JmmNode methodCaller = methodCall.getJmmChild(0);
+        if (methodCaller.getKind().equals("This")) {
+            return table.getClassName();
+        } else {
+            return methodCaller.get("name");
+        }
+    }
+
+    private boolean isImportedMethodName(String methodName, SymbolTable table) {
+        return table.getImports().contains(methodName);
+    }
+
+    private boolean isImportedMethodVar(Type methodType, SymbolTable table) {
+        return table.getImports().contains(methodType.getName());
+    }
+
+    private boolean isMethodNotDefinedInClass(JmmNode methodCall, SymbolTable table) {
+        return !table.getMethods().contains(methodCall.get("methodName"));
+    }
+
+    private void reportUndefinedMethod(JmmNode methodCall, SymbolTable table) {
+        String message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+    }
+
+    private List<JmmNode> collectArgumentNodes(JmmNode methodCall) {
+        List<JmmNode> arguments = new ArrayList<>();
+        for (int i = 1; i < methodCall.getNumChildren(); i++) {
+            arguments.add(methodCall.getJmmChild(i));
+        }
+        return arguments;
+    }
+
+    private boolean isValidArgumentCount(List<JmmNode> arguments, List<Symbol> expectedParameters) {
+        return arguments.size() == expectedParameters.size();
+    }
+
+    private void reportIncorrectNumberOfArguments(JmmNode methodCall) {
+        String message = "Incorrect number of arguments for method call";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+    }
+
+    private boolean areArgumentTypesValid(List<JmmNode> arguments, List<Symbol> expectedParameters, SymbolTable table, JmmNode node) {
+        for (int i = 0; i < arguments.size(); i++) {
+            if (!Objects.equals(getVarType(arguments.get(i).get("name"), table, node), expectedParameters.get(i).getType())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void reportIncorrectArgumentTypes(JmmNode methodCall) {
+        String message = "Incorrect types in method call";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
     }
 
     private Type getVarType(String varName, SymbolTable table, JmmNode node) {
@@ -152,6 +248,7 @@ public class OtherSemantics extends AnalysisVisitor {
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
         List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
 
+        // Check if var is in local variables
         for (Symbol symbol : symbolTableOfLocalVars) {
             if (symbol.getName().equals(varName)) {
                 // found variable
@@ -159,6 +256,7 @@ public class OtherSemantics extends AnalysisVisitor {
             }
         }
 
+        // Check if var is in parameters
         for (Symbol symbol : symbolTableOfParameters) {
             if (symbol.getName().equals(varName)) {
                 // found variable
@@ -171,14 +269,35 @@ public class OtherSemantics extends AnalysisVisitor {
         return null;
     }
 
+    private Type getVarTypeNoError(String varName, SymbolTable table, JmmNode node) {
+
+        List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
+        List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
+
+        // Check if var is in local variables
+        for (Symbol symbol : symbolTableOfLocalVars) {
+            if (symbol.getName().equals(varName)) {
+                // found variable
+                return symbol.getType();
+            }
+        }
+
+        // Check if var is in parameters
+        for (Symbol symbol : symbolTableOfParameters) {
+            if (symbol.getName().equals(varName)) {
+                // found variable
+                return symbol.getType();
+            }
+        }
+
+        return null;
+    }
+
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType, SymbolTable table) {
         String intTypeName = TypeUtils.getIntTypeName();
 
-        System.out.println(operator);
-
         return switch (operator) {
-            case "+" -> leftType == rightType;
-            case "*" -> leftType == rightType;
+            case "+", "*" -> leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName);
             case "ASSIGN" -> isAssignValid(leftType, rightType, table);
             default -> false;
         };
@@ -212,4 +331,26 @@ public class OtherSemantics extends AnalysisVisitor {
         return false;
     }
 
+    private Void verifyIfCondition(JmmNode ifNode, SymbolTable table) {
+        JmmNode conditionNode = ifNode.getChild(0);
+
+        // Check if condition is a boolean variable
+        // TODO -> test this, there are no semantic tests for this
+        if (conditionNode.getKind().equals("VarRefExpr")) {
+            Type conditionType = getVarType(conditionNode.get("name"), table, conditionNode);
+            assert conditionType != null;
+            if (conditionType.getName().equals("boolean")) {
+                return null;
+            }
+        }
+
+        // TODO -> Check if condition is a boolean expression
+
+        // TODO -> Check if condition is Method Call that returns boolean
+
+        // If condition isn't none of the above, add error report
+        var message = "If condition not valid";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(ifNode), NodeUtils.getColumn(ifNode), message, null));
+        return null;
+    }
 }

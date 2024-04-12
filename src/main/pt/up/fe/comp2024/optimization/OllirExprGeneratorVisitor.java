@@ -6,6 +6,9 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -28,6 +31,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(NEW_CLASS_INSTANCE, this::visitNewClassInstance);
+        addVisit(THIS, this::visitThis);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -87,6 +93,52 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
      * @param unused
      * @return
      */
+
+    private OllirExprResult visitMethodCall(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        List<String> argsCode = new ArrayList<>();
+
+        // Visit the owner of the method (e.g., an instance of a class, or the class itself for static methods)
+        OllirExprResult ownerExpr = visit(node.getJmmChild(0));
+        computation.append(ownerExpr.getComputation());
+
+        // Get the method name and return type
+        String methodName = node.get("methodName");
+        Type returnType = table.getReturnType(methodName);
+        String returnTypeString = OptUtils.toOllirType(returnType);
+
+        // Handle each argument of the method
+        for (int i = 1; i < node.getNumChildren(); i++) {
+            OllirExprResult argExpr = visit(node.getJmmChild(i));
+            computation.append(argExpr.getComputation());
+            argsCode.add(argExpr.getCode());
+        }
+
+        // Construct the method call
+        String argsList = String.join(", ", argsCode);
+        String tempVar = OptUtils.getTemp() + returnTypeString;
+        String methodCallCode = "invokevirtual(" + ownerExpr.getCode() + ", \"" + methodName + "\""
+                + (argsCode.isEmpty() ? "" : ", " + argsList)
+                + ")" + returnTypeString;
+
+        // Store the result of the method call in a temporary variable
+        computation.append(tempVar).append(" :=").append(returnTypeString).append(" ").append(methodCallCode).append(END_STMT);
+
+        return new OllirExprResult(tempVar, computation.toString());
+    }
+
+    private OllirExprResult visitThis(JmmNode node, Void unused) {
+        return new OllirExprResult("this", "");
+    }
+
+    private OllirExprResult visitNewClassInstance(JmmNode node, Void unused) {
+        String className = node.get("name");
+        String tempVar = OptUtils.getTemp() + "." + className;
+        String initializationCode = tempVar + " " + ASSIGN + "." + className + " " + "new(" + className + ")." + className
+                + END_STMT + "invokespecial(" + tempVar + ",\"<init>\").V" + END_STMT;
+        return new OllirExprResult(tempVar, initializationCode);
+    }
+
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
 
         for (var child : node.getChildren()) {
@@ -95,5 +147,4 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         return OllirExprResult.EMPTY;
     }
-
 }

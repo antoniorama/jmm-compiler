@@ -470,5 +470,96 @@ public class GrammarTest {
         );
     }
 
+    @Test
+    public void testHelloWorldMethodInvocation() {
+        TestUtils.parseVerbose(
+                """
+                        import ioPlus;
+                        class HelloWorld {
+                           public static void main(String[] args) {
+                               ioPlus.printHelloWorld();
+                           }
+                        }"""
+        );
+    }
 
+    @Test
+    public void testIntInIfCondition() {
+        TestUtils.parseVerbose(
+            """
+                    class IntInIfCondition {
+                            public static void main(String[] args) {
+                            }
+                            public int foo() {
+                                if (1 + 2) {
+                                } else {
+                                }
+                                return 0;
+                            }
+                        }
+                  """
+        );
+    }
+
+    @Test
+    public void testIncompatibleArguments() {
+        TestUtils.parseVerbose(
+            """
+                    class IncompatibleArguments {
+                        public static void main(String[] args) {
+                        }
+                        public int foo(int a) {
+                            return a + 1;
+                        }
+                        public int bar() {
+                            IncompatibleArguments a;
+                            boolean b;
+                            a = new IncompatibleArguments();
+                            b = true;
+                            return a.foo(b);
+                        }
+                    }
+                  """
+        );
+    }
+
+    @Test
+    public void testAppSimple() {
+        TestUtils.parseVerbose(
+            """
+                    import io;
+                    class Simple {
+                        public int add(int a, int b){
+                            int c;
+                            c = a + this.constInstr();
+                            return c;
+                        }
+                        public static void main(String[] args){
+                            int a;
+                            int b;
+                            int c;
+                            Simple s;
+                            a = 20;
+                            b = 10;
+                            s = new Simple();
+                            c = s.add(a,b);
+                            io.println(c);
+                        }
+                        public int constInstr(){
+                            int c;
+                            c = 0;
+                            c = 4;
+                            c = 8;
+                            c = 14;
+                            c = 250;
+                            c = 400;
+                            c = 1000;
+                            c = 100474650;
+                    		c = 10;
+                            return c;
+                        }
+                    }
+                 """
+        );
+    }
 }

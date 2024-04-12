@@ -8,9 +8,12 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -273,7 +276,9 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+        var type = operand.getType();
+        String loadInstruction = loadInstructionForType(type);
+        return loadInstruction + reg + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -321,12 +326,100 @@ public class JasminGenerator {
             code.append("dup").append(NL);
 
             code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
+            // code.append("pop").append(NL);
         }
+        else if (call.getInvocationType() == CallType.invokestatic) {
+            String callerName = extractClassName(call.getCaller().toElement().toString());
+            String methodName = extractMethodName(call.getMethodName().toElement().toString());
+            String operandString = ollirTypeToJasminType(call.getReturnType());
 
-        // TODO: Expand this section to handle arguments and other call types
+            List<Element> args = call.getArguments();
+
+            StringBuilder argTypes = new StringBuilder();
+            for (Element arg : args) {
+                String argType = ollirTypeToJasminType(arg.getType());
+                argTypes.append(argType);
+                code.append(generateArgument(arg));
+            }
+
+            code.append("invokestatic ").append(callerName).append("/").append(methodName).append("(").append(argTypes).append(")").append(operandString).append(NL);
+        }
+        else if (call.getInvocationType() == CallType.invokevirtual) {
+            String callerName = extractClassType(call.getCaller().toElement().toString());
+            String callerName2 = extractClassName(call.getCaller().toElement().toString()); // needed for getting aload
+
+            /*
+            System.out.println("\nDEBUG INVOKEVIRTUAL");
+            System.out.println("CALLERNAME2 : " + callerName2);
+            System.out.println("VAR TABLE : " + currentMethod.getVarTable());
+            System.out.println("\n");
+             */
+
+            var virtualReg = currentMethod.getVarTable().get(callerName2).getVirtualReg();
+            code.append("aload ").append(virtualReg).append(NL);
+
+            String methodName = extractMethodName(call.getMethodName().toElement().toString());
+            String operandString = ollirTypeToJasminType(call.getReturnType());
+
+            List<Element> args = call.getArguments();
+
+            StringBuilder argTypes = new StringBuilder();
+            for (Element arg : args) {
+                String argType = ollirTypeToJasminType(arg.getType());
+                argTypes.append(argType);
+                code.append(generateArgument(arg));
+            }
+
+            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("(").append(argTypes).append(")").append(operandString).append(NL);
+        }
 
         return code.toString();
     }
 
+    private String extractClassName(String callRepresentation) {
+        // This method parses the class name from the call representation
+        String classNamePattern = "Operand: (.+?)\\.";
+        return matchPattern(callRepresentation, classNamePattern);
+    }
 
+    private String extractClassType(String callRepresentation) {
+        String classTypePattern = "\\((.*?)\\)";
+        return matchPattern(callRepresentation, classTypePattern);
+    }
+
+    private String extractMethodName(String callRepresentation) {
+        // This method parses the method name from the call representation
+        String methodNamePattern = "LiteralElement: \"(.+?)\"\\.STRING";
+        return matchPattern(callRepresentation, methodNamePattern);
+    }
+
+    private String matchPattern(String input, String regexPattern) {
+        Pattern pattern = Pattern.compile(regexPattern);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1); // Return the first capturing group
+        }
+        return ""; // Return an empty string if no match was found
+    }
+
+    private String generateArgument(Element arg) {
+        if (arg instanceof LiteralElement) {
+            return "ldc " + ((LiteralElement) arg).getLiteral() + NL;
+        } else if (arg instanceof Operand operand) {
+            int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+            return loadInstructionForType(operand.getType()) + " " + reg + NL;
+        }
+        return "";
+    }
+
+    private String loadInstructionForType(Type type) {
+        switch (type.toString()) {
+            case "INT32", "BOOLEAN" -> {
+                return "iload ";
+            }
+            default -> {
+                return "aload ";
+            }
+        }
+    }
 }

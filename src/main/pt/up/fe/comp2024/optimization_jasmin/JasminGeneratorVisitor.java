@@ -40,6 +40,7 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit("Program", this::visitProgram);
         addVisit("ClassDecl", this::visitClassDecl);
         addVisit("MethodDecl", this::visitMethodDecl);
+        // addVisit("MainMethodDecl", this::visitMethodDecl);
         addVisit("AssignStmt", this::visitAssignStmt);
         addVisit("ReturnStmt", this::visitReturnStmt);
     }
@@ -85,7 +86,6 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitMethodDecl(JmmNode methodDecl, Void unused) {
         var methodName = methodDecl.get("name");
-
 
         // set method
         currentMethod = methodName;

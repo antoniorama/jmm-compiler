@@ -325,6 +325,7 @@ public class JasminGenerator {
             code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
         }
         else if (call.getInvocationType() == CallType.invokestatic) {
+            System.out.println("CALLER" + call.getCaller().toElement().toString());
             String callerName = extractClassName(call.getCaller().toElement().toString());
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
@@ -332,6 +333,15 @@ public class JasminGenerator {
             // TODO -> handle arguments
 
             code.append("invokestatic ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
+        }
+        else if (call.getInvocationType() == CallType.invokevirtual) {
+            String callerName = extractClassType(call.getCaller().toElement().toString());
+            String methodName = extractMethodName(call.getMethodName().toElement().toString());
+            String operandString = ollirTypeToJasminType(call.getReturnType());
+
+            // TODO -> handle arguments
+
+            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
         }
 
         return code.toString();
@@ -341,6 +351,11 @@ public class JasminGenerator {
         // This method parses the class name from the call representation
         String classNamePattern = "Operand: (.+?)\\.CLASS";
         return matchPattern(callRepresentation, classNamePattern);
+    }
+
+    private String extractClassType(String callRepresentation) {
+        String classTypePattern = "\\((.*?)\\)";
+        return matchPattern(callRepresentation, classTypePattern);
     }
 
     private String extractMethodName(String callRepresentation) {

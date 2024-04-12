@@ -143,6 +143,7 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitMethodCall(JmmNode methodCall, SymbolTable table) {
+
         if (isMethodFromSuperClass(table)) {
             return null;
         }
@@ -168,18 +169,27 @@ public class OtherSemantics extends AnalysisVisitor {
 
         List<JmmNode> argumentNodes = collectArgumentNodes(methodCall);
         List<Symbol> expectedParameters = table.getParameters(methodName);
+        boolean isVarArgs = false;
+        if (!argumentNodes.isEmpty()) isVarArgs = isMethodVarArgs(methodName, table);
 
-        if (!isValidArgumentCount(argumentNodes, expectedParameters)) {
+        if (!isValidArgumentCount(argumentNodes, expectedParameters, isVarArgs)) {
             reportIncorrectNumberOfArguments(methodCall);
             return null;
         }
 
-        if (!areArgumentTypesValid(argumentNodes, expectedParameters, table, methodCall)) {
+        // TODO -> verify that each varargs param has correct type
+        // This would be implemented inside areArgumentTypesValid
+        if (!isVarArgs && !areArgumentTypesValid(argumentNodes, expectedParameters, table, methodCall)) {
             reportIncorrectArgumentTypes(methodCall);
             return null;
         }
 
         return null;
+    }
+
+    private boolean isMethodVarArgs(String methodName, SymbolTable table) {
+        Type lastParamType = table.getParameters(methodName).get(table.getParameters(methodName).size() - 1).getType();
+        return lastParamType.hasAttribute("isVarArgs");
     }
 
     private boolean isMethodFromSuperClass(SymbolTable table) {
@@ -220,8 +230,13 @@ public class OtherSemantics extends AnalysisVisitor {
         return arguments;
     }
 
-    private boolean isValidArgumentCount(List<JmmNode> arguments, List<Symbol> expectedParameters) {
-        return arguments.size() == expectedParameters.size();
+    private boolean isValidArgumentCount(List<JmmNode> argumentNodes, List<Symbol> expectedParameters, boolean isVarArgs) {
+        if (isVarArgs) {
+            int minArgs = expectedParameters.size() - 1; // Varargs methods can take at least the non-varargs arguments
+            return argumentNodes.size() >= minArgs;
+        } else {
+            return argumentNodes.size() == expectedParameters.size();
+        }
     }
 
     private void reportIncorrectNumberOfArguments(JmmNode methodCall) {

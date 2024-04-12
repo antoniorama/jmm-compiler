@@ -86,7 +86,7 @@ public class TypeUtils {
     private static Type getVarRefType(JmmNode varRefExpr, SymbolTable table) {
         // Get the current method
         JmmNode parent = varRefExpr.getParent();
-        while (!parent.getKind().equals("MethodDecl")) {
+        while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
             parent = parent.getParent();
         }
         String methodName = parent.get("name");

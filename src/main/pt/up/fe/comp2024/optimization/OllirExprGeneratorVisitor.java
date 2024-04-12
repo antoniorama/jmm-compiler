@@ -28,6 +28,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(THIS, this::visitThis);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -87,6 +89,30 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
      * @param unused
      * @return
      */
+
+    private OllirExprResult visitMethodCall(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+
+        OllirExprResult ownerExpr = visit(node.getJmmChild(0)); // This should handle "this"
+        computation.append(ownerExpr.getComputation());
+
+        String methodName = node.get("methodName");
+        Type returnType = table.getReturnType(methodName);
+        String returnTypeString = OptUtils.toOllirType(returnType);
+
+        // Ensuring method call result is stored in a temp variable
+        String tempVar = OptUtils.getTemp() + returnTypeString;
+        String methodCallCode = "invokevirtual(" + ownerExpr.getCode() + ", \"" + methodName + "\")" + returnTypeString;
+
+        computation.append(tempVar).append(" :=").append(returnTypeString).append(" ").append(methodCallCode).append(END_STMT);
+
+        return new OllirExprResult(tempVar, computation.toString());
+    }
+
+    private OllirExprResult visitThis(JmmNode node, Void unused) {
+        return new OllirExprResult("this", "");
+    }
+
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
 
         for (var child : node.getChildren()) {
@@ -95,5 +121,4 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         return OllirExprResult.EMPTY;
     }
-
 }

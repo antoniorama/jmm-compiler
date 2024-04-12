@@ -29,6 +29,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(NEW_CLASS_INSTANCE, this::visitNewClassInstance);
         addVisit(THIS, this::visitThis);
 
         setDefaultVisit(this::defaultVisit);
@@ -111,6 +112,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
     private OllirExprResult visitThis(JmmNode node, Void unused) {
         return new OllirExprResult("this", "");
+    }
+
+    private OllirExprResult visitNewClassInstance(JmmNode node, Void unused) {
+        String className = node.get("name");
+        String tempVar = OptUtils.getTemp() + "." + className;
+        String initializationCode = tempVar + " " + ASSIGN + "." + className + " " + "new(" + className + ")." + className + END_STMT;
+        return new OllirExprResult(tempVar, initializationCode);
     }
 
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {

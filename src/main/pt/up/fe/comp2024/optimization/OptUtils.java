@@ -57,7 +57,7 @@ public class OptUtils {
         String type = "." + switch (typeName) {
             case "int" -> "i32";
             case "boolean" -> "bool";
-            default -> "test";
+            default -> typeName;
         };
 
         return type;

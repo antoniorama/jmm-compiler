@@ -85,9 +85,7 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitMethodDecl(JmmNode methodDecl, Void unused) {
-        System.out.println("herehreher");
         var methodName = methodDecl.get("name");
-        System.out.println("METHOD NAME" + methodName);
 
         // set method
         currentMethod = methodName;

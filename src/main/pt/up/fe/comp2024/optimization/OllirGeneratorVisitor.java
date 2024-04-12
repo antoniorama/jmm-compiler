@@ -263,8 +263,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                     }
                 }
 
-                System.out.println("PARAM BUILDER" + paramBuilder);
-
                 // Append method call
                 code.append("invokestatic(").append(beforeDotName).append(", \"").append(methodName).append("\"");
                 if (!paramBuilder.isEmpty()) {

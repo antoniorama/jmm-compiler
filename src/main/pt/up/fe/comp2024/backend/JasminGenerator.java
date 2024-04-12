@@ -334,7 +334,6 @@ public class JasminGenerator {
             String operandString = ollirTypeToJasminType(call.getReturnType());
 
             List<Element> args = call.getArguments();
-            System.out.println("ARGS222" + args);
 
             StringBuilder argTypes = new StringBuilder();
             for (Element arg : args) {

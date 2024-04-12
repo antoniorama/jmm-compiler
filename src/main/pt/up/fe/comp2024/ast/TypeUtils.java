@@ -124,8 +124,7 @@ public class TypeUtils {
     }
 
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
-        System.out.println(table.getReturnType(methodCall.get("methodName")));
-         return table.getReturnType(methodCall.get("methodName"));
+        return table.getReturnType(methodCall.get("methodName"));
     }
 
 

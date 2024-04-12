@@ -169,9 +169,6 @@ public class OtherSemantics extends AnalysisVisitor {
         List<JmmNode> argumentNodes = collectArgumentNodes(methodCall);
         List<Symbol> expectedParameters = table.getParameters(methodName);
 
-        System.out.println(argumentNodes);
-        System.out.println(expectedParameters);
-
         if (!isValidArgumentCount(argumentNodes, expectedParameters)) {
             reportIncorrectNumberOfArguments(methodCall);
             return null;

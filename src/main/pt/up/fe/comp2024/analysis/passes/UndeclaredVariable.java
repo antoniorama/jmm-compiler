@@ -54,7 +54,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
             return null;
         }
 
-        System.out.println(table.getMethods());
         // Var is a method, return
         if (table.getMethods().stream()
                 .anyMatch(method -> method.equals(varRefName))) {

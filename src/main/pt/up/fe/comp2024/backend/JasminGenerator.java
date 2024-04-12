@@ -8,6 +8,7 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -325,7 +326,6 @@ public class JasminGenerator {
             code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
         }
         else if (call.getInvocationType() == CallType.invokestatic) {
-            System.out.println("CALLER" + call.getCaller().toElement().toString());
             String callerName = extractClassName(call.getCaller().toElement().toString());
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
@@ -335,13 +335,24 @@ public class JasminGenerator {
             code.append("invokestatic ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
         }
         else if (call.getInvocationType() == CallType.invokevirtual) {
+            code.append("aload 0").append(NL);
             String callerName = extractClassType(call.getCaller().toElement().toString());
             String methodName = extractMethodName(call.getMethodName().toElement().toString());
             String operandString = ollirTypeToJasminType(call.getReturnType());
+            /*
+            List<Element> args = call.getArguments();
+            System.out.println("GET ARGUMENTS" + call);
 
-            // TODO -> handle arguments
+            StringBuilder argTypes = new StringBuilder();
+            for (Element arg : args) {
+                String argType = ollirTypeToJasminType(arg.getType());
+                argTypes.append(argType);
+                code.append(generateArgument(arg));
+            }
+            System.out.println("ARGS " + argTypes);
+            */
 
-            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("()").append(operandString).append(NL);
+            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("(").append(")").append(operandString).append(NL);
         }
 
         return code.toString();
@@ -371,5 +382,26 @@ public class JasminGenerator {
             return matcher.group(1); // Return the first capturing group
         }
         return ""; // Return an empty string if no match was found
+    }
+
+    private String generateArgument(Element arg) {
+        if (arg instanceof LiteralElement) {
+            return "ldc " + ((LiteralElement) arg).getLiteral() + NL;
+        } else if (arg instanceof Operand operand) {
+            int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+            return loadInstructionForType(operand.getType()) + " " + reg + NL;
+        }
+        return "";
+    }
+
+    private String loadInstructionForType(Type type) {
+        switch (type.toString()) {
+            case "INT32", "BOOLEAN" -> {
+                return "iload";
+            }
+            default -> {
+                return "aload";
+            }
+        }
     }
 }

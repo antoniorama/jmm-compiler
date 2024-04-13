@@ -33,6 +33,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.RETURN_STMT, this::verifyReturnType);
         addVisit(Kind.IF_STMT, this::verifyIfCondition);
         addVisit(Kind.VAR_DECL, this::visitVarDecl);
+        addVisit(Kind.PARAM, this::visitParam);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -414,5 +415,15 @@ public class OtherSemantics extends AnalysisVisitor {
             }
         }
         return false;
+    }
+
+    private Void visitParam(JmmNode paramNode, SymbolTable table) {
+        // Check if param name is not length
+        if (Objects.equals(paramNode.get("name"), "length")) {
+            String message = "Can't name this 'length'";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(paramNode), NodeUtils.getColumn(paramNode), message, null));
+        }
+
+        return null;
     }
 }

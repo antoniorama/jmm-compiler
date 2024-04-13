@@ -61,13 +61,20 @@ public class OtherSemantics extends AnalysisVisitor {
     private boolean methodReturnChecks(JmmNode method) {
         // Check if only one return exists in method
         if (!methodOnlyOneReturn(method)) return false;
+        if (!methodReturnIsLast(method)) return false;
         return true;
     }
 
     private boolean methodOnlyOneReturn(JmmNode method) {
-        System.out.println(method.getChildren(RETURN_STMT));
         if (method.get("name").equals("main")) return method.getChildren(RETURN_STMT).size() == 1 || method.getChildren(RETURN_STMT).isEmpty();
         return method.getChildren(RETURN_STMT).size() == 1;
+    }
+
+    private boolean methodReturnIsLast(JmmNode method) {
+        if (method.get("name").equals("main") && method.getChildren(RETURN_STMT).isEmpty()) return true;
+        String lastKind = method.getChild(method.getNumChildren() - 1).getKind();
+        System.out.println(lastKind);
+        return lastKind.equals("ReturnStmt");
     }
 
     // Verifies type compatibility for BinaryOps and Assigns

@@ -97,6 +97,13 @@ public class OtherSemantics extends AnalysisVisitor {
             var message = String.format("The return type '%s' does not match the method's return type '%s'.", returnType, currentMethodReturnType);
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
         }
+
+        // Verify if return isn't VarArgs
+        if (returnType != null && returnType.hasAttribute("isVarArgs")) {
+            var message = "Can't return VarArgs";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
+        }
+
         return null;
     }
 

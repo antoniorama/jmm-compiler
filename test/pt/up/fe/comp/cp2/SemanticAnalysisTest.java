@@ -183,4 +183,12 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }
+
+    @Test
+    public void methodCallSimpleOk() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivMethodCallSimpleOk.jmm"));
+        TestUtils.noErrors(result);
+        System.out.println(result.getReports());
+    }
 }

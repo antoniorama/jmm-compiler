@@ -71,6 +71,13 @@ public class OtherSemantics extends AnalysisVisitor {
             rightType = TypeUtils.getExprType(node.getChild(1), table);
         }
 
+        // Arrays cannot be used in arithmetic operations
+        if (!Objects.equals(operator, "ASSIGN") && (leftType.isArray() || rightType.isArray())) {
+            var message = "Arrays cannot be used in arithmetic operations";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+            return null;
+        }
+
 
         // Verify the compatibility of the types and handle the error report
         if (!areTypesCompatible(operator, leftType, rightType, table)) {

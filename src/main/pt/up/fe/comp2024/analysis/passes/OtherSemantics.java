@@ -32,6 +32,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.METHOD_CALL, this::visitMethodCall);
         addVisit(Kind.RETURN_STMT, this::verifyReturnType);
         addVisit(Kind.IF_STMT, this::verifyIfCondition);
+        addVisit(Kind.VAR_DECL, this::visitVarDecl);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -378,5 +379,33 @@ public class OtherSemantics extends AnalysisVisitor {
         var message = "If condition not valid";
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(ifNode), NodeUtils.getColumn(ifNode), message, null));
         return null;
+    }
+
+    private Void visitVarDecl(JmmNode varDeclNode, SymbolTable table) {
+        String varName = varDeclNode.getChild(0).get("name");
+
+        // Check fields for varargs
+        if (checkForVarArgs(varName, table.getFields(), varDeclNode)) {
+            return null;
+        }
+
+        // Check local variables for varargs
+        if (checkForVarArgs(varName, table.getLocalVariables(currentMethod), varDeclNode)) {
+            return null;
+        }
+
+        return null;
+    }
+
+    private boolean checkForVarArgs(String varName, List<Symbol> symbols, JmmNode varDeclNode) {
+        for (Symbol s : symbols) {
+            Type type = s.getType();
+            if (s.getName().equals(varName) && type.hasAttribute("isVarArgs")) {
+                String message = "Varargs are not allowed here";
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(varDeclNode), NodeUtils.getColumn(varDeclNode), message, null));
+                return true;
+            }
+        }
+        return false;
     }
 }

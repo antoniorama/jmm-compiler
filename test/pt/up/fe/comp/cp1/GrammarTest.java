@@ -581,4 +581,17 @@ public class GrammarTest {
                     """
         );
     }
+
+    @Test
+    public void testVarArgsInFieldInvalid() {
+        TestUtils.parseVerbose(
+                """
+                    class VarargsFieldInvalid {
+                        int... numbers;
+                        public static void main(String[] args) {
+                        }
+                    }
+                    """
+        );
+    }
 }

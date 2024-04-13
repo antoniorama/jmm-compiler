@@ -191,4 +191,12 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
         System.out.println(result.getReports());
     }
+
+    @Test
+    public void varArgsInFieldInvalid() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivVarArgsInFieldInvalid.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
 }

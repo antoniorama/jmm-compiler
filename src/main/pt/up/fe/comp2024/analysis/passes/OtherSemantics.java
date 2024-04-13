@@ -93,6 +93,7 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitArrayAccess(JmmNode arrayAccess, SymbolTable table) {
+        System.out.println("VISITING ARRAY ACCESS");
         JmmNode arrayVar = arrayAccess.getChild(0);
         JmmNode arrayIndex = arrayAccess.getChild(1);
 
@@ -108,6 +109,7 @@ public class OtherSemantics extends AnalysisVisitor {
         } else {
             arrayVarType = TypeUtils.getExprType(arrayAccess.getChild(0), table);
         }
+
 
         // Error if variable isn't an array
         if (!arrayVarType.isArray()) {
@@ -262,6 +264,8 @@ public class OtherSemantics extends AnalysisVisitor {
 
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
         List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
+
+        System.out.println(symbolTableOfLocalVars);
 
         // Check if var is in local variables
         for (Symbol symbol : symbolTableOfLocalVars) {

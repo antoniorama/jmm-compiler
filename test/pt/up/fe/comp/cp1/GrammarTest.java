@@ -562,4 +562,23 @@ public class GrammarTest {
                  """
         );
     }
+
+    @Test
+    public void testArrayIndexNotInt() {
+        TestUtils.parseVerbose(
+                """
+                    class ArrayIndexNotInt {
+                            public static void main(String[] args) {
+                            }
+                            public int foo() {
+                                int[] a;
+                                boolean b;
+                                a = new int[2];
+                                b = true;
+                                return a[b];
+                            }
+                        }
+                    """
+        );
+    }
 }

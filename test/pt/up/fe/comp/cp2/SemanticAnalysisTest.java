@@ -48,6 +48,7 @@ public class SemanticAnalysisTest {
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test
@@ -170,6 +171,15 @@ public class SemanticAnalysisTest {
     public void arrayInitWrong2() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInitWrong2.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
+    // Private Tests
+    @Test
+    public void arrayIndexOk() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivArrayIndexOk.jmm"));
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }

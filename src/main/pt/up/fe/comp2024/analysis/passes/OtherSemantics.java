@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static pt.up.fe.comp2024.ast.Kind.*;
+
 public class OtherSemantics extends AnalysisVisitor {
 
     private String currentMethod;
@@ -46,8 +48,26 @@ public class OtherSemantics extends AnalysisVisitor {
             }
         }
 
+        // Return Checks
+        if (!methodReturnChecks(method)) {
+            var message = "Illegal number of return statements in method " + method.get("name");
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(method), NodeUtils.getColumn(method), message, null));
+        }
+
         currentMethod = method.get("name");
         return null;
+    }
+
+    private boolean methodReturnChecks(JmmNode method) {
+        // Check if only one return exists in method
+        if (!methodOnlyOneReturn(method)) return false;
+        return true;
+    }
+
+    private boolean methodOnlyOneReturn(JmmNode method) {
+        System.out.println(method.getChildren(RETURN_STMT));
+        if (method.get("name").equals("main")) return method.getChildren(RETURN_STMT).size() == 1 || method.getChildren(RETURN_STMT).isEmpty();
+        return method.getChildren(RETURN_STMT).size() == 1;
     }
 
     // Verifies type compatibility for BinaryOps and Assigns

@@ -99,7 +99,7 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         // Verify if return isn't VarArgs
-        if (returnType != null && returnType.hasAttribute("isVarArgs")) {
+        if (currentMethodReturnType.hasAttribute("isVarArgs")) {
             var message = "Can't return VarArgs";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
         }

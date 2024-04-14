@@ -181,15 +181,25 @@ public class OtherSemantics extends AnalysisVisitor {
             return null;
         }
 
-        String calledName = determineCalledName(methodCall, table);
-        Type calledType = getVarTypeNoError(calledName, table, methodCall);
+        String callerName = determineCalledName(methodCall, table);
+        Type callerType = TypeUtils.getExprType(methodCall.getJmmChild(0), table);
+
+        Type calledType = TypeUtils.getExprType(methodCall, table);
         String methodName = methodCall.get("methodName");
 
-        if (isImportedMethodName(calledName, table)) {
+        // There are two possible cases for imports
+
+        // 1. Using import name directly
+        if (isImportedMethodName(callerName, table)) {
             return null;
         }
 
-        if (calledName.equals(table.getClassName()) || (calledType != null && calledType.getName().equals(table.getClassName()))) {
+        // 2. Using var and imported is type of var
+        if (callerType != null && isImportedMethodName(callerType.getName(), table)) {
+            return null;
+        }
+
+        if (callerName.equals(table.getClassName()) || (calledType != null && calledType.getName().equals(table.getClassName()))) {
             if (isMethodNotDefinedInClass(methodCall, table)) {
                 reportUndefinedMethod(methodCall, table);
                 return null;
@@ -239,6 +249,8 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private boolean isImportedMethodName(String methodName, SymbolTable table) {
+        System.out.println("METHOD NAME: " + methodName);
+        System.out.println(table.getImports());
         return table.getImports().contains(methodName);
     }
 
@@ -293,30 +305,6 @@ public class OtherSemantics extends AnalysisVisitor {
     private void reportIncorrectArgumentTypes(JmmNode methodCall) {
         String message = "Incorrect types in method call";
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
-    }
-
-    private Type getVarTypeNoError(String varName, SymbolTable table, JmmNode node) {
-
-        List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
-        List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
-
-        // Check if var is in local variables
-        for (Symbol symbol : symbolTableOfLocalVars) {
-            if (symbol.getName().equals(varName)) {
-                // found variable
-                return symbol.getType();
-            }
-        }
-
-        // Check if var is in parameters
-        for (Symbol symbol : symbolTableOfParameters) {
-            if (symbol.getName().equals(varName)) {
-                // found variable
-                return symbol.getType();
-            }
-        }
-
-        return null;
     }
 
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType, SymbolTable table) {

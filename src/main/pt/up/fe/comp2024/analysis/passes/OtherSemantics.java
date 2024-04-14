@@ -89,19 +89,8 @@ public class OtherSemantics extends AnalysisVisitor {
         if (node.getKind().equals("BinaryExpr"))
             operator = node.get("op");
 
-        Type leftType;
-        if (node.getChild(0).getKind().equals("VarRefExpr")) {
-            leftType = getVarType(node.getChild(0).get("name"), table, node);
-        } else {
-            leftType = TypeUtils.getExprType(node.getChild(0), table);
-        }
-
-        Type rightType;
-        if (node.getChild(1).getKind().equals("VarRefExpr")) {
-            rightType = getVarType(node.getChild(1).get("name"), table, node);
-        } else {
-            rightType = TypeUtils.getExprType(node.getChild(1), table);
-        }
+        Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);;
+        Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);;
 
         // Arrays cannot be used in arithmetic operations
         if (!Objects.equals(operator, "ASSIGN") && (leftType.isArray() || rightType.isArray())) {
@@ -151,13 +140,7 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 
-        Type arrayVarType;
-        if (arrayVar.getKind().equals("VarRefExpr")) {
-            arrayVarType = getVarType(arrayAccess.getChild(0).get("name"), table, arrayAccess);
-        } else {
-            arrayVarType = TypeUtils.getExprType(arrayAccess.getChild(0), table);
-        }
-
+        Type arrayVarType = TypeUtils.getExprType(arrayAccess.getJmmChild(0), table);
 
         // Error if variable isn't an array
         if (!arrayVarType.isArray()) {
@@ -299,8 +282,6 @@ public class OtherSemantics extends AnalysisVisitor {
 
             Type expectedType = expectedParameters.get(i).getType();
             Type actualType = TypeUtils.getExprType(arguments.get(i), table);
-            System.out.println("EXPECTED TYPE: " + expectedType);
-            System.out.println("ACTUAL TYPE: " + actualType);
 
             if (!expectedType.equals(actualType)) {
                 return false;
@@ -312,34 +293,6 @@ public class OtherSemantics extends AnalysisVisitor {
     private void reportIncorrectArgumentTypes(JmmNode methodCall) {
         String message = "Incorrect types in method call";
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
-    }
-
-    private Type getVarType(String varName, SymbolTable table, JmmNode node) {
-
-        List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(this.currentMethod);
-        List<Symbol> symbolTableOfParameters = table.getParameters(this.currentMethod);
-
-        System.out.println(symbolTableOfLocalVars);
-
-        // Check if var is in local variables
-        for (Symbol symbol : symbolTableOfLocalVars) {
-            if (symbol.getName().equals(varName)) {
-                // found variable
-                return symbol.getType();
-            }
-        }
-
-        // Check if var is in parameters
-        for (Symbol symbol : symbolTableOfParameters) {
-            if (symbol.getName().equals(varName)) {
-                // found variable
-                return symbol.getType();
-            }
-        }
-
-        var message = String.format("Variable " + varName + " not found.");
-        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-        return null;
     }
 
     private Type getVarTypeNoError(String varName, SymbolTable table, JmmNode node) {

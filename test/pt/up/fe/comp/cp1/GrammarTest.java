@@ -594,4 +594,23 @@ public class GrammarTest {
                     """
         );
     }
+
+    @Test
+    public void testArrayInWhileCondition() {
+        TestUtils.parseVerbose(
+                """
+                        class ArrayInWhileCondition {
+                                public static void main(String[] args) {
+                                }
+                                public int foo() {
+                                    int[] a;
+                                    a = new int[2];
+                                    while (a) {
+                                    }
+                                    return 0;
+                                }
+                            }
+                    """
+        );
+    }
 }

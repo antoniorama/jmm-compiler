@@ -296,7 +296,13 @@ public class OtherSemantics extends AnalysisVisitor {
 
     private boolean areArgumentTypesValid(List<JmmNode> arguments, List<Symbol> expectedParameters, SymbolTable table, JmmNode node) {
         for (int i = 0; i < arguments.size(); i++) {
-            if (!Objects.equals(getVarType(arguments.get(i).get("name"), table, node), expectedParameters.get(i).getType())) {
+
+            Type expectedType = expectedParameters.get(i).getType();
+            Type actualType = TypeUtils.getExprType(arguments.get(i), table);
+            System.out.println("EXPECTED TYPE: " + expectedType);
+            System.out.println("ACTUAL TYPE: " + actualType);
+
+            if (!expectedType.equals(actualType)) {
                 return false;
             }
         }

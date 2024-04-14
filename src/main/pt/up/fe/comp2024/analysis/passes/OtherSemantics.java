@@ -143,9 +143,11 @@ public class OtherSemantics extends AnalysisVisitor {
         JmmNode arrayVar = arrayAccess.getChild(0);
         JmmNode arrayIndex = arrayAccess.getChild(1);
 
+        Type type = TypeUtils.getExprType(arrayIndex, table);
+
         // Error if index is not an integer
-        if (!arrayIndex.getKind().equals(TypeUtils.getIntTypeName()) && !arrayIndex.getKind().equals("IntegerLiteral")) {
-            var message = String.format("Trying to access array with index that is not an Integer");
+        if (!type.getName().equals("int")) {
+            var message = "Trying to access array with index that is not an Integer";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 

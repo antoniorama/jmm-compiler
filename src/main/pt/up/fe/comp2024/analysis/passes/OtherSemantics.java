@@ -35,6 +35,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.METHOD_CALL, this::visitMethodCall);
         addVisit(Kind.RETURN_STMT, this::verifyReturnType);
         addVisit(Kind.IF_STMT, this::verifyIfCondition);
+        addVisit(Kind.WHILE_STMT, this::visitWhileStmt);
         addVisit(Kind.VAR_DECL, this::visitVarDecl);
         addVisit(Kind.PARAM, this::visitParam);
     }
@@ -463,6 +464,18 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         currentMethod = mainMethod.get("name");
+        return null;
+    }
+
+    private Void visitWhileStmt(JmmNode whileNode, SymbolTable table) {
+        JmmNode conditionNode = whileNode.getChild(0);
+        Type conditionType = TypeUtils.getExprType(conditionNode, table);
+
+        if (conditionType == null || !conditionType.getName().equals("boolean") || conditionType.isArray()) {
+            String message = String.format("While condition must be a boolean, but found type '%s'.", conditionType);
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(conditionNode), NodeUtils.getColumn(conditionNode), message, null));
+        }
+
         return null;
     }
 }

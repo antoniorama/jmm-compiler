@@ -425,15 +425,22 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitClassDecl(JmmNode classDeclNode, SymbolTable table) {
-        // Check if there are no duplicate imports
+        // Check if there are no duplicates imports
         List<String> imported = table.getImports();
-        Set<String> uniqueImports = new HashSet<>();
+        Set<String> uniqueImports = new HashSet<>(imported);
 
-        for (String importItem : imported) {
-            if (!uniqueImports.add(importItem)) {
-                String message = "Can't have duplicated imports";
-                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
-            }
+        if (uniqueImports.size() != imported.size()) {
+            String message = "Can't have duplicated imports";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
+        }
+
+        // Check if there are no duplicated methods
+        List<String> methods = table.getMethods();
+        Set<String> uniqueMethods = new HashSet<>(methods);
+
+        if (uniqueMethods.size() != methods.size()) {
+            String message = "Can't have duplicated methods";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
         }
 
         return null;

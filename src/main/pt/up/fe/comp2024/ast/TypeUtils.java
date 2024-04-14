@@ -48,6 +48,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(actualExpr);
             case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(actualExpr);
             case ARRAY_INIT -> getArrayType(actualExpr, table);
+            case NEW_ARRAY -> getNewArrayType(actualExpr);
             case INTEGER_TYPE, INTEGER_LITERAL, ARRAY_ACCESS -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE, BOOLEAN_VALUE -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
@@ -121,6 +122,11 @@ public class TypeUtils {
         JmmNode firstElement = expressionList.getJmmChild(0);
         Type firstElementType = getExprType(firstElement, table);
         return new Type(firstElementType.getName(), true);
+    }
+
+    private static Type getNewArrayType(JmmNode newArray) {
+        JmmNode typeNode = newArray.getJmmChild(0);
+        return new Type(typeNode.get("value"), true);
     }
 
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {

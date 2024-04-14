@@ -180,7 +180,7 @@ public class SemanticAnalysisTest {
     public void arrayIndexOk() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivArrayIndexOk.jmm"));
-        TestUtils.mustFail(result);
+        TestUtils.noErrors(result);
         System.out.println(result.getReports());
     }
 

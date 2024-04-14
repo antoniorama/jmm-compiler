@@ -54,6 +54,7 @@ public class TypeUtils {
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);
             case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
+            case THIS -> getThisType(actualExpr, table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -132,7 +133,9 @@ public class TypeUtils {
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
         return table.getReturnType(methodCall.get("methodName"));
     }
-
+    private static Type getThisType(JmmNode methodCall, SymbolTable table) {
+        return new Type(table.getClassName(), false);
+    }
 
     /**
      * @param sourceType

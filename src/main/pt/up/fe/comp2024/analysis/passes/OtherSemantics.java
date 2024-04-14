@@ -318,16 +318,9 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private boolean isAssignValid(Type leftType, Type rightType, SymbolTable table) {
-        // TODO - probably isn't handling all possible cases
 
-        // Check for array compatibility first. If one is an array and the other isn't, they can't be assigned regardless of their base type.
-        if (leftType.isArray() != rightType.isArray()) {
-            return false; // Directly return false if one is an array and the other isn't.
-        }
-
-        // If both types have the same name and array status, they are compatible.
-        // This check is sufficient for both primitive types and class types, including arrays, since we already checked array status compatibility.
-        if (leftType.getName().equals(rightType.getName())) {
+        // Check if types are the same
+        if (leftType.equals(rightType)) {
             return true;
         }
 

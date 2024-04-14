@@ -12,9 +12,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -39,6 +37,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.WHILE_STMT, this::visitWhileStmt);
         addVisit(Kind.VAR_DECL, this::visitVarDecl);
         addVisit(Kind.PARAM, this::visitParam);
+        addVisit(CLASS_DECL, this::visitClassDecl);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -420,6 +419,21 @@ public class OtherSemantics extends AnalysisVisitor {
         if (!lengthNode.getKind().equals("IntegerLiteral")) {
             String message = "Array must have integer length";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(newArrayNode), NodeUtils.getColumn(newArrayNode), message, null));
+        }
+
+        return null;
+    }
+
+    private Void visitClassDecl(JmmNode classDeclNode, SymbolTable table) {
+        // Check if there are no duplicate imports
+        List<String> imported = table.getImports();
+        Set<String> uniqueImports = new HashSet<>();
+
+        for (String importItem : imported) {
+            if (!uniqueImports.add(importItem)) {
+                String message = "Can't have duplicated imports";
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
+            }
         }
 
         return null;

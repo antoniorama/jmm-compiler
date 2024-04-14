@@ -27,6 +27,7 @@ public class OtherSemantics extends AnalysisVisitor {
     protected void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.MAIN_METHOD_DECL, this::visitMethodDecl);
+        addVisit(Kind.MAIN_METHOD_DECL, this::visitMainMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_INIT, this::visitArrayInit);
         addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
@@ -451,6 +452,17 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(paramNode), NodeUtils.getColumn(paramNode), message, null));
         }
 
+        return null;
+    }
+
+    private Void visitMainMethodDecl(JmmNode mainMethod, SymbolTable table) {
+        // Check if there is any THIS in descendants
+        if (!mainMethod.getDescendants(THIS).isEmpty()) {
+            String message = "Can't use 'this' in main method";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(mainMethod), NodeUtils.getColumn(mainMethod), message, null));
+        }
+
+        currentMethod = mainMethod.get("name");
         return null;
     }
 }

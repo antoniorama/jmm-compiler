@@ -1,0 +1,10 @@
+class Test {
+    public static void main(String[] args) {
+        int a;
+        a = this.test();
+    }
+
+    public int test() {
+        return 1;
+    }
+}

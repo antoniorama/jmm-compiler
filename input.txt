@@ -7,11 +7,9 @@ class CompileMethodInvocation {
     }
 
     public int foo() {
-        int a;
-
-        a = 1;
-
-        io.println(a);
+        int result;
+        int numbers;
+        result = numbers[0];
 
         return 0;
     }

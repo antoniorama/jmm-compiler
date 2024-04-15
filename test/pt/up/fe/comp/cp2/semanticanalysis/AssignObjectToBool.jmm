@@ -1,16 +1,15 @@
 import A;
 
-class IntPlusObject {
+class AssignObjectToBool {
 
     public static void main(String[] args) {
 
     }
 
-    public int foo() {
-        A a;
+    public boolean foo() {
+        boolean a;
 
         a = new A();
-
-        return 10 + a;
+        return a;
     }
 }

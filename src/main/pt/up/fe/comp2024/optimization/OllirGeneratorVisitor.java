@@ -51,7 +51,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitImport(JmmNode node, Void unused) {
-        return "import " + node.get("name") + END_STMT;
+        return "import " + TypeUtils.converImportName(node.get("name")) + END_STMT;
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {

@@ -5,7 +5,9 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TypeUtils {
 
@@ -133,17 +135,16 @@ public class TypeUtils {
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
         return table.getReturnType(methodCall.get("methodName"));
     }
+
     private static Type getThisType(JmmNode methodCall, SymbolTable table) {
         return new Type(table.getClassName(), false);
     }
 
-    /**
-     * @param sourceType
-     * @param destinationType
-     * @return true if sourceType can be assigned to destinationType
-     */
-    public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
-        // TODO: Simple implementation that needs to be expanded
-        return sourceType.getName().equals(destinationType.getName());
+    public static String converImportName(String rawImportName) {
+        String[] parts = rawImportName.replace("[", "").replace("]", "").split(",");
+
+        return Arrays.stream(parts)
+                .map(String::trim)
+                .collect(Collectors.joining("."));
     }
 }

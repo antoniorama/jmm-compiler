@@ -49,11 +49,7 @@ public class JmmSymbolTableBuilder {
             String rawNames = importDecl.get("name");
             // System.out.println("Raw NAMES : " + rawNames);
 
-            String[] parts = rawNames.replace("[", "").replace("]", "").split(",");
-
-            String formattedName = Arrays.stream(parts)
-                    .map(String::trim)
-                    .collect(Collectors.joining("."));
+            String formattedName = TypeUtils.converImportName(rawNames);
 
             // System.out.println("Formatted names : " + formattedName);
             imports.add(formattedName);

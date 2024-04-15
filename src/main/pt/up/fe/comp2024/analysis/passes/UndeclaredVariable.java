@@ -36,12 +36,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var varRefName = varRefExpr.get("name");
 
-        // Var can't be named lenght
-        if (varRefName.equals("length")) {
-            var message = "Variable can't be 'length'";
-            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(varRefExpr), NodeUtils.getColumn(varRefExpr), message, null));
-        }
-
         // Var is a field, return
         if (table.getFields().stream()
                 .anyMatch(param -> param.getName().equals(varRefName))) {

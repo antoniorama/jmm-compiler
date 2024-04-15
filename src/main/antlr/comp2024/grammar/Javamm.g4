@@ -40,7 +40,6 @@ RETURN : 'return' ;
 IMPORT : 'import' ;
 EXTENDS : 'extends' ;
 STATIC : 'static' ;
-LENGTH : 'length' ;
 NEW : 'new' ;
 TRUE : 'true' ;
 FALSE : 'false' ;
@@ -119,7 +118,7 @@ stmt
 expr
     : expr LRECT expr RRECT #ArrayAccess
     | expr DOT ID #PropertyAccess
-    | expr DOT LENGTH #LengthAccess
+    | expr DOT name=ID #LengthAccess
     | methodName=ID LPAREN exprList? RPAREN #MethodCallOnAssign
     | expr '.' methodName=ID LPAREN (expr (COMMA expr) *)? RPAREN #MethodCall
     | value=(TRUE | FALSE) #BooleanValue

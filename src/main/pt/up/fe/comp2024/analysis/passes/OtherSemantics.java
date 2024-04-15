@@ -383,7 +383,7 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         // Check local variables for varargs
-        if (checkForVarArgs(varName, table.getLocalVariables(currentMethod), varDeclNode)) {
+        if (currentMethod != null && checkForVarArgs(varName, table.getLocalVariables(currentMethod), varDeclNode)) {
             return null;
         }
 

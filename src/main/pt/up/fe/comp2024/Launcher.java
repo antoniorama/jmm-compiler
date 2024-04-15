@@ -47,7 +47,7 @@ public class Launcher {
         TestUtils.noErrors(ollirResult.getReports());
 
         // Print OLLIR code
-        //System.out.println(ollirResult.getOllirCode());
+        System.out.println(ollirResult.getOllirCode());
 
         // Code generation stage
         JasminBackendImpl jasminGen = new JasminBackendImpl();

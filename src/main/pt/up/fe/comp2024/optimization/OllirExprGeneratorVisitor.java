@@ -117,7 +117,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // Construct the method call
         String argsList = String.join(", ", argsCode);
         String tempVar = OptUtils.getTemp() + returnTypeString;
-        String methodCallCode = "invokevirtual(" + ownerExpr.getCode() + ", \"" + methodName + "\""
+        String methodCallCode = "invokevirtual(" + ownerExpr.getCode() + "." + table.getClassName() + ", \"" + methodName + "\""
                 + (argsCode.isEmpty() ? "" : ", " + argsList)
                 + ")" + returnTypeString;
 

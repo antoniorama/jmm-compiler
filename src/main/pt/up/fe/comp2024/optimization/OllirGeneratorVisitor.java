@@ -7,8 +7,6 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
-import java.util.List;
-
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -117,9 +115,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
         var id = node.get("name");
 
-        String code = id + typeCode;
-
-        return code;
+        return id + typeCode;
     }
 
 
@@ -154,7 +150,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
-        if (paramsCode.length() > 0) {
+        if (!paramsCode.isEmpty()) {
             code.append("(").append(paramsCode).append(")");
         } else {
             code.append("()");
@@ -205,9 +201,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(table.getClassName());
 
         // class extends
+        code.append(" extends ");
         if (node.hasAttribute("extendedClass")) {
-            code.append(" extends ");
             code.append(node.get("extendedClass"));
+        }
+        else {
+            code.append("Object");
         }
 
         code.append(L_BRACKET);
@@ -281,7 +280,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 "invokespecial(this, \"<init>\").V;\n" +
                 "}\n";
     }
-
 
     private String visitProgram(JmmNode node, Void unused) {
 

@@ -105,8 +105,14 @@ public class OtherSemantics extends AnalysisVisitor {
         if (node.getKind().equals("BinaryExpr"))
             operator = node.get("op");
 
-        Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);;
-        Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);;
+        Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);
+        Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
+
+        // Assign -> check if left type is allowed
+        if (Objects.equals(operator, "ASSIGN") && !node.getJmmChild(0).getKind().equals("VarRefExpr") && (leftType.getName().equals("int") || leftType.getName().equals("boolean"))) {
+            var message = "Left assignment invalid!";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        }
 
         // Arrays cannot be used in arithmetic operations
         if (!Objects.equals(operator, "ASSIGN") && (leftType.isArray() || rightType.isArray())) {
@@ -114,7 +120,6 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
             return null;
         }
-
 
         // Verify the compatibility of the types and handle the error report
         if (!areTypesCompatible(operator, leftType, rightType, table)) {

@@ -49,6 +49,8 @@ IF : 'if' ;
 ELSE : 'else' ;
 WHILE : 'while' ;
 
+NULL : 'null' ;
+
 INTEGER : '0' | [1-9][0-9]* ; // changed so there arent any leading zeros
 ID : [a-zA-Z_$]([a-zA-Z0-9_$])* ;
 

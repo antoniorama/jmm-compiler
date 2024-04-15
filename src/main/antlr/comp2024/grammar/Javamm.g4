@@ -70,9 +70,8 @@ classDecl
         RCURLY
     ;
 
-// name variable not capturing full import path
 importDecl
-    : IMPORT name=ID (DOT ID)* SEMI
+    : IMPORT name+=ID (DOT name+=ID)* SEMI
     ;
 
 varDecl

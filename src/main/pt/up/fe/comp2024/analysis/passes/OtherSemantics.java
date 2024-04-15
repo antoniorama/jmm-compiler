@@ -492,7 +492,7 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         if (hasDuplicateImports) {
-            String message = "Can't have duplicated imports";
+            String message = "This class can't have duplicate imports!";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
         }
 
@@ -501,7 +501,16 @@ public class OtherSemantics extends AnalysisVisitor {
         Set<String> uniqueMethods = new HashSet<>(methods);
 
         if (uniqueMethods.size() != methods.size()) {
-            String message = "Can't have duplicated methods";
+            String message = "This class can't have duplicate methods!";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
+        }
+
+        // Check if there are no duplicate fields
+        List<Symbol> fields = table.getFields();
+        Set<Symbol> uniqueFields = new HashSet<>(fields);
+
+        if (uniqueFields.size() != fields.size()) {
+            String message = "This class can't have duplicate fields!";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
         }
 

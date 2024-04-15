@@ -108,6 +108,12 @@ public class OtherSemantics extends AnalysisVisitor {
         Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);
         Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
 
+        // Check if rightType comes from an import (null)
+        // In this case we assume that the types are assignable
+        if (operator.equals("ASSIGN") && rightType == null) {
+            return null;
+        }
+
         // TODO -> this can't be like this...
         // Assign -> check if left type is allowed
         // if (Objects.equals(operator, "ASSIGN") && !node.getJmmChild(0).getKind().equals("VarRefExpr") && (leftType.getName().equals("int") || leftType.getName().equals("boolean"))) {
@@ -232,6 +238,14 @@ public class OtherSemantics extends AnalysisVisitor {
             return null;
         }
 
+        // If it hasn't return in the previous code, the only option is for the method to be from current class
+        // Check this first
+        if (!table.getMethods().contains(methodName)) {
+            String message = String.format("Method %s doesn't exist in class %s", methodCall.get("methodName"), table.getClassName());
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
+            return null;
+        }
+
         List<JmmNode> argumentNodes = collectArgumentNodes(methodCall);
         List<Symbol> expectedParameters = table.getParameters(methodName);
         boolean isVarArgs = false;
@@ -340,6 +354,11 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private boolean isAssignValid(Type leftType, Type rightType, SymbolTable table) {
+
+        // Check if rightType wasn't valid
+        if (rightType == null) {
+            return false;
+        }
 
         // Check if types are the same
         if (leftType.equals(rightType)) {

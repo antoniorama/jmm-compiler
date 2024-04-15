@@ -71,7 +71,7 @@ classDecl
     ;
 
 importDecl
-    : IMPORT name+=ID (DOT name+=ID)* SEMI
+    : IMPORT name=ID (DOT ID)* SEMI
     ;
 
 varDecl

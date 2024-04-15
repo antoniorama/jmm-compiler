@@ -59,6 +59,15 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(method), NodeUtils.getColumn(method), message, null));
         }
 
+        // Check for duplicate parameters in method call
+        List<Symbol> parameters = table.getParameters(method.get("name"));
+        Set<Symbol> uniqueParameters = new HashSet<>(parameters);
+
+        if (uniqueParameters.size() != parameters.size()) {
+            String message = "Method can't have duplicate parameters";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(method), NodeUtils.getColumn(method), message, null));
+        }
+
         // Return Checks
         if (!methodReturnChecks(method)) {
             var message = "Illegal number of return statements in method " + method.get("name");

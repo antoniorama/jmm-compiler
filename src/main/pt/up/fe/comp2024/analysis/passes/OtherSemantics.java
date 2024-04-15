@@ -50,6 +50,15 @@ public class OtherSemantics extends AnalysisVisitor {
             }
         }
 
+        // Check for duplicate local variables within method
+        List<Symbol> locals = table.getLocalVariables(method.get("name"));
+        Set<Symbol> uniqueLocals = new HashSet<>(locals);
+
+        if (uniqueLocals.size() != locals.size()) {
+            String message = "Method can't have duplicate local variables";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(method), NodeUtils.getColumn(method), message, null));
+        }
+
         // Return Checks
         if (!methodReturnChecks(method)) {
             var message = "Illegal number of return statements in method " + method.get("name");

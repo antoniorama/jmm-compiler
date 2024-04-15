@@ -13,6 +13,8 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -470,11 +472,26 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitClassDecl(JmmNode classDeclNode, SymbolTable table) {
-        // Check if there are no duplicates imports
-        List<String> imported = table.getImports();
-        Set<String> uniqueImports = new HashSet<>(imported);
+        // Regex to extract the last part of the import string
+        Pattern pattern = Pattern.compile(".*\\.([^.]+)$");
 
-        if (uniqueImports.size() != imported.size()) {
+        // Check for duplicate imports based on the last part
+        List<String> imported = table.getImports();
+        Set<String> lastParts = new HashSet<>();
+        boolean hasDuplicateImports = false;
+
+        for (String importStr : imported) {
+            Matcher matcher = pattern.matcher(importStr);
+            if (matcher.find()) {
+                String lastPart = matcher.group(1);
+                if (!lastParts.add(lastPart)) {
+                    hasDuplicateImports = true;
+                    break;
+                }
+            }
+        }
+
+        if (hasDuplicateImports) {
             String message = "Can't have duplicated imports";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
         }

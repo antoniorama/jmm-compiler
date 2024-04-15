@@ -108,11 +108,19 @@ public class OtherSemantics extends AnalysisVisitor {
         Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);
         Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
 
-        // Check if rightType comes from an import (null)
+        // Check if any of the types comes from an import
         // In this case we assume that the types are assignable
-        if (operator.equals("ASSIGN") && rightType == null) {
+        System.out.println("IMPORTS : " + table.getImports());
+        if (operator.equals("ASSIGN") && (rightType == null | table.getImports().contains(leftType.getName()) | (rightType != null && table.getImports().contains(rightType.getName())))) {
+
+            if (rightType != null && rightType.getName().equals(table.getClassName()) && !checkIfExtends(leftType.getName(), table)) {
+                var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType + "'");
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+            }
+
             return null;
         }
+
 
         // TODO -> this can't be like this...
         // Assign -> check if left type is allowed
@@ -136,6 +144,11 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         return null;
+    }
+
+    private boolean checkIfExtends(String methodName, SymbolTable table) {
+        if (table.getSuper() == null) return false; // there is no super
+        return table.getSuper().equals(methodName);
     }
 
     private Void verifyReturnType(JmmNode returnNode, SymbolTable table){

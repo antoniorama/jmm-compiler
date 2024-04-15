@@ -37,10 +37,29 @@ public class JmmSymbolTableBuilder {
         return new JmmSymbolTable(className, extendedClass, methods, returnTypes, params, locals, imports, fields);
     }
 
-    private static List<String> buildImports(JmmNode node){
-        return node.getChildren(IMPORT_DECL).stream()
-                .map(importDecl -> importDecl.get("name"))
-                .toList();
+    private static List<String> buildImports(JmmNode node) {
+        // In the grammar, imports are stored in a name "list"
+        // This is actually not a list, it is a String, so it has to be formatted in this function
+        // For example [foo, bar] needs to become foo.bar
+
+        List<String> imports = new ArrayList<>();
+        List<JmmNode> children = node.getChildren(IMPORT_DECL);
+
+        for (JmmNode importDecl : children) {
+            String rawNames = importDecl.get("name");
+            // System.out.println("Raw NAMES : " + rawNames);
+
+            String[] parts = rawNames.replace("[", "").replace("]", "").split(",");
+
+            String formattedName = Arrays.stream(parts)
+                    .map(String::trim)
+                    .collect(Collectors.joining("."));
+
+            // System.out.println("Formatted names : " + formattedName);
+            imports.add(formattedName);
+        }
+
+        return imports;
     }
 
     private static String buildExtendedClass(JmmNode node){

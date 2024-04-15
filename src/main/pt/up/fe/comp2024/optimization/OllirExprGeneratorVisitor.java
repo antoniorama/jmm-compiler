@@ -128,7 +128,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitThis(JmmNode node, Void unused) {
-        return new OllirExprResult("this", "");
+        return new OllirExprResult("this." + table.getClassName(), "");
     }
 
     private OllirExprResult visitNewClassInstance(JmmNode node, Void unused) {

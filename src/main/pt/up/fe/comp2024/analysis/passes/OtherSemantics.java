@@ -108,11 +108,12 @@ public class OtherSemantics extends AnalysisVisitor {
         Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);
         Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
 
+        // TODO -> this can't be like this...
         // Assign -> check if left type is allowed
-        if (Objects.equals(operator, "ASSIGN") && !node.getJmmChild(0).getKind().equals("VarRefExpr") && (leftType.getName().equals("int") || leftType.getName().equals("boolean"))) {
-            var message = "Left assignment invalid!";
-            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-        }
+        // if (Objects.equals(operator, "ASSIGN") && !node.getJmmChild(0).getKind().equals("VarRefExpr") && (leftType.getName().equals("int") || leftType.getName().equals("boolean"))) {
+        //    var message = "Left assignment invalid!";
+        //    addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        //}
 
         // Arrays cannot be used in arithmetic operations
         if (!Objects.equals(operator, "ASSIGN") && (leftType.isArray() || rightType.isArray())) {

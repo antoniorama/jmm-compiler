@@ -241,7 +241,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
            code.append(childCode);
         }
 
-        code.append("ret.V;\n");
+        code.append("ret.V ;\n");
         code.append(R_BRACKET);
         code.append(NL);
 

@@ -1,23 +1,22 @@
 import Io;
 
 class Test {
-    
-    public int nothing() {
+
+    public int readInt() {
         return 0;
     }
 
-    public int nothing2() {
-        return 0;
-    }
-
-    public static void main(String[] varargs) {
+    public int testInvokeThisAndImportSameMethodDiffReturn() {
         Test test;
         Io io;
-        int resultStatic;
-        int resultVirtual;
-        test = new Test();
-        io = new Io();
-        resultStatic = Io.readInt();
-        resultVirtual = test.nothing();
+        int resultThis;
+        int resultStaticImport;
+        int resultImport;
+
+        resultThis = this.readInt();
+        resultStaticImport = Io.readInt();
+        resultImport = io.readInt();
+
+        return 0;
     }
 }

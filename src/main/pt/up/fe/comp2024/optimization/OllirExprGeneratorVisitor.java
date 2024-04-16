@@ -8,6 +8,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -116,6 +117,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             argsCode.add(argExpr.getCode());
         }
 
+        boolean isImported = true;
         boolean isAssign = false;
         boolean isStatic = false;
 
@@ -126,8 +128,15 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             isAssign = true;
         }
 
+        JmmNode child = node.getJmmChild(0);
+        var type = TypeUtils.getExprType(child, table);
+
+        if (child.getKind().equals("This") || (type != null && Objects.equals(type.getName(), table.getClassName()))) {
+            isImported = false;
+        }
+
         // imported method
-        if (returnType == null) {
+        if (isImported) {
 
             JmmNode varRef = node.getJmmChild(0);
             returnType = TypeUtils.getExprType(varRef, table);

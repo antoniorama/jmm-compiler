@@ -2,11 +2,19 @@ import Io;
 
 class Test {
 
+    public int nothing() {
+        return 0;
+    }
+
     public int test() {
         int i;
         Io io;
-        i = io.readInt();
-        i = Io.read();
+        this.nothing(); // virtual call
+        io.readInt(); // virtual import call
+        Io.readInt(); // static import call
+        i = io.readInt(); // virtual import assign
+        i = Io.readInt(); // static import assign
+
         return 0;
     }
 }

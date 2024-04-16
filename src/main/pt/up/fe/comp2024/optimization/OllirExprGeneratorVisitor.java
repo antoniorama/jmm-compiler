@@ -132,13 +132,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             JmmNode varRef = node.getJmmChild(0);
             returnType = TypeUtils.getExprType(varRef, table);
 
+            // static method
             if (returnType == null) {
                 isStatic = true;
-                returnType = new Type("void", false);
-            }
 
-            if (isAssign) {
-                returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
+                if (isAssign) {
+                    returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
+                }
+                else returnType = new Type("void", false);
             }
         }
 

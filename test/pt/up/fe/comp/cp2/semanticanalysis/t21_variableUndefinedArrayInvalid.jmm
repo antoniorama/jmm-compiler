@@ -1,0 +1,12 @@
+class Whatever {
+    int a;
+
+    public int foo() {
+        int[] myArray;
+        return myArray[0];
+    }
+
+    public static void main(String[] args) {
+
+    }
+}

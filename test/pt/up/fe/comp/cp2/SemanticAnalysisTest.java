@@ -247,5 +247,11 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
-
+    @Test
+    public void privVariableUndefinedArrayInvalid() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/t21_variableUndefinedArrayInvalid.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
 }

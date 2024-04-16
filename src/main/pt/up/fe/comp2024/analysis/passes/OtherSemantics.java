@@ -15,6 +15,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -383,7 +384,7 @@ public class OtherSemantics extends AnalysisVisitor {
     private boolean isAssignValid(Type leftType, Type rightType, SymbolTable table) {
 
         // Check if rightType wasn't valid
-        if (rightType == null) {
+        if (rightType == null || leftType == null) {
             return false;
         }
 
@@ -453,6 +454,23 @@ public class OtherSemantics extends AnalysisVisitor {
         if (!mainMethod.getDescendants(THIS).isEmpty()) {
             String message = "Can't use 'this' in main method";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(mainMethod), NodeUtils.getColumn(mainMethod), message, null));
+        }
+
+        // Prepare a set of all field names for quick lookup
+        Set<String> fieldNames = table.getFields().stream()
+                .map(Symbol::getName)
+                .collect(Collectors.toSet());
+
+        // Check if any var ref is a field
+        List<JmmNode> varRefNodes = mainMethod.getDescendants(VAR_REF_EXPR);
+        for (JmmNode varRef : varRefNodes) {
+            String varName = varRef.get("name");
+            // If the variable name is in the set of fields, then it's a field reference
+            if (fieldNames.contains(varName)) {
+                // Variable reference is a field, add a report
+                String message = String.format("Variable reference '%s' in static main method cannot be a field", varName);
+                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(varRef), NodeUtils.getColumn(varRef), message, null));
+            }
         }
 
         currentMethod = mainMethod.get("name");

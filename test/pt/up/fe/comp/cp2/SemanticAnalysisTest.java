@@ -247,5 +247,12 @@ public class SemanticAnalysisTest {
         TestUtils.noErrors(result);
     }
 
+    @Test
+    public void privFieldInStaticInvalid() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/t10_fieldInStaticInvalid.jmm"));
+        TestUtils.mustFail(result);
+    }
+
 
 }

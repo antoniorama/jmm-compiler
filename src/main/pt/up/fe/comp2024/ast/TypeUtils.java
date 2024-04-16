@@ -101,13 +101,21 @@ public class TypeUtils {
     }
 
     private static Type getVarRefType(JmmNode varRefExpr, SymbolTable table) {
+        String varName = varRefExpr.get("name");
+
+        // Check in fields
+        List<Symbol> fields = table.getFields();
+        for (Symbol field : fields) {
+            if (field.getName().equals(varName))
+                return field.getType();
+        }
+
         // Get the current method
         JmmNode parent = varRefExpr.getParent();
         while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
             parent = parent.getParent();
         }
         String methodName = parent.get("name");
-        String varName = varRefExpr.get("name");
 
         List<Symbol> symbolTableOfLocalVars = table.getLocalVariables(methodName);
         List<Symbol> symbolTableOfParameters = table.getParameters(methodName);

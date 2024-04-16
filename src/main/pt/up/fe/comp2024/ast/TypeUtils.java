@@ -57,6 +57,7 @@ public class TypeUtils {
             case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);
             case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
             case THIS -> getThisType(actualExpr, table);
+            case PROPERTY_ACCESS -> null; // I think we are not dealing with property types (ex: array.size)
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 

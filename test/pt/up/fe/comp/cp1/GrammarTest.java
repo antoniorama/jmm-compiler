@@ -639,4 +639,21 @@ public class GrammarTest {
                     """
         );
     }
+
+    @Test
+    public void testMemberAccessWrong() {
+        TestUtils.parseVerbose(
+                """
+                        class MemberAccessWrong {
+                                    public int foo() {
+                                        int[] arr;
+                                        arr = [1, 2, 3];
+                                        return arr.size;
+                                    }
+                                    public static void main(String[] args) {
+                                    }
+                                }
+                    """
+        );
+    }
 }

@@ -161,6 +161,13 @@ public class OtherSemantics extends AnalysisVisitor {
     private Void verifyReturnType(JmmNode returnNode, SymbolTable table){
         Type currentMethodReturnType = table.getReturnType(currentMethod);
         Type returnType = TypeUtils.getExprType(returnNode.getChild(0), table);
+
+        // Check for invalid return type
+        if (returnType == null) {
+            var message = "Invalid return type";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
+        }
+
         if(returnType != null && !returnType.equals(currentMethodReturnType)){
             var message = String.format("The return type '%s' does not match the method's return type '%s'.", returnType, currentMethodReturnType);
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));

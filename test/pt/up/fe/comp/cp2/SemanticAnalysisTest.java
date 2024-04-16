@@ -232,4 +232,20 @@ public class SemanticAnalysisTest {
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }
+
+    @Test
+    public void privLengthAsName() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MiscLengthAsName.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+    @Test
+    public void privMemberAccess() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MemberAccess.jmm"));
+        TestUtils.noErrors(result);
+    }
+
+
 }

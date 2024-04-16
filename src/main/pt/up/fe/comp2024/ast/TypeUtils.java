@@ -57,7 +57,7 @@ public class TypeUtils {
             case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);
             case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
             case THIS -> getThisType(actualExpr, table);
-            case PROPERTY_ACCESS -> null; // I think we are not dealing with property types (ex: array.size)
+            case PROPERTY_ACCESS -> getPropertyAccessType(actualExpr, table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -68,6 +68,18 @@ public class TypeUtils {
 
         // System.out.println(type);
         return type;
+    }
+
+    private static Type getPropertyAccessType(JmmNode propertyAccessNode, SymbolTable table) {
+        Type callerType = getExprType(propertyAccessNode.getJmmChild(0), table);
+
+        // check for only valid property (length) and if the caller is array
+        if (propertyAccessNode.get("name").equals("length") && callerType.isArray()) {
+            return new Type(INT_TYPE_NAME, false);
+        }
+
+        // if not a valid property, return null type
+        return null;
     }
 
     private static Type getBinExprType(JmmNode binaryExpr) {

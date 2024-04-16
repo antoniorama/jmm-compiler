@@ -118,7 +118,7 @@ stmt
 
 expr
     : expr LRECT expr RRECT #ArrayAccess
-    | expr DOT ID #PropertyAccess
+    | expr DOT name=ID #PropertyAccess
     | expr DOT name=ID #LengthAccess
     | methodName=ID LPAREN exprList? RPAREN #MethodCallOnAssign
     | expr '.' methodName=ID LPAREN (expr (COMMA expr) *)? RPAREN #MethodCall

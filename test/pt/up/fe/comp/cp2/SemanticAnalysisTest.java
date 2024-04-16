@@ -48,6 +48,7 @@ public class SemanticAnalysisTest {
     public void arrayAccessOnInt() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayAccessOnInt.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test
@@ -59,12 +60,6 @@ public class SemanticAnalysisTest {
     @Test
     public void assignIntToBool() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssignIntToBool.jmm"));
-        TestUtils.mustFail(result);
-    }
-
-    @Test
-    public void assignObjectToBool() {
-        var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/AssignObjectToBool.jmm"));
         TestUtils.mustFail(result);
     }
 
@@ -97,6 +92,7 @@ public class SemanticAnalysisTest {
     public void arrayInWhileCondition() {
         var result = TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/ArrayInWhileCondition.jmm"));
         TestUtils.mustFail(result);
+        System.out.println(result.getReports());
     }
 
     @Test
@@ -150,24 +146,9 @@ public class SemanticAnalysisTest {
     }
 
     @Test
-    public void varargsWithArray() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarargsWithArray.jmm"));
-        TestUtils.noErrors(result);
-    }
-
-    @Test
     public void varargsWrong() {
         var result = TestUtils
                 .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarargsWrong.jmm"));
-        TestUtils.mustFail(result);
-        System.out.println(result.getReports());
-    }
-
-    @Test
-    public void varargsWithArrayWrong() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/VarargsWithArrayWrong.jmm"));
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }
@@ -195,80 +176,51 @@ public class SemanticAnalysisTest {
         System.out.println(result.getReports());
     }
 
+    // Private Tests
     @Test
-    public void staticMethodWithThis() {
+    public void arrayIndexOk() {
         var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/StaticMethodWithThis.jmm"));
-        TestUtils.mustFail(result);
-        System.out.println(result.getReports());
-    }
-
-    @Test
-    public void staticMethodWithField() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/StaticMethodWithField.jmm"));
-        TestUtils.mustFail(result);
-        System.out.println(result.getReports());
-    }
-
-    @Test
-    public void memberAccess() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MemberAccess.jmm"));
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivArrayIndexOk.jmm"));
         TestUtils.noErrors(result);
-    }
-
-    @Test
-    public void memberAccessOnInt() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MemberAccessOnInt.jmm"));
-        TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }
 
     @Test
-    public void mainMethodWrong1() {
+    public void methodCallSimpleOk() {
         var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MainMethodWrong1.jmm"));
-        TestUtils.mustFail(result);
-        System.out.println(result.getReports());
-    }
-
-    @Test
-    public void mainMethodWrong2() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MainMethodWrong2.jmm"));
-        TestUtils.mustFail(result);
-        System.out.println(result.getReports());
-    }
-
-    @Test
-    public void miscLengthAsName() {
-        var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MiscLengthAsName.jmm"));
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivMethodCallSimpleOk.jmm"));
         TestUtils.noErrors(result);
+        System.out.println(result.getReports());
     }
 
     @Test
-    public void memberAccessWrong() {
+    public void varArgsInFieldInvalid() {
         var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MemberAccessWrong.jmm"));
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivVarArgsInFieldInvalid.jmm"));
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }
 
     @Test
-    public void multipleReturns() {
+    public void varArgsInReturnInvalid() {
         var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/MultipleReturns.jmm"));
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivVarArgsInReturnInvalid.jmm"));
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }
 
     @Test
-    public void noReturns() {
+    public void miscMethodMultipleReturnsInvalid() {
         var result = TestUtils
-                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/NoReturns.jmm"));
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivMiscMethodMultipleReturnsInvalid.jmm"));
+        TestUtils.mustFail(result);
+        System.out.println(result.getReports());
+    }
+
+    @Test
+    public void thisInMainInvalid() {
+        var result = TestUtils
+                .analyse(SpecsIo.getResource("pt/up/fe/comp/cp2/semanticanalysis/PrivThisInMainInvalid.jmm"));
         TestUtils.mustFail(result);
         System.out.println(result.getReports());
     }

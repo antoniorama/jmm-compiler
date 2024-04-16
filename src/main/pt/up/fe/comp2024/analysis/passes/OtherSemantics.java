@@ -112,16 +112,21 @@ public class OtherSemantics extends AnalysisVisitor {
 
         // Check if any of the types comes from an import
         // In this case we assume that the types are assignable
-        System.out.println("IMPORTS : " + table.getImports());
-        if (operator.equals("ASSIGN") && (rightType == null | table.getImports().contains(leftType.getName()) | (rightType != null && table.getImports().contains(rightType.getName())))) {
 
-            if (rightType != null && rightType.getName().equals(table.getClassName()) && !checkIfExtends(leftType.getName(), table)) {
-                var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType + "'");
-                addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-            }
-
+        // System.out.println("IMPORTS : " + table.getImports());
+        System.out.println("RIGHT TYPE : " + rightType);
+        if (rightType == null) {
             return null;
         }
+        // if (operator.equals("ASSIGN") && (rightType == null | table.getImports().contains(leftType.getName()) | (rightType != null && table.getImports().contains(rightType.getName())))) {
+
+       //     if (rightType != null && rightType.getName().equals(table.getClassName()) && !checkIfExtends(leftType.getName(), table)) {
+        //        var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType + "'");
+        //        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        //    }
+
+        //    return null;
+        //}
 
 
         // TODO -> this can't be like this...

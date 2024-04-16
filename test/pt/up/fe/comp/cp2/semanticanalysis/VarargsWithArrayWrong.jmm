@@ -1,8 +1,8 @@
-class Varargs {
+class VarargsWrong {
 
     public int foo() {
         int a;
-        a = this.varargs(10, 20, 30);
+        a = this.varargs([10, 20, 30], 40);
         return a;
     }
 

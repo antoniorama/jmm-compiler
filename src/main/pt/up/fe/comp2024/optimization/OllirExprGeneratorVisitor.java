@@ -120,8 +120,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         boolean isStatic = false;
 
         JmmNode parent = node.getParent();
+        JmmNode grandParent = parent.getParent();
 
-        if (parent.getKind().equals("AssignStmt")) {
+        if (parent.getKind().equals("AssignStmt") || grandParent.getKind().equals("AssignStmt"))  {
             isAssign = true;
         }
 

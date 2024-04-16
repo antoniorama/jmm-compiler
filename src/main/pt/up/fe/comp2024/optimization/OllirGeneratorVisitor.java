@@ -252,8 +252,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         for (JmmNode child : node.getChildren()) {
-            if (child.getKind().equals("MethodCall")) {
-                String beforeDotName = child.getChild(0).get("name");
+
+            var childCode = exprVisitor.visit(child);
+                code.append(childCode.getComputation());
+                /*String beforeDotName = child.getChild(0).get("name");
                 String methodName = child.get("methodName");
                 StringBuilder paramBuilder = new StringBuilder();
 
@@ -274,9 +276,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 if (!paramBuilder.isEmpty()) {
                     code.append(", ").append(paramBuilder);
                 }
-                code.append(").V;\n");
+                code.append(").V;\n");*/
             }
-        }
+
 
         return code.toString();
     }

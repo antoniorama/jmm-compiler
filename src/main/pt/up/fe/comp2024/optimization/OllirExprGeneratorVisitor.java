@@ -116,26 +116,30 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             argsCode.add(argExpr.getCode());
         }
 
+        boolean isAssign = false;
         boolean isStatic = false;
+
+        JmmNode parent = node.getParent();
+
+        if (parent.getKind().equals("AssignStmt")) {
+            isAssign = true;
+        }
 
         // imported method
         if (returnType == null) {
 
-            JmmNode parent = node.getParent();
-            JmmNode varRef = node.getJmmChild(0);
-
-            // Check if its assign like i = A.method() or just A.method()
-            if (parent.getKind().equals("AssignStmt")) {
-                returnType = TypeUtils.getExprType(varRef, table);
-
-                // If the return type is null, then it is a static method
-                if (returnType == null) {
-                    isStatic = true;
-                    returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
-                }
+            if (isAssign) {
+                returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
             }
             else {
-                returnType = new Type("void", false);
+                JmmNode varRef = parent.getJmmChild(0);
+                returnType = TypeUtils.getExprType(varRef, table);
+
+                // Static method returns void
+                if (returnType == null) {
+                    isStatic = true;
+                    returnType = new Type("void", false);
+                }
             }
         }
 
@@ -149,7 +153,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                 + ")" + returnTypeString;
 
         // Store the result of the method call in a temporary variable
-        computation.append(tempVar).append(" :=").append(returnTypeString).append(" ").append(methodCallCode).append(END_STMT);
+        if (isAssign) {
+            computation.append(tempVar).append(SPACE).append(ASSIGN).append(returnTypeString).append(SPACE);
+        }
+        computation.append(methodCallCode).append(END_STMT);
 
         return new OllirExprResult(tempVar, computation.toString());
     }

@@ -1,15 +1,18 @@
-import A;
+import io;
 
-class Simple {
-    public int bar() {
-        return 1;
-    }
+class CompileMethodInvocation {
+
     public static void main(String[] args) {
-        Simple simple;
-        A a;
-        int i;
-        i = A.what(); // static method
-        i = a.wut(); // static import
+
     }
 
+    public int foo() {
+        int a;
+
+        a = 1;
+
+        io.println(a);
+
+        return 0;
+    }
 }

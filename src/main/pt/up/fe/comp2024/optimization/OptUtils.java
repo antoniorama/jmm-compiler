@@ -38,6 +38,8 @@ public class OptUtils {
 
         if (typeNode.getKind() == "integerType") INTEGER_TYPE.checkOrThrow(typeNode);
         else if (typeNode.getKind() == "booleanType") BOOLEAN_TYPE.checkOrThrow(typeNode);
+        else if (typeNode.getKind() == "stringType") STRING_TYPE.checkOrThrow(typeNode);
+        else if (typeNode.getKind() == "voidType") VOID_TYPE.checkOrThrow(typeNode);
         // else if (typeNode.getKind().equals("OtherType")) OTHER_TYPE.checkOrThrow(typeNode);
         // TODO -> add the other types
 
@@ -54,13 +56,11 @@ public class OptUtils {
 
     private static String toOllirType(String typeName) {
 
-        String type = "." + switch (typeName) {
+        return "." + switch (typeName) {
             case "int" -> "i32";
             case "boolean" -> "bool";
             default -> typeName;
         };
-
-        return type;
     }
 
 

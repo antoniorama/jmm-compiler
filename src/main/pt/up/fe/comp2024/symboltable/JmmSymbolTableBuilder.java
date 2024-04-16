@@ -19,7 +19,6 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
-
     public static JmmSymbolTable build(JmmNode root) {
         var imports = buildImports(root);
 

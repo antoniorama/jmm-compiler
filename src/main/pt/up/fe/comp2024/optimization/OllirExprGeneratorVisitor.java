@@ -79,8 +79,11 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         var id = node.get("name");
         Type type = TypeUtils.getExprType(node, table);
-        String ollirType = OptUtils.toOllirType(type);
 
+        if (type == null) {
+            return new OllirExprResult(id);
+        }
+        String ollirType = OptUtils.toOllirType(type);
         String code = id + ollirType;
 
         return new OllirExprResult(code);
@@ -105,7 +108,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // Get the method name and return type
         String methodName = node.get("methodName");
         Type returnType = table.getReturnType(methodName);
-        String returnTypeString = OptUtils.toOllirType(returnType);
 
         // Handle each argument of the method
         for (int i = 1; i < node.getNumChildren(); i++) {
@@ -114,10 +116,35 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             argsCode.add(argExpr.getCode());
         }
 
+        boolean isStatic = false;
+
+        // imported method
+        if (returnType == null) {
+
+            JmmNode parent = node.getParent();
+            JmmNode varRef = node.getJmmChild(0);
+
+            // Check if its assign like i = A.method() or just A.method()
+            if (parent.getKind().equals("AssignStmt")) {
+                returnType = TypeUtils.getExprType(varRef, table);
+
+                // If the return type is null, then it is a static method
+                if (returnType == null) {
+                    isStatic = true;
+                    returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
+                }
+            }
+            else {
+                returnType = new Type("void", false);
+            }
+        }
+
+        String returnTypeString = OptUtils.toOllirType(returnType);
+
         // Construct the method call
         String argsList = String.join(", ", argsCode);
         String tempVar = OptUtils.getTemp() + returnTypeString;
-        String methodCallCode = "invokevirtual(" + ownerExpr.getCode() + ", \"" + methodName + "\""
+        String methodCallCode =  (isStatic ? "invokestatic(" : "invokevirtual(") + ownerExpr.getCode() + ", \"" + methodName + "\""
                 + (argsCode.isEmpty() ? "" : ", " + argsList)
                 + ")" + returnTypeString;
 

@@ -169,7 +169,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         String className = node.get("name");
         String tempVar = OptUtils.getTemp() + "." + className;
         String initializationCode = tempVar + " " + ASSIGN + "." + className + " " + "new(" + className + ")." + className
-                + END_STMT + "invokespecial(" + tempVar + ",\"<init>\").V" + END_STMT;
+                + END_STMT + "invokespecial(" + tempVar + ", \"<init>\").V" + END_STMT;
         return new OllirExprResult(tempVar, initializationCode);
     }
 

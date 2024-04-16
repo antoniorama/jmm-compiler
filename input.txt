@@ -6,11 +6,17 @@ class Test {
         return 0;
     }
 
+    public int nothing2() {
+        return 0;
+    }
+
     public static void main(String[] varargs) {
         Test test;
+        Io io;
         int resultStatic;
         int resultVirtual;
-        test = new Test(); // Declaration and assignment
+        test = new Test();
+        io = new Io();
         resultStatic = Io.readInt();
         resultVirtual = test.nothing();
     }

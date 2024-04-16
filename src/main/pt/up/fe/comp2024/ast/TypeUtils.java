@@ -103,13 +103,6 @@ public class TypeUtils {
     private static Type getVarRefType(JmmNode varRefExpr, SymbolTable table) {
         String varName = varRefExpr.get("name");
 
-        // Check in fields
-        List<Symbol> fields = table.getFields();
-        for (Symbol field : fields) {
-            if (field.getName().equals(varName))
-                return field.getType();
-        }
-
         // Get the current method
         JmmNode parent = varRefExpr.getParent();
         while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
@@ -132,6 +125,13 @@ public class TypeUtils {
                 // found variable
                 return symbol.getType();
             }
+        }
+
+        // Check in fields
+        List<Symbol> fields = table.getFields();
+        for (Symbol field : fields) {
+            if (field.getName().equals(varName))
+                return field.getType();
         }
 
         return null;

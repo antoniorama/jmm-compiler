@@ -1,20 +1,16 @@
 package pt.up.fe.comp2024.symboltable;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.awt.desktop.SystemEventListener;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static pt.up.fe.comp2024.JavammParser.EXTENDS;
-import static pt.up.fe.comp2024.JavammParser.TRUE;
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
@@ -48,7 +44,7 @@ public class JmmSymbolTableBuilder {
             String rawNames = importDecl.get("name");
             // System.out.println("Raw NAMES : " + rawNames);
 
-            String formattedName = TypeUtils.converImportName(rawNames);
+            String formattedName = TypeUtils.convertImportName(rawNames);
 
             // System.out.println("Formatted names : " + formattedName);
             imports.add(formattedName);

@@ -44,6 +44,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
     private OllirExprResult visitInteger(JmmNode node, Void unused) {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
+        var name = node.get("value");
+
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
         return new OllirExprResult(code);

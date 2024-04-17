@@ -2,12 +2,8 @@ class Test {
 
     int i;
 
-    public int nothing() {
-        return 1;
-    }
-
     public int test() {
-        i = this.nothing();
-        return i;
+        i = 5;
+        return 10;
     }
 }

@@ -168,10 +168,36 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
-        var lhs = exprVisitor.visit(node.getJmmChild(0));
+        var child = node.getJmmChild(0);
+        var lhs = exprVisitor.visit(child);
         var rhs = exprVisitor.visit(node.getJmmChild(1));
 
         StringBuilder code = new StringBuilder();
+
+        boolean isFieldAssignment = true;
+
+        // Check if its local variable
+        for (var local : table.getLocalVariables(node.getParent().get("name"))) {
+            if (local.getName().equals(child.get("name"))) {
+                isFieldAssignment = false;
+                break;
+            }
+        }
+
+        // Check if its a param
+        if (isFieldAssignment) {
+            for (var param : table.getParameters(node.getParent().get("name"))) {
+                if (param.getName().equals(child.get("name"))) {
+                    isFieldAssignment = false;
+                    break;
+                }
+            }
+        }
+
+        if (isFieldAssignment) {
+            code.append("putfield(this, ").append(lhs.getCode()).append(", ").append(rhs.getCode()).append(").V;\n");
+            return code.toString();
+        }
 
         // code to compute the children
         code.append(lhs.getComputation());

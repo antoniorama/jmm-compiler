@@ -6,17 +6,13 @@ class Test {
         return 0;
     }
 
-    public int testInvokeThisAndImportSameMethodDiffReturn() {
-        Test test;
-        Io io;
-        int resultThis;
-        int resultStaticImport;
-        int resultImport;
+    public int test() {
 
-        resultThis = this.readInt();
-        resultStaticImport = Io.readInt();
-        resultImport = io.readInt();
+        int b;
+        boolean a;
+        b = 2;
+        a = true;
 
-        return 0;
+        return 1;
     }
 }

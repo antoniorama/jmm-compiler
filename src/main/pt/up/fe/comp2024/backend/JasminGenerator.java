@@ -52,6 +52,7 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(CallInstruction.class, this::generateCall);
+        generators.put(Field.class, this::generateField);
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(ReturnInstruction.class, this::generateReturn);
@@ -217,6 +218,28 @@ public class JasminGenerator {
                     throw new NotImplementedException("Store instruction not implemented for type: " + type);
                 }
             }
+        };
+    }
+
+    private String generateField(Field field){
+        var code = new StringBuilder();
+        String acessModifier = getJasminAccessModifier(field.getFieldAccessModifier());
+
+        String fieldName = field.getFieldName();
+
+        String jasminType = ollirTypeToJasminType(field.getFieldType());
+
+        code.append(".field").append(acessModifier).append(" ").append(fieldName).append(" ").append(jasminType).append("\n");
+
+        return code.toString();
+    }
+
+    private String getJasminAccessModifier(AccessModifier accessModifier) {
+        return switch (accessModifier) {
+            case PUBLIC -> "public";
+            case PRIVATE -> "private";
+            case PROTECTED -> "protected";
+            default -> "";  // default is package-private, which does not have a keyword in Jasmin
         };
     }
 

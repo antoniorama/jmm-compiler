@@ -32,6 +32,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(PARENTHESES_EXPRESSION, this::visitParenthesesExpr);
         addVisit(BINARY_EXPR, this::visitBinExpr);
+        addVisit(LOGICAL_EXPRESSION, this::visitLogicalExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_VALUE, this::visitBoolean);
         addVisit(METHOD_CALL, this::visitMethodCall);
@@ -88,6 +89,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                 .append(rhs.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
+    }
+
+    //TODO
+    private OllirExprResult visitLogicalExpr(JmmNode node, Void unused) {
+        return visitBinExpr(node, unused);
     }
 
 

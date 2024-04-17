@@ -1,9 +1,8 @@
 class Test {
 
-    public int test() {
-        int i;
-        i = (1+1);
-        return i;
+    public boolean test2(Test t) {
+        boolean a;
+        a = true;
+        return a && true;
     }
-
 }

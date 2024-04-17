@@ -1,8 +1,13 @@
-class Test extends A {
+class Test {
+
+    int i;
+
+    public int nothing() {
+        return 1;
+    }
 
     public int test() {
-
-        this.foo();
-        return 1;
+        i = this.nothing();
+        return i;
     }
 }

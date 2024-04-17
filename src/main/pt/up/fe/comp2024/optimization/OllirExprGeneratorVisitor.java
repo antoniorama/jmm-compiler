@@ -96,9 +96,43 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             return new OllirExprResult(id);
         }
         String ollirType = OptUtils.toOllirType(type);
-        String code = id + ollirType;
 
-        return new OllirExprResult(code);
+        String computation = "";
+        boolean isField = true;
+
+        // Get the current method
+        JmmNode parent = node.getParent();
+        while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
+            parent = parent.getParent();
+        }
+        String methodName = parent.get("name");
+
+        for (var local : table.getLocalVariables(methodName)) {
+            if (local.getName().equals(node.get("name"))) {
+                isField = false;
+                break;
+            }
+        }
+
+        // Check if it's a param
+        if (isField) {
+
+            for (var param : table.getParameters(methodName)) {
+                if (param.getName().equals(node.get("name"))) {
+                    isField = false;
+                    break;
+                }
+            }
+
+        }
+        if (isField) {
+            var temp = OptUtils.getTemp();
+            computation = temp + ollirType + SPACE + ASSIGN + ollirType + " getfield(this, " + id + ollirType + ")" + ollirType + END_STMT;
+            id = temp;
+        }
+
+        String code = id + ollirType;
+        return new OllirExprResult(code, computation);
     }
 
     /**

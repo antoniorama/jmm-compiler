@@ -22,10 +22,6 @@ public class TypeUtils {
 
     /**
      * Gets the {@link Type} of an arbitrary expression.
-     *
-     * @param expr
-     * @param table
-     * @return
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
 
@@ -34,12 +30,12 @@ public class TypeUtils {
         boolean isArray = false;
         boolean isVarArgs = false;
         if (expr.getKind().equals("ArrayType")) {
-            actualExpr = expr.getJmmChild(0); // update acutalExpr to correct one
+            actualExpr = expr.getJmmChild(0); // update actualExpr to correct one
             isArray = true;
         }
 
         else if (expr.getKind().equals("VarArgsType")) {
-            actualExpr = expr.getJmmChild(0); // update acutalExpr to correct one
+            actualExpr = expr.getJmmChild(0); // update actualExpr to correct one
             isArray = true;
             isVarArgs = true;
         }
@@ -73,7 +69,7 @@ public class TypeUtils {
     private static Type getPropertyAccessType(JmmNode propertyAccessNode, SymbolTable table) {
         Type callerType = getExprType(propertyAccessNode.getJmmChild(0), table);
 
-        // check for only valid property (length) and if the caller is array
+        // check for only valid property (length) and if the caller is an array
         if (propertyAccessNode.get("name").equals("length") && callerType.isArray()) {
             return new Type(INT_TYPE_NAME, false);
         }
@@ -161,7 +157,7 @@ public class TypeUtils {
         return new Type(table.getClassName(), false);
     }
 
-    public static String converImportName(String rawImportName) {
+    public static String convertImportName(String rawImportName) {
         String[] parts = rawImportName.replace("[", "").replace("]", "").split(",");
 
         return Arrays.stream(parts)

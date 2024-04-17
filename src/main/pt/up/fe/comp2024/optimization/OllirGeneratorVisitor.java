@@ -60,7 +60,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitImport(JmmNode node, Void unused) {
-        return "import " + TypeUtils.converImportName(node.get("name")) + END_STMT;
+        return "import " + TypeUtils.convertImportName(node.get("name")) + END_STMT;
     }
 
     private String visitClass(JmmNode node, Void unused) {
@@ -184,7 +184,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
-        // Check if its a param
+        // Check if it's a param
         if (isFieldAssignment) {
             for (var param : table.getParameters(node.getParent().get("name"))) {
                 if (param.getName().equals(child.get("name"))) {
@@ -221,7 +221,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
-
 
     private String visitReturn(JmmNode node, Void unused) {
 
@@ -316,13 +315,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 "}\n";
     }
 
-    /**
-     * Default visitor. Visits every child node and return an empty string.
-     *
-     * @param node
-     * @param unused
-     * @return
-     */
     private String defaultVisit(JmmNode node, Void unused) {
 
         for (var child : node.getChildren()) {

@@ -114,10 +114,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         OllirExprResult ownerExpr = visit(node.getJmmChild(0));
         computation.append(ownerExpr.getComputation());
 
-        // Get the method name and return type
-        String methodName = node.get("methodName");
-        Type returnType = table.getReturnType(methodName);
-
         // Handle each argument of the method
         for (int i = 1; i < node.getNumChildren(); i++) {
             OllirExprResult argExpr = visit(node.getJmmChild(i));
@@ -129,6 +125,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         boolean isAssign = false;
         boolean isStatic = false;
 
+        // Get the method name and return type
+        String methodName = node.get("methodName");
+        Type returnType = table.getReturnType(methodName);
+
         JmmNode parent = node.getParent();
         JmmNode grandParent = parent.getParent();
 
@@ -137,27 +137,26 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
 
         JmmNode child = node.getJmmChild(0);
-        var type = TypeUtils.getExprType(child, table);
+        var childType = TypeUtils.getExprType(child, table);
 
-        if (child.getKind().equals("This") || (type != null && Objects.equals(type.getName(), table.getClassName()))) {
+        if (childType == null) {
+            isStatic = true;
+        }
+
+        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
             isImported = false;
         }
 
         // imported method
-        if (isImported) {
+        if (isImported && isAssign && isStatic) {
 
-            JmmNode varRef = node.getJmmChild(0);
-            returnType = TypeUtils.getExprType(varRef, table);
-
-            // static method
-            if (returnType == null) {
-                isStatic = true;
-
-                if (isAssign) {
-                    returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
-                }
-                else returnType = new Type("void", false);
-            }
+            returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
+        }
+        else if (isImported && !isStatic) {
+            returnType = childType;
+        }
+        else if (returnType == null) {
+            returnType = new Type("void",  false);
         }
 
         String returnTypeString = OptUtils.toOllirType(returnType);

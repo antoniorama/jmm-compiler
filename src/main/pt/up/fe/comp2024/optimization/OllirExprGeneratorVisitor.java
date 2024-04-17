@@ -155,8 +155,11 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         else if (isImported && !isStatic) {
             returnType = childType;
         }
+        else if (returnType == null && node.getAncestor(CLASS_DECL).get().hasAttribute("extendedClass")) {
+            returnType = new Type(table.getClassName(),  false);
+        }
         else if (returnType == null) {
-            returnType = new Type("void",  false);
+            returnType = new Type("void", false);
         }
 
         String returnTypeString = OptUtils.toOllirType(returnType);

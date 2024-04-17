@@ -44,6 +44,7 @@ public class TypeUtils {
 
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(actualExpr);
+            case LOGICAL_EXPRESSION -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(actualExpr);
             case ARRAY_INIT -> getArrayType(actualExpr, table);
             case NEW_ARRAY -> getNewArrayType(actualExpr);

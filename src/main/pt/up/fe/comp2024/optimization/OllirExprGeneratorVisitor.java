@@ -8,6 +8,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -31,6 +32,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit(BOOLEAN_VALUE, this::visitBoolean);
         addVisit(METHOD_CALL, this::visitMethodCall);
         addVisit(NEW_CLASS_INSTANCE, this::visitNewClassInstance);
         addVisit(THIS, this::visitThis);
@@ -43,6 +45,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         var intType = new Type(TypeUtils.getIntTypeName(), false);
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
+        return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitBoolean(JmmNode node, Void unused) {
+        var boolType = new Type(TypeUtils.getBooleanTypeName(), false);
+        String ollirBoolType = OptUtils.toOllirType(boolType);
+        String code = (Objects.equals(node.get("value"), "true") ? "1" : "0") + ollirBoolType;
         return new OllirExprResult(code);
     }
 
@@ -105,10 +114,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         OllirExprResult ownerExpr = visit(node.getJmmChild(0));
         computation.append(ownerExpr.getComputation());
 
-        // Get the method name and return type
-        String methodName = node.get("methodName");
-        Type returnType = table.getReturnType(methodName);
-
         // Handle each argument of the method
         for (int i = 1; i < node.getNumChildren(); i++) {
             OllirExprResult argExpr = visit(node.getJmmChild(i));
@@ -116,8 +121,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             argsCode.add(argExpr.getCode());
         }
 
+        boolean isImported = true;
         boolean isAssign = false;
         boolean isStatic = false;
+
+        // Get the method name and return type
+        String methodName = node.get("methodName");
+        Type returnType = table.getReturnType(methodName);
 
         JmmNode parent = node.getParent();
         JmmNode grandParent = parent.getParent();
@@ -126,21 +136,27 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             isAssign = true;
         }
 
+        JmmNode child = node.getJmmChild(0);
+        var childType = TypeUtils.getExprType(child, table);
+
+        if (childType == null) {
+            isStatic = true;
+        }
+
+        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
+            isImported = false;
+        }
+
         // imported method
-        if (returnType == null) {
+        if (isImported && isAssign && isStatic) {
 
-            JmmNode varRef = node.getJmmChild(0);
-            returnType = TypeUtils.getExprType(varRef, table);
-
-            // static method
-            if (returnType == null) {
-                isStatic = true;
-
-                if (isAssign) {
-                    returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
-                }
-                else returnType = new Type("void", false);
-            }
+            returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
+        }
+        else if (isImported && !isStatic) {
+            returnType = childType;
+        }
+        else if (returnType == null) {
+            returnType = new Type("void",  false);
         }
 
         String returnTypeString = OptUtils.toOllirType(returnType);
@@ -169,7 +185,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         String className = node.get("name");
         String tempVar = OptUtils.getTemp() + "." + className;
         String initializationCode = tempVar + " " + ASSIGN + "." + className + " " + "new(" + className + ")." + className
-                + END_STMT + "invokespecial(" + tempVar + ",\"<init>\").V" + END_STMT;
+                + END_STMT + "invokespecial(" + tempVar + ", \"<init>\").V" + END_STMT;
         return new OllirExprResult(tempVar, initializationCode);
     }
 

@@ -1,17 +1,28 @@
 import Io;
 
 class Test {
-    
-    public int nothing() {
+
+    public int readInt() {
         return 0;
     }
 
-    public static void main(String[] varargs) {
-        Test test;
-        int resultStatic;
-        int resultVirtual;
-        test = new Test(); // Declaration and assignment
-        resultStatic = Io.readInt();
-        resultVirtual = test.nothing();
+    public int test() {
+
+        Io io;
+        int i;
+
+        i = this.readInt(); // Invoke virtual local method assigment
+        i = io.readInt(); // Invoke virtual imported method with same name assigment
+        i = Io.readInt(); // Invoke static imported method with same name assigment
+        i = io.read();
+        i = Io.read();
+
+        this.readInt(); // Invoke virtual local method
+        io.readInt(); // Invoke virtual imported method with same name
+        Io.readInt(); // Invoke static imported method with same name
+        io.read();
+        Io.read();
+        return 1;
+
     }
 }

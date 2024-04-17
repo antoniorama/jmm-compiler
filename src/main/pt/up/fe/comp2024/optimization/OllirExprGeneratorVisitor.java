@@ -30,6 +30,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     @Override
     protected void buildVisitor() {
         addVisit(VAR_REF_EXPR, this::visitVarRef);
+        addVisit(PARENTHESES_EXPRESSION, this::visitParenthesesExpr);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_VALUE, this::visitBoolean);
@@ -55,6 +56,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String ollirBoolType = OptUtils.toOllirType(boolType);
         String code = (Objects.equals(node.get("value"), "true") ? "1" : "0") + ollirBoolType;
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitParenthesesExpr(JmmNode node, Void unused) {
+        return visit(node.getJmmChild(0));
     }
 
 

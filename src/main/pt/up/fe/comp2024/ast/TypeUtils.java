@@ -54,6 +54,7 @@ public class TypeUtils {
             case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
             case THIS -> getThisType(actualExpr, table);
             case PROPERTY_ACCESS -> getPropertyAccessType(actualExpr, table);
+            case PARENTHESES_EXPRESSION -> getExprType(actualExpr.getJmmChild(0), table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 

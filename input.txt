@@ -14,5 +14,6 @@ class Test {
         a = true;
 
         return 1;
+        
     }
 }

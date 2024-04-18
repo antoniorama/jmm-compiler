@@ -9,11 +9,6 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-/**
- * Checks if the type of the expression in a return statement is compatible with the method return type.
- *
- * @author JBispo
- */
 public class UndeclaredVariable extends AnalysisVisitor {
 
     private String currentMethod;

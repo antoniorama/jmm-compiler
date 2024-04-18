@@ -106,14 +106,20 @@ public class OtherSemantics extends AnalysisVisitor {
         if (node.getKind().equals("BinaryExpr"))
             operator = node.get("op");
 
-        Type leftType = TypeUtils.getExprType(node.getJmmChild(0), table);
+        JmmNode leftNode = node.getJmmChild(0);
+        Type leftType = TypeUtils.getExprType(leftNode, table);
         Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
 
         // Check if any of the types comes from an import
         // In this case we assume that the types are assignable
 
+        if (Objects.equals(operator, "ASSIGN") && (leftNode.getKind().equals("IntegerLiteral") || leftNode.getKind().equals("BooleanValue"))) {
+            var message = "Can't assign to int or boolean literals";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        }
+
         // System.out.println("IMPORTS : " + table.getImports());
-        System.out.println("RIGHT TYPE : " + rightType);
+        //System.out.println("RIGHT TYPE : " + rightType);
         if (rightType == null) {
             return null;
         }

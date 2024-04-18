@@ -1,16 +1,14 @@
-import A;
+import A.B.C;
+class ThisTest extends C {
 
-class B {
-
-
-
-    int bar(){
-     B b;
-     A a;
-     boolean c;
-     b = new B();
-     c = a.foo();
-     return 0;
+    public int foo() {
+        int a;
+        a = this.thistest();
+        return a;
     }
 
+    public int thistest() {
+        true = false;
+        return 0;
+    }
 }

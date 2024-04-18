@@ -9,10 +9,7 @@ class Test {
         A a;
         int i;
         boolean b;
-        i = this.test();
-        i = a.test();
-        i = A.test();
-        b = a.test();
+        this.nothing();
         return 0;
     }
 }

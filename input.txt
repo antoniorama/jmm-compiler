@@ -1,14 +1,13 @@
-import A.B.C;
-class ThisTest extends C {
+class A {
 
-    public int foo() {
-        int a;
-        a = this.thistest();
-        return a;
-    }
+    public int nothing(int i) {
+        int counter;
+        counter = 0;
 
-    public int thistest() {
-        true = false;
-        return 0;
+        while (i > 0) {
+            i = i - 1;
+            counter = counter + 1;
+        }
+        return counter;
     }
 }

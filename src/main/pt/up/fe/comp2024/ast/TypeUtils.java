@@ -47,12 +47,11 @@ public class TypeUtils {
 
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(actualExpr);
-            case LOGICAL_EXPRESSION -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(actualExpr);
             case ARRAY_INIT -> getArrayType(actualExpr, table);
             case NEW_ARRAY -> getNewArrayType(actualExpr);
             case INTEGER_TYPE, INTEGER_LITERAL, ARRAY_ACCESS -> new Type(INT_TYPE_NAME, isArray);
-            case BOOLEAN_TYPE, BOOLEAN_VALUE -> new Type(BOOLEAN_TYPE_NAME, isArray);
+            case BOOLEAN_TYPE, BOOLEAN_VALUE, LOGICAL_EXPRESSION, RELATIONAL_EXPRESSION -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);
             case VAR_REF_EXPR -> getVarRefType(actualExpr, table);

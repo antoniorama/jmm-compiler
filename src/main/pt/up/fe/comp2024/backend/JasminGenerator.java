@@ -310,64 +310,63 @@ public class JasminGenerator {
 
     private String generateCall(CallInstruction call) {
         var code = new StringBuilder();
+        String invocationCode = "";
 
-        // Check if it's a constructor call
-        var className = ollirResult.getOllirClass().getClassName();
-        if (call.getInvocationType() == CallType.NEW) {
-            code.append("new ").append(className).append(NL);
-            code.append("dup").append(NL);
+        Operand caller = (Operand) call.getCaller();
+        String callerName = caller.getName();
 
-            code.append("invokespecial ").append(className).append("/<init>()V").append(NL);
-            // code.append("pop").append(NL);
-        }
-        else if (call.getInvocationType() == CallType.invokestatic) {
-            String callerName = extractClassName(call.getCaller().toElement().toString());
-            String methodName = extractMethodName(call.getMethodName().toElement().toString());
-            String operandString = ollirTypeToJasminType(call.getReturnType());
+        ClassType callerClass = (ClassType) caller.getType();
 
-            List<Element> args = call.getArguments();
+        String className = ollirResult.getOllirClass().getClassName();
 
-            StringBuilder argTypes = new StringBuilder();
-            for (Element arg : args) {
-                String argType = ollirTypeToJasminType(arg.getType());
-                argTypes.append(argType);
-                code.append(generateArgument(arg));
-            }
-
-            code.append("invokestatic ").append(callerName).append("/").append(methodName).append("(").append(argTypes).append(")").append(operandString).append(NL);
-        }
-        else if (call.getInvocationType() == CallType.invokevirtual) {
-            String callerName = extractClassType(call.getCaller().toElement().toString());
-            String callerName2 = extractClassName(call.getCaller().toElement().toString()); // needed for getting aload
-
-            /*
-            System.out.println("\nDEBUG INVOKEVIRTUAL");
-            System.out.println("CALLERNAME2 : " + callerName2);
-            System.out.println("VAR TABLE : " + currentMethod.getVarTable());
-            System.out.println("\n");
-             */
-
-            var virtualReg = currentMethod.getVarTable().get(callerName2).getVirtualReg();
-            code.append("aload ").append(virtualReg).append(NL);
-
-            String methodName = extractMethodName(call.getMethodName().toElement().toString());
-            String operandString = ollirTypeToJasminType(call.getReturnType());
-
-            List<Element> args = call.getArguments();
-
-            StringBuilder argTypes = new StringBuilder();
-            for (Element arg : args) {
-                String argType = ollirTypeToJasminType(arg.getType());
-                argTypes.append(argType);
-                code.append(generateArgument(arg));
-            }
-
-            code.append("invokevirtual ").append(callerName).append("/").append(methodName).append("(").append(argTypes).append(")").append(operandString).append(NL);
+        CallType invocationType = call.getInvocationType();
+        ArrayList<String> argumentsType = new ArrayList<>();
+        for (Element argument : call.getArguments()) {
+            argumentsType.add(ollirTypeToJasminType(argument.getType()));
         }
 
+        String returnType = ollirTypeToJasminType(call.getReturnType());
+
+
+        switch(invocationType){
+            case invokestatic:
+                String staticMethod = ((LiteralElement) call.getMethodName()).getLiteral();
+                String staticMethodName = staticMethod.substring(1, staticMethod.length() - 1);
+                for (Element arg : call.getArguments()) {
+                    code.append(generators.apply(arg));
+                }
+                code.append(getCall("invokestatic", callerName, staticMethodName, argumentsType, returnType));
+                break;
+            case invokevirtual:
+                String virtualMethod = ((LiteralElement) call.getMethodName()).getLiteral();
+                String virtualMethodName = virtualMethod.substring(1, virtualMethod.length() - 1);
+                code.append(generators.apply(call.getCaller()));
+                for (Element arg : call.getArguments()) {
+                    code.append(generators.apply(arg));
+                }
+                code.append(getCall("invokevirtual", className, virtualMethodName, argumentsType, returnType));
+                break;
+            case NEW:
+                code.append("new ").append(className).append(NL).append("dup ").append(NL);
+                String constructorName = "<init>";
+                code.append("invokespecial ").append(className).append("/<init>()V");
+                break;
+        }
+
+
+        code.append(NL);
         return code.toString();
     }
 
+    private String getCall(String invocationType, String className, String methodName, List<String> argumentsType, String returnType) {
+        StringBuilder code = new StringBuilder();
+        code.append(invocationType).append(" ").append(className).append("/").append(methodName).append("(");
+        for (String argumentType : argumentsType) {
+            code.append(argumentType);
+        }
+        code.append(")").append(returnType);
+        return code.toString();
+    }
     private String ollirTypeToJasminType(Type type) {
         // This method should map OLLIR types to Jasmin type descriptors
         return switch (type.toString()) {
@@ -413,24 +412,5 @@ public class JasminGenerator {
         return ""; // Return an empty string if no match was found
     }
 
-    private String generateArgument(Element arg) {
-        if (arg instanceof LiteralElement) {
-            return "ldc " + ((LiteralElement) arg).getLiteral() + NL;
-        } else if (arg instanceof Operand operand) {
-            int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-            return loadInstructionForType(operand.getType()) + " " + reg + NL;
-        }
-        return "";
-    }
 
-    private String loadInstructionForType(Type type) {
-        switch (type.toString()) {
-            case "INT32", "BOOLEAN" -> {
-                return "iload ";
-            }
-            default -> {
-                return "aload ";
-            }
-        }
-    }
 }

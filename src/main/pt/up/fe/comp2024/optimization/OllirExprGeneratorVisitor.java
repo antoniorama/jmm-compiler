@@ -91,7 +91,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    //TODO
     private OllirExprResult visitLogicalExpr(JmmNode node, Void unused) {
         return visitBinExpr(node, unused);
     }

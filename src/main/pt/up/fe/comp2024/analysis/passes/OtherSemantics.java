@@ -38,6 +38,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.WHILE_STMT, this::visitWhileStmt);
         addVisit(Kind.VAR_DECL, this::visitVarDecl);
         addVisit(CLASS_DECL, this::visitClassDecl);
+        addVisit(EXPRESSION_STMT, this::verifyExpressionStmt);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -541,6 +542,19 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(classDeclNode), NodeUtils.getColumn(classDeclNode), message, null));
         }
 
+        return null;
+    }
+
+    private Void verifyExpressionStmt(JmmNode expressionStmt, SymbolTable table) {
+        List<JmmNode> children = expressionStmt.getChildren();
+
+        for (JmmNode child : children) {
+            if (child.getKind().equals("MethodCall")) {
+                return null;
+            }
+        }
+        String message = "Expression statement must contain a method call";
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(expressionStmt), NodeUtils.getColumn(expressionStmt), message, null));
         return null;
     }
 }

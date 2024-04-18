@@ -153,10 +153,6 @@ public class TypeUtils {
     }
 
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
-        JmmNode child = methodCall.getJmmChild(0);
-        var childType = getExprType(child, table);
-        // Check for imported methods that might have the same name as the normal methods
-        if (!child.getKind().equals("This") && (childType == null || Objects.equals(childType.getName(), table.getClassName()))) return null;
         return table.getReturnType(methodCall.get("methodName"));
     }
 

@@ -87,11 +87,15 @@ public class JasminGenerator {
             code.append(".super ").append(superName).append(NL);
         }
 
+        for (Field field : ollirResult.getOllirClass().getFields()) {
+            code.append(generators.apply(field));
+        }
+        code.append(NL);
         // generate a single constructor method
         var defaultConstructor = """
                 ;default constructor
                 .method public <init>()V
-                    aload_0
+                    aload 0
                     invokespecial %s/<init>()V
                     return
                 .end method
@@ -163,25 +167,6 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String ollirTypeToJasminType(Type type) {
-        // This method should map OLLIR types to Jasmin type descriptors
-        return switch (type.toString()) {
-            case "INT32" -> "I";
-            case "BOOLEAN" -> "Z";
-            case "STRING[]" -> "[Ljava/lang/String;";
-            case "VOID" -> "V";
-            default -> {
-                if (type.toString().startsWith("OBJECTREF")) {
-                    // Assuming the format is OBJECTREF(<ClassName>)
-                    var className = type.toString().substring(9, type.toString().length() - 1);
-                    yield "L" + className + ";";
-                } else {
-                    throw new NotImplementedException("Jasmin type not implemented for: " + type);
-                }
-            }
-        };
-    }
-
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
@@ -200,26 +185,15 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        String storeInstruction = getStoreInstruction(operand.getType());
-        code.append(storeInstruction).append(" ").append(reg).append(NL);
-
+        String storeInstruction = switch(operand.getType().getTypeOfElement()){
+            case INT32, BOOLEAN -> "istore ";
+            case ARRAYREF, OBJECTREF, CLASS, STRING -> "astore ";
+            case THIS, VOID -> null;
+        };
+        code.append(storeInstruction).append(reg).append(NL);
         return code.toString();
     }
 
-    private String getStoreInstruction(Type type) {
-        return switch (type.toString()) {
-            case "INT32" -> "istore";
-            case "BOOLEAN" -> "istore";
-            default -> {
-                // Dynamically handle any type starting with "OBJECTREF"
-                if (type.toString().startsWith("OBJECTREF")) {
-                    yield "astore";
-                } else {
-                    throw new NotImplementedException("Store instruction not implemented for type: " + type);
-                }
-            }
-        };
-    }
 
     private String generateField(Field field){
         var code = new StringBuilder();
@@ -229,7 +203,7 @@ public class JasminGenerator {
 
         String jasminType = ollirTypeToJasminType(field.getFieldType());
 
-        code.append(".field").append(acessModifier).append(" ").append(fieldName).append(" ").append(jasminType).append("\n");
+        code.append(".field ").append(acessModifier).append(" ").append(fieldName).append(" ").append(jasminType).append("\n");
 
         return code.toString();
     }
@@ -245,44 +219,31 @@ public class JasminGenerator {
 
     private String generatePutFieldInstruction(PutFieldInstruction putFieldInst) {
         var code = new StringBuilder();
+        Operand field =putFieldInst.getField();
+        var reg = field.getParamId();
+        code.append("aload ").append(reg).append(NL);
 
-        code.append("aload_0").append(NL);
+        code.append(generators.apply(putFieldInst.getValue()));
 
-        // Generate code for the value to be assigned to the field
-        String rhsCode = generateCodeForRHS(putFieldInst.getValue());
-        code.append(rhsCode);
+        code.append("putfield ");
+        code.append(currentMethod.getOllirClass().getClassName()).append("/").append(field.getName()).append(" ");
 
-        // Get field details
-        var fieldName = putFieldInst.getField().getName();
-        var fieldType = ollirTypeToJasminType(putFieldInst.getField().getType());
-
-        // Perform the field assignment
-        code.append("putfield ").append(ollirResult.getOllirClass().getClassName())
-                .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
+        code.append(ollirTypeToJasminType(field.getType())).append(NL);
 
         return code.toString();
     }
 
-    private String generateCodeForRHS(Element value) {
-        var code = new StringBuilder();
-        if (value instanceof LiteralElement literal) {
-            code.append("ldc ").append(literal.getLiteral()).append(NL);
-        } else if (value instanceof Operand operand) {
-            int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-            code.append("iload ").append(reg).append(NL);
-        }
-        return code.toString();
-    }
 
     private String generateGetFieldInstruction(GetFieldInstruction getFieldInst) {
         var code = new StringBuilder();
 
         // Get field details
-        var fieldName = getFieldInst.getField().getName();
-        var fieldType = ollirTypeToJasminType(getFieldInst.getField().getType());
+        var field = getFieldInst.getField();
+        var fieldName = field.getName();
+        var fieldType = ollirTypeToJasminType(field.getType());
 
-        code.append("aload_0").append(NL);
-        code.append("getfield ").append(ollirResult.getOllirClass().getClassName())
+        code.append("aload ").append(field.getParamId()).append(NL);
+        code.append("getfield ").append(currentMethod.getOllirClass().getClassName())
                 .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
 
         return code.toString();
@@ -297,11 +258,11 @@ public class JasminGenerator {
     }
 
     private String generateOperand(Operand operand) {
-        // get register
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        var type = operand.getType();
-        String loadInstruction = loadInstructionForType(type);
-        return loadInstruction + reg + NL;
+        return switch (operand.getType().getTypeOfElement()) {
+            case THIS, STRING, ARRAYREF, OBJECTREF -> "aload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
+            case BOOLEAN, INT32 -> "iload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg()+ NL;
+            default -> null;
+        };
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -317,6 +278,10 @@ public class JasminGenerator {
             case MUL -> "imul";
             case SUB -> "isub";
             case DIV -> "idiv";
+            case AND, ANDB -> "iand";
+            case OR, ORB -> "ior";
+            case EQ, NEQ, LTE, GTE -> "icmp";
+            case NOT, NOTB -> "ineg";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
@@ -328,16 +293,18 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
-        // TODO: Hardcoded to int return type, needs to be
-
         // If the return is void, then .getOperand() is null, not sure how to handle this
-        if (returnInst.getOperand() == null) {
-            code.append("return").append(NL);
-        } else {
+        if (returnInst.hasReturnValue()){
             code.append(generators.apply(returnInst.getOperand()));
-            code.append("ireturn").append(NL);
         }
 
+        String returnCode = switch (returnInst.getReturnType().getTypeOfElement()){
+            case INT32, BOOLEAN -> "ireturn";
+            case ARRAYREF, OBJECTREF, CLASS, THIS, STRING -> "areturn";
+            case VOID -> "return";
+        };
+
+        code.append(returnCode).append(NL);
         return code.toString();
     }
 
@@ -399,6 +366,25 @@ public class JasminGenerator {
         }
 
         return code.toString();
+    }
+
+    private String ollirTypeToJasminType(Type type) {
+        // This method should map OLLIR types to Jasmin type descriptors
+        return switch (type.toString()) {
+            case "INT32" -> "I";
+            case "BOOLEAN" -> "Z";
+            case "STRING[]" -> "[Ljava/lang/String;";
+            case "VOID" -> "V";
+            default -> {
+                if (type.toString().startsWith("OBJECTREF")) {
+                    // Assuming the format is OBJECTREF(<ClassName>)
+                    var className = type.toString().substring(9, type.toString().length() - 1);
+                    yield "L" + className + ";";
+                } else {
+                    throw new NotImplementedException("Jasmin type not implemented for: " + type);
+                }
+            }
+        };
     }
 
     private String extractClassName(String callRepresentation) {

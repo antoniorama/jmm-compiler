@@ -179,10 +179,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         // Get the method name and return type
         String methodName = node.get("methodName");
         Type returnType = TypeUtils.getExprType(node, table);
-
-        if (isAssign && isImported && !isStatic) {
-            returnType = childType; // Fix return type for virtual imported methods
-        }
+        
         String returnTypeString = OptUtils.toOllirType(returnType);
 
         // Construct the method call

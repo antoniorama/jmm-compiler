@@ -1,15 +1,16 @@
 import A;
 
-class Test {
-    public int nothing() {
-        return 0;
+class B {
+
+
+
+    int bar(){
+     B b;
+     A a;
+     boolean c;
+     b = new B();
+     c = a.foo();
+     return 0;
     }
 
-    public int test() {
-        A a;
-        int i;
-        boolean b;
-        this.nothing();
-        return 0;
-    }
 }

@@ -1,8 +1,15 @@
+import Io;
+
 class Test {
 
-    public boolean test2(Test t) {
-        boolean a;
-        a = true;
-        return a && true;
+    public int get() {
+        return 0;
+    }
+
+    public int test() {
+        boolean b;
+        int i;
+        b = Io.get();
+        return 0;
     }
 }

@@ -97,9 +97,6 @@ public enum Kind {
 
     /**
      * Tests if the given JmmNode has the same kind as this type.
-     *
-     * @param node
-     * @return
      */
     public boolean check(JmmNode node) {
         return node.isInstance(this);
@@ -107,8 +104,6 @@ public enum Kind {
 
     /**
      * Performs a check and throws if the test fails. Otherwise, does nothing.
-     *
-     * @param node
      */
     public void checkOrThrow(JmmNode node) {
 

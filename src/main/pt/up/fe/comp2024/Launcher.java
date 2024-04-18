@@ -49,7 +49,7 @@ public class Launcher {
         System.out.println(ollirResult.getOllirCode());
 
         // Code generation stage
-        //JasminBackendImpl jasminGen = new JasminBackendImpl();
+        JasminBackendImpl jasminGen = new JasminBackendImpl();
         //JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
         //TestUtils.noErrors(jasminResult.getReports());
 

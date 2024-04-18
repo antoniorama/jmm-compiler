@@ -1,15 +1,18 @@
-import Io;
+import A;
 
 class Test {
-
-    public int get() {
+    public int nothing() {
         return 0;
     }
 
     public int test() {
-        boolean b;
+        A a;
         int i;
-        b = Io.get();
+        boolean b;
+        i = this.test();
+        i = a.test();
+        i = A.test();
+        b = a.test();
         return 0;
     }
 }

@@ -42,10 +42,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         setDefaultVisit(this::defaultVisit);
     }
 
-
     private OllirExprResult visitInteger(JmmNode node, Void unused) {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
-        var name = node.get("value");
 
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
@@ -62,7 +60,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitParenthesesExpr(JmmNode node, Void unused) {
         return visit(node.getJmmChild(0));
     }
-
 
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
 
@@ -94,7 +91,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitLogicalExpr(JmmNode node, Void unused) {
         return visitBinExpr(node, unused);
     }
-
 
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
 
@@ -144,14 +140,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    /**
-     * Default visitor. Visits every child node and return an empty result.
-     *
-     * @param node
-     * @param unused
-     * @return
-     */
-
     private OllirExprResult visitMethodCall(JmmNode node, Void unused) {
         StringBuilder computation = new StringBuilder();
         List<String> argsCode = new ArrayList<>();
@@ -167,47 +155,34 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             argsCode.add(argExpr.getCode());
         }
 
-        boolean isImported = true;
         boolean isAssign = false;
+        boolean isImported = true;
         boolean isStatic = false;
-
-        // Get the method name and return type
-        String methodName = node.get("methodName");
-        Type returnType = table.getReturnType(methodName);
-
         JmmNode parent = node.getParent();
-        JmmNode grandParent = parent.getParent();
-
-        if (parent.getKind().equals("AssignStmt") || grandParent.getKind().equals("AssignStmt"))  {
-            isAssign = true;
-        }
-
         JmmNode child = node.getJmmChild(0);
-        var childType = TypeUtils.getExprType(child, table);
+        Type childType = TypeUtils.getExprType(child, table);
 
+        while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
+            if (parent.getKind().equals("AssignStmt")) {
+                isAssign = true;
+                break;
+            }
+            parent = parent.getParent();
+        }
+        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
+            isImported = false;
+        }
         if (childType == null) {
             isStatic = true;
         }
 
-        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
-            isImported = false;
-        }
+        // Get the method name and return type
+        String methodName = node.get("methodName");
+        Type returnType = TypeUtils.getExprType(node, table);
 
-        // imported method
-        if (isImported && isAssign && isStatic) {
-
-            returnType = TypeUtils.getExprType(parent.getJmmChild(0), table);
+        if (isAssign && isImported && !isStatic) {
+            returnType = childType; // Fix return type for virtual imported methods
         }
-        else if (isImported && !isStatic) {
-            returnType = childType;
-        }
-        else if (returnType == null && node.getAncestor(CLASS_DECL).get().hasAttribute("extendedClass")) {
-            returnType = new Type(table.getClassName(),  false);
-        }
-        else if (returnType == null) {
-            returnType = new Type("void", false);
-        }
-
         String returnTypeString = OptUtils.toOllirType(returnType);
 
         // Construct the method call

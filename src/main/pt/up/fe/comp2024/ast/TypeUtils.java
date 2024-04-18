@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static pt.up.fe.comp2024.ast.Kind.CLASS_DECL;
+
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
@@ -153,7 +155,47 @@ public class TypeUtils {
     }
 
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
-        return table.getReturnType(methodCall.get("methodName"));
+
+        boolean isAssign = false;
+        boolean isImported = true;
+        boolean isStatic = false;
+        JmmNode parent = methodCall.getParent();
+        JmmNode child = methodCall.getJmmChild(0);
+        Type returnType = table.getReturnType(methodCall.get("methodName"));
+        Type childType = getExprType(child, table);
+
+        while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
+            if (parent.getKind().equals("AssignStmt")) {
+                isAssign = true;
+                break;
+            }
+            parent = parent.getParent();
+        }
+
+        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
+            isImported = false;
+        }
+
+        if (childType == null) {
+            isStatic = true;
+        }
+
+        // Return type of the variable being assigned
+        if (isAssign && isImported) return TypeUtils.getExprType(parent.getJmmChild(0), table);
+
+        // Return the normal type from the table
+        if (isAssign) return returnType;
+
+        // Return void
+        if (isImported && isStatic && returnType == null) return new Type("void", false);
+
+        // Found a method call with the same name, return that type
+        if (isImported && isStatic) return returnType;
+
+        // Return the type of the child (imported class)
+        if (isImported) return childType;
+
+        return new Type("void", false);
     }
 
     private static Type getThisType(JmmNode methodCall, SymbolTable table) {

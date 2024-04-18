@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -22,7 +21,6 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 public class OtherSemantics extends AnalysisVisitor {
 
     private String currentMethod;
-
 
     @Override
     protected void buildVisitor() {
@@ -83,8 +81,7 @@ public class OtherSemantics extends AnalysisVisitor {
     private boolean methodReturnChecks(JmmNode method) {
         // Check if only one return exists in method
         if (!methodOnlyOneReturn(method)) return false;
-        if (!methodReturnIsLast(method)) return false;
-        return true;
+        return methodReturnIsLast(method);
     }
 
     private boolean methodOnlyOneReturn(JmmNode method) {

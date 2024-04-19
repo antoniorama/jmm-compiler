@@ -51,11 +51,11 @@ public class JasminGenerator {
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
-        generators.put(CallInstruction.class, this::generateCall);
-        generators.put(Field.class, this::generateField);
-        generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
-        generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(ReturnInstruction.class, this::generateReturn);
+        generators.put(Field.class, this::generateField);
+        generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
+        generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
+        generators.put(CallInstruction.class, this::generateCall);
     }
 
     public List<Report> getReports() {
@@ -79,7 +79,7 @@ public class JasminGenerator {
 
         // generate class name
         var className = ollirResult.getOllirClass().getClassName();
-        code.append(".class ").append(className).append(NL).append(NL);
+        code.append(".class public ").append(className).append(NL).append(NL);
 
         // Check if there is a class extends
         var superName = Objects.equals(ollirResult.getOllirClass().getSuperClass(), "null") ? ollirResult.getOllirClass().getSuperClass() : "java/lang/Object";
@@ -128,35 +128,32 @@ public class JasminGenerator {
 
         // calculate modifier
         var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
-                method.getMethodAccessModifier().name().toLowerCase() + " " :
+                method.getMethodAccessModifier().name().toLowerCase() + (method.isStaticMethod() ? " static" : "") + " " :
                 "";
 
         var methodName = method.getMethodName();
+        code.append("\n.method ").append(modifier).append(methodName).append("(");
 
-        ArrayList<Element> paramList = method.getParams();
-        var params = new StringBuilder();
-        for (Element p : paramList) {
-            params.append(ollirTypeToJasminType(p.getType()));
+        for (Element param : method.getParams()) {
+            Type type = param.getType();
+            code.append(ollirTypeToJasminType(type));
         }
+
         String returnType = ollirTypeToJasminType(method.getReturnType());
-
-        // Add static on main method
-        String staticString = "";
-        if (Objects.equals(method.getMethodName(), "main")) {
-            staticString = "static ";
-        }
-
-        code.append("\n.method ").append(modifier).append(staticString).append(methodName).append("(").append(params).append(")").append(returnType).append(NL);
+        code.append(")").append(returnType).append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
         code.append(TAB).append(".limit locals 99").append(NL);
 
-        for (var inst : method.getInstructions()) {
-            var instCode = StringLines.getLines(generators.apply(inst)).stream()
-                    .collect(Collectors.joining(NL + TAB, TAB, NL));
+        for (Instruction inst : method.getInstructions()) {
+            String instCode = StringLines.getLines(generators.apply(inst)).stream().collect(Collectors.joining(NL + TAB, TAB, NL));
 
             code.append(instCode);
+
+            if (inst instanceof CallInstruction callInstruction && !callInstruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
+                code.append(TAB + "pop" + NL);
+            }
         }
 
         code.append(".end method\n");
@@ -176,11 +173,10 @@ public class JasminGenerator {
         // store value in the stack in destination
         var lhs = assign.getDest();
 
-        if (!(lhs instanceof Operand)) {
+        if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
 
-        var operand = (Operand) lhs;
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
@@ -197,29 +193,24 @@ public class JasminGenerator {
 
     private String generateField(Field field){
         var code = new StringBuilder();
-        String acessModifier = getJasminAccessModifier(field.getFieldAccessModifier());
+        String acessModifier = field.getFieldAccessModifier() != AccessModifier.DEFAULT ?
+                field.getFieldAccessModifier().name().toLowerCase() + " " :
+                "private ";;
 
         String fieldName = field.getFieldName();
 
         String jasminType = ollirTypeToJasminType(field.getFieldType());
 
-        code.append(".field ").append(acessModifier).append(" ").append(fieldName).append(" ").append(jasminType).append("\n");
+        code.append("\n.field ").append(acessModifier).append(fieldName).append(" ").append(jasminType).append(NL);
 
         return code.toString();
     }
 
-    private String getJasminAccessModifier(AccessModifier accessModifier) {
-        return switch (accessModifier) {
-            case PUBLIC -> "public";
-            case PRIVATE -> "private";
-            case PROTECTED -> "protected";
-            default -> "";  // default is package-private, which does not have a keyword in Jasmin
-        };
-    }
+
 
     private String generatePutFieldInstruction(PutFieldInstruction putFieldInst) {
         var code = new StringBuilder();
-        Operand field =putFieldInst.getField();
+        Operand field = putFieldInst.getField();
         var reg = field.getParamId();
         code.append("aload ").append(reg).append(NL);
 
@@ -239,10 +230,13 @@ public class JasminGenerator {
 
         // Get field details
         var field = getFieldInst.getField();
+        var reg = field.getParamId();
+        currentMethod.getVarTable().get(field.getName()).setVirtualReg(reg);
+
         var fieldName = field.getName();
         var fieldType = ollirTypeToJasminType(field.getType());
 
-        code.append("aload ").append(field.getParamId()).append(NL);
+        code.append("aload ").append(reg).append(NL);
         code.append("getfield ").append(currentMethod.getOllirClass().getClassName())
                 .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
 
@@ -259,9 +253,9 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         return switch (operand.getType().getTypeOfElement()) {
-            case THIS, STRING, ARRAYREF, OBJECTREF -> "aload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
-            case BOOLEAN, INT32 -> "iload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg()+ NL;
-            default -> null;
+            case BOOLEAN, INT32 -> "iload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
+            default -> "aload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
+
         };
     }
 

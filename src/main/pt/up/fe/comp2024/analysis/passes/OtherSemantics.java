@@ -131,7 +131,7 @@ public class OtherSemantics extends AnalysisVisitor {
 
         JmmNode leftNode = node.getJmmChild(0);
 
-        if (Objects.equals(operator, "ASSIGN") && leftNode.getKind().equals("IntegerLiteral")) {
+        if (Objects.equals(operator, "ASSIGN") && (leftNode.getKind().equals("IntegerLiteral") || leftNode.getKind().equals("BooleanValue") || leftNode.getKind().equals("ExpressionSmt"))) {
             var message = "Can't assign to int literals";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
             return null;

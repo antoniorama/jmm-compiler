@@ -6,7 +6,7 @@ class Test {
     }
 
     public int foo() {
-        5 = get();
+        false = get();
         return 1;
     }
 }

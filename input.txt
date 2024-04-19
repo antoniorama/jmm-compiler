@@ -1,13 +1,10 @@
 import A;
 
 class Test {
-    int x;
-    boolean b;
-    int[] c;
 
     public int foo() {
-        boolean a;
-        a = true && 5;
+        int i;
+        i = this.afe;
         return 0;
     }
 }

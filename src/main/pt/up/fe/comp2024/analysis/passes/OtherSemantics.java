@@ -40,7 +40,28 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.WHILE_STMT, this::visitWhileStmt);
         addVisit(Kind.VAR_DECL, this::visitVarDecl);
         addVisit(CLASS_DECL, this::visitClassDecl);
+        addVisit(PROPERTY_ACCESS, this::verifyPropertyAccess);
         addVisit(EXPRESSION_STMT, this::verifyExpressionStmt);
+    }
+
+    private Void verifyPropertyAccess(JmmNode propertyAccess, SymbolTable table) {
+        String propertyName = propertyAccess.get("name");
+
+        if (propertyName.equals("length")) {
+            return null;
+        }
+
+        List<Symbol> fields = table.getFields();
+        for (Symbol field : fields) {
+            if (field.getName().equals(propertyName)) {
+                return null;
+            }
+        }
+
+        String message = String.format("Property '%s' does not exist in class '%s'", propertyName, table.getClassName());
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(propertyAccess), NodeUtils.getColumn(propertyAccess), message, null));
+
+        return null;
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {

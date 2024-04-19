@@ -130,8 +130,17 @@ public class OtherSemantics extends AnalysisVisitor {
             operator = node.get("op");
 
         JmmNode leftNode = node.getJmmChild(0);
+
+        if (Objects.equals(operator, "ASSIGN") && leftNode.getKind().equals("IntegerLiteral")) {
+            var message = "Can't assign to int literals";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+            return null;
+        }
+
         Type leftType = TypeUtils.getExprType(leftNode, table);
         Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
+
+
 
         if (Objects.equals(operator, "op") && (!leftType.getName().equals("int") || !rightType.getName().equals("int"))) {
             var message = "Binary operator '" + operator + "' can only be used with integers";

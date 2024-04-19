@@ -1,25 +1,11 @@
-class A {
-    A a2;
-    public static void main(String[] args) {
-    }
+import A;
 
-    public boolean salam(boolean b) {
-        A a;
-        a = new A();
-        a.foo( (new A()).getArray(), a2.bar(new A()) );
-        return b;
-    }
+class Test {
+    int x;
+    boolean b;
+    int[] c;
 
-    public boolean bar(A a) {
-        return true;
-    }
-
-    public int getArray() {
-        int a;
-        return a;
-    }
-
-    public boolean foo(int num, boolean b) {
-        return true;
+    public int foo() {
+        return arr[0];
     }
 }

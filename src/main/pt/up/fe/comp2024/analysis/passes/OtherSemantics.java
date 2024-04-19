@@ -110,6 +110,11 @@ public class OtherSemantics extends AnalysisVisitor {
         Type leftType = TypeUtils.getExprType(leftNode, table);
         Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
 
+        if (Objects.equals(operator, "op") && (!leftType.getName().equals("int") || !rightType.getName().equals("int"))) {
+            var message = "Binary operator '" + operator + "' can only be used with integers";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
+        }
+
         // Check if any of the types comes from an import
         // In this case we assume that the types are assignable
 
@@ -207,6 +212,9 @@ public class OtherSemantics extends AnalysisVisitor {
             var message = String.format("Variable " + arrayVarType.getName() + " is not an array.");
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
+
+        //Error if accessing index out of bounds
+        System.out.println(table.print());
 
         return null;
     }
@@ -314,8 +322,6 @@ public class OtherSemantics extends AnalysisVisitor {
 
         return methodCaller.get("name");
     }
-
-
 
     private boolean isImportedMethodName(String methodName, SymbolTable table) {
         System.out.println("METHOD NAME: " + methodName);

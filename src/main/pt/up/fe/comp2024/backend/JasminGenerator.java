@@ -38,6 +38,7 @@ public class JasminGenerator {
 
     public JasminGenerator(OllirResult ollirResult) {
         this.ollirResult = ollirResult;
+        ollirResult.getOllirClass().getImports().add("java/lang/Object");
 
         reports = new ArrayList<>();
         code = null;
@@ -81,11 +82,11 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class public ").append(className).append(NL).append(NL);
 
-        // Check if there is a class extends
-        var superName = Objects.equals(ollirResult.getOllirClass().getSuperClass(), "null") ? ollirResult.getOllirClass().getSuperClass() : "java/lang/Object";
-        if (!Objects.equals(superName, "")) {
-            code.append(".super ").append(superName).append(NL);
-        }
+        String superClass = ollirResult.getOllirClass().getSuperClass();
+        if (superClass == null)
+            superClass = "Object";
+        String superName = getFullName(superClass);
+        code.append(".super ").append(superName).append(NL);
 
         for (Field field : ollirResult.getOllirClass().getFields()) {
             code.append(generators.apply(field));

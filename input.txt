@@ -1,13 +1,25 @@
 class A {
+    A a2;
+    public static void main(String[] args) {
+    }
 
-    public int nothing(int i) {
-        int counter;
-        counter = 0;
+    public boolean salam(boolean b) {
+        A a;
+        a = new A();
+        a.foo( (new A()).getArray(), a2.bar(new A()) );
+        return b;
+    }
 
-        while (i > 0) {
-            i = i - 1;
-            counter = counter + 1;
-        }
-        return counter;
+    public boolean bar(A a) {
+        return true;
+    }
+
+    public int getArray() {
+        int a;
+        return a;
+    }
+
+    public boolean foo(int num, boolean b) {
+        return true;
     }
 }

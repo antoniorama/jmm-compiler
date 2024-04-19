@@ -309,12 +309,13 @@ public class OtherSemantics extends AnalysisVisitor {
 
     private String determineCalledName(JmmNode methodCall, SymbolTable table) {
         JmmNode methodCaller = methodCall.getJmmChild(0);
-        if (methodCaller.getKind().equals("This")) {
-            return table.getClassName();
-        } else {
-            return methodCaller.get("name");
-        }
+        if (methodCaller.getKind().equals("This")) return table.getClassName();
+        if (methodCaller.getKind().equals("ParenthesesExpression")) return determineCalledName(methodCaller, table);
+
+        return methodCaller.get("name");
     }
+
+
 
     private boolean isImportedMethodName(String methodName, SymbolTable table) {
         System.out.println("METHOD NAME: " + methodName);

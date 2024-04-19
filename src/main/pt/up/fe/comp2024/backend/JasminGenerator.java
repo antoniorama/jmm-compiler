@@ -302,59 +302,57 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String generateCall(CallInstruction call) {
-        var code = new StringBuilder();
+    private String generateCall(CallInstruction callInstruction) {
+        StringBuilder code = new StringBuilder();
         String invocationCode = "";
 
-        Operand caller = (Operand) call.getCaller();
+        Operand caller = (Operand) callInstruction.getCaller();
         String callerName = caller.getName();
 
         ClassType callerClass = (ClassType) caller.getType();
+        String callerType = getFullName(callerClass.getName());
 
-        String className = ollirResult.getOllirClass().getClassName();
+        CallType invocationType = callInstruction.getInvocationType();
 
-        CallType invocationType = call.getInvocationType();
         ArrayList<String> argumentsType = new ArrayList<>();
-        for (Element argument : call.getArguments()) {
+        for (Element argument : callInstruction.getArguments()) {
             argumentsType.add(ollirTypeToJasminType(argument.getType()));
         }
 
-        String returnType = ollirTypeToJasminType(call.getReturnType());
-
-
-        switch(invocationType){
-            case invokestatic:
-                String staticMethod = ((LiteralElement) call.getMethodName()).getLiteral();
-                String staticMethodName = staticMethod.substring(1, staticMethod.length() - 1);
-                for (Element arg : call.getArguments()) {
-                    code.append(generators.apply(arg));
-                }
-                code.append(getCall("invokestatic", callerName, staticMethodName, argumentsType, returnType));
+        String returnType = ollirTypeToJasminType(callInstruction.getReturnType());
+        switch (invocationType) {
+            case invokespecial:
+                invocationCode = getCall(invocationType.toString(), callerType, "<init>", argumentsType, "V");
                 break;
             case invokevirtual:
-                String virtualMethod = ((LiteralElement) call.getMethodName()).getLiteral();
+                String virtualMethod = ((LiteralElement) callInstruction.getMethodName()).getLiteral();
                 String virtualMethodName = virtualMethod.substring(1, virtualMethod.length() - 1);
-                code.append(generators.apply(call.getCaller()));
-                for (Element arg : call.getArguments()) {
-                    code.append(generators.apply(arg));
-                }
-                code.append(getCall("invokevirtual", className, virtualMethodName, argumentsType, returnType));
+                invocationCode = getCall(invocationType.toString(), callerType, virtualMethodName, argumentsType, returnType);
+                code.append(generators.apply(callInstruction.getCaller()));
                 break;
+
+            case invokestatic:
+                String staticMethod = ((LiteralElement) callInstruction.getMethodName()).getLiteral();
+                String staticMethodName = staticMethod.substring(1, staticMethod.length() - 1);
+                invocationCode = getCall(invocationType.toString(), callerName, staticMethodName, argumentsType, returnType);
+                break;
+
             case NEW:
-                code.append("new ").append(className).append(NL).append("dup ").append(NL);
-                String constructorName = "<init>";
-                code.append("invokespecial ").append(className).append("/<init>()V");
+                code.append("new ").append(callerType).append(NL).append("dup");
                 break;
         }
 
+        for (Element argument : callInstruction.getArguments()) {
+            code.append(generators.apply(argument));
+        }
+        code.append(invocationCode).append(NL);
 
-        code.append(NL);
         return code.toString();
     }
 
     private String getCall(String invocationType, String className, String methodName, List<String> argumentsType, String returnType) {
         StringBuilder code = new StringBuilder();
-        code.append(invocationType).append(" ").append(className).append("/").append(methodName).append("(");
+        code.append(invocationType).append(" ").append(className).append(".").append(methodName).append("(");
         for (String argumentType : argumentsType) {
             code.append(argumentType);
         }
@@ -404,6 +402,15 @@ public class JasminGenerator {
             return matcher.group(1); // Return the first capturing group
         }
         return ""; // Return an empty string if no match was found
+    }
+    private String getFullName(String shortName) {
+        for (String importName : ollirResult.getOllirClass().getImports()) {
+            if (importName.endsWith(shortName)) {
+                return importName.replace(".", "/");
+            }
+        }
+
+        return shortName;
     }
 
 

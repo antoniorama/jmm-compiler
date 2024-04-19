@@ -97,7 +97,7 @@ public class JasminGenerator {
                 ;default constructor
                 .method public <init>()V
                     aload 0
-                    invokespecial %s/<init>()V
+                    invokespecial %s.<init>()V
                     return
                 .end method
                 """.formatted(superName);
@@ -362,22 +362,17 @@ public class JasminGenerator {
     }
     private String ollirTypeToJasminType(Type type) {
         // This method should map OLLIR types to Jasmin type descriptors
-        return switch (type.toString()) {
-            case "INT32" -> "I";
-            case "BOOLEAN" -> "Z";
-            case "STRING[]" -> "[Ljava/lang/String;";
-            case "VOID" -> "V";
-            default -> {
-                if (type.toString().startsWith("OBJECTREF")) {
-                    // Assuming the format is OBJECTREF(<ClassName>)
-                    var className = type.toString().substring(9, type.toString().length() - 1);
-                    yield "L" + className + ";";
-                } else {
-                    throw new NotImplementedException("Jasmin type not implemented for: " + type);
-                }
-            }
-        };
-    }
+        return switch (type.getTypeOfElement()) {
+            case INT32 -> "I";
+            case BOOLEAN -> "Z";
+            case STRING -> "Ljava/lang/String;";
+            case VOID -> "V";
+            case THIS -> null;
+            case ARRAYREF -> "[Ljava/lang/String;";
+            case OBJECTREF, CLASS -> "L" + getFullName(((ClassType) type).getName()) + ";";
+            };
+        }
+
 
     private String extractClassName(String callRepresentation) {
         // This method parses the class name from the call representation

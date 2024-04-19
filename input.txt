@@ -6,6 +6,8 @@ class Test {
     int[] c;
 
     public int foo() {
-        return arr[0];
+        boolean a;
+        a = true && 5;
+        return 0;
     }
 }

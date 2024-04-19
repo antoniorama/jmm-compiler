@@ -28,9 +28,11 @@ public class OtherSemantics extends AnalysisVisitor {
         addVisit(Kind.MAIN_METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.MAIN_METHOD_DECL, this::visitMainMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::verifyTypeCompatibility);
+        addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
+        addVisit(RELATIONAL_EXPRESSION, this::verifyTypeCompatibility);
+        addVisit(LOGICAL_EXPRESSION, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_INIT, this::visitArrayInit);
         addVisit(Kind.NEW_ARRAY, this::visitNewArray);
-        addVisit(Kind.ASSIGN_STMT, this::verifyTypeCompatibility);
         addVisit(Kind.ARRAY_ACCESS, this::visitArrayAccess);
         addVisit(Kind.METHOD_CALL, this::visitMethodCall);
         addVisit(Kind.RETURN_STMT, this::verifyReturnType);

@@ -116,7 +116,6 @@ public class OtherSemantics extends AnalysisVisitor {
     private boolean methodReturnIsLast(JmmNode method) {
         if (method.get("name").equals("main") && method.getChildren(RETURN_STMT).isEmpty()) return true;
         String lastKind = method.getChild(method.getNumChildren() - 1).getKind();
-        System.out.println(lastKind);
         return lastKind.equals("ReturnStmt");
     }
 
@@ -225,7 +224,6 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitArrayAccess(JmmNode arrayAccess, SymbolTable table) {
-        System.out.println("VISITING ARRAY ACCESS");
         JmmNode arrayVar = arrayAccess.getChild(0);
         JmmNode arrayIndex = arrayAccess.getChild(1);
 
@@ -246,7 +244,6 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         //Error if accessing index out of bounds
-        System.out.println(table.print());
 
         return null;
     }
@@ -356,8 +353,6 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private boolean isImportedMethodName(String methodName, SymbolTable table) {
-        System.out.println("METHOD NAME: " + methodName);
-        System.out.println(table.getImports());
         return table.getImports().contains(methodName);
     }
 

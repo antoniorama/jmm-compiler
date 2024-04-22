@@ -192,7 +192,7 @@ public class TypeUtils {
         if (isImported && isStatic) return returnType;
 
         // Return the type of the child (imported class)
-        if (isImported) return childType;
+        if (isImported) return new Type("void", false);
 
         if (!isStatic) return returnType;
 

@@ -1,12 +1,11 @@
+import Io;
 
 class Test {
 
-    public int get() {
-        return 1;
-    }
-
-    public int foo() {
-        false = get();
-        return 1;
+    public int test() {
+        int i;
+        Io io;
+        io.readInt();
+        return i;
     }
 }

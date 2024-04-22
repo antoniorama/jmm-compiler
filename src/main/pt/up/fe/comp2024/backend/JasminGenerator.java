@@ -335,7 +335,7 @@ public class JasminGenerator {
             case invokestatic:
                 String staticMethod = ((LiteralElement) callInstruction.getMethodName()).getLiteral();
                 String staticMethodName = staticMethod.substring(1, staticMethod.length() - 1);
-                invocationCode = getCall(invocationType.toString(), callerName, staticMethodName, argumentsType, returnType);
+                invocationCode = getCall(invocationType.toString(), getFullName(callerName), staticMethodName, argumentsType, returnType);
                 break;
 
             case NEW:
@@ -373,32 +373,6 @@ public class JasminGenerator {
             };
         }
 
-
-    private String extractClassName(String callRepresentation) {
-        // This method parses the class name from the call representation
-        String classNamePattern = "Operand: (.+?)\\.";
-        return matchPattern(callRepresentation, classNamePattern);
-    }
-
-    private String extractClassType(String callRepresentation) {
-        String classTypePattern = "\\((.*?)\\)";
-        return matchPattern(callRepresentation, classTypePattern);
-    }
-
-    private String extractMethodName(String callRepresentation) {
-        // This method parses the method name from the call representation
-        String methodNamePattern = "LiteralElement: \"(.+?)\"\\.STRING";
-        return matchPattern(callRepresentation, methodNamePattern);
-    }
-
-    private String matchPattern(String input, String regexPattern) {
-        Pattern pattern = Pattern.compile(regexPattern);
-        Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return matcher.group(1); // Return the first capturing group
-        }
-        return ""; // Return an empty string if no match was found
-    }
     private String getFullName(String shortName) {
         for (String importName : ollirResult.getOllirClass().getImports()) {
             if (importName.endsWith(shortName)) {
@@ -408,6 +382,4 @@ public class JasminGenerator {
 
         return shortName;
     }
-
-
 }

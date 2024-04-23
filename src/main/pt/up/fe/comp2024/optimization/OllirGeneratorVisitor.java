@@ -7,6 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.Objects;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -169,17 +171,23 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         boolean isFieldAssignment = true;
 
+        JmmNode parent = node.getParent();
+        while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
+            parent = parent.getParent();
+        }
+
         // Check if its local variable
-        for (var local : table.getLocalVariables(node.getParent().get("name"))) {
+        for (var local : table.getLocalVariables(parent.get("name"))) {
             if (local.getName().equals(child.get("name"))) {
                 isFieldAssignment = false;
                 break;
             }
         }
 
+
         // Check if it's a param
         if (isFieldAssignment) {
-            for (var param : table.getParameters(node.getParent().get("name"))) {
+            for (var param : table.getParameters(parent.get("name"))) {
                 if (param.getName().equals(child.get("name"))) {
                     isFieldAssignment = false;
                     break;

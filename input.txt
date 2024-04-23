@@ -1,11 +1,14 @@
-import Io;
-
 class Test {
 
     public int test() {
-        int i;
-        Io io;
-        io.readInt();
-        return i;
+        boolean b;
+        b = true;
+
+        if (b) {
+            b = false;
+        } else {
+            b = true;
+        }
+        return 1;
     }
 }

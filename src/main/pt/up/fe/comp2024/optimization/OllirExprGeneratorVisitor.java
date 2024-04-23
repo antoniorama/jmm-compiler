@@ -69,21 +69,17 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         StringBuilder computation = new StringBuilder();
 
         // code to compute the children
-        computation.append(lhs.getComputation());
-        computation.append(rhs.getComputation());
+        computation.append(lhs.getComputation()).append(rhs.getComputation());
 
         // code to compute self
         Type resType = TypeUtils.getExprType(node, table);
         String resOllirType = OptUtils.toOllirType(resType);
         String code = OptUtils.getTemp() + resOllirType;
 
-        computation.append(code).append(SPACE)
-                .append(ASSIGN).append(resOllirType).append(SPACE)
-                .append(lhs.getCode()).append(SPACE);
+        computation.append(code).append(SPACE).append(ASSIGN).append(resOllirType).append(SPACE).append(lhs.getCode()).append(SPACE);
 
         Type type = TypeUtils.getExprType(node, table);
-        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
-                .append(rhs.getCode()).append(END_STMT);
+        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE).append(rhs.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
     }
@@ -156,7 +152,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         boolean isAssign = false;
-        boolean isImported = true;
         boolean isStatic = false;
         JmmNode parent = node.getParent();
         JmmNode child = node.getJmmChild(0);
@@ -169,9 +164,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             }
             parent = parent.getParent();
         }
-        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
-            isImported = false;
-        }
+
         if (childType == null) {
             isStatic = true;
         }

@@ -32,11 +32,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(PARENTHESES_EXPRESSION, this::visitParenthesesExpr);
         addVisit(BINARY_EXPR, this::visitBinExpr);
-        addVisit(LOGICAL_EXPRESSION, this::visitLogicalExpr);
+        addVisit(LOGICAL_EXPRESSION, this::visitBinExpr);
+        addVisit(RELATIONAL_EXPRESSION, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_VALUE, this::visitBoolean);
+        addVisit(NOT_EXPRESSION, this::visitNotExpr);
         addVisit(METHOD_CALL, this::visitMethodCall);
+        addVisit(PROPERTY_ACCESS, this::visitPropertyAccess);
         addVisit(NEW_CLASS_INSTANCE, this::visitNewClassInstance);
+        addVisit(NEW_ARRAY, this::visitNewArray);
         addVisit(THIS, this::visitThis);
 
         setDefaultVisit(this::defaultVisit);
@@ -55,6 +59,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String ollirBoolType = OptUtils.toOllirType(boolType);
         String code = (Objects.equals(node.get("value"), "true") ? "1" : "0") + ollirBoolType;
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitNotExpr(JmmNode node, Void unused) {
+        var child = visit(node.getJmmChild(0));
+        Type childType = TypeUtils.getExprType(node, table);
+        StringBuilder computation = new StringBuilder();
+        computation.append(child.getComputation());
+        String code = OptUtils.getTemp() + OptUtils.toOllirType(TypeUtils.getExprType(node, table));
+        computation.append(code).append(SPACE).append(ASSIGN).append(OptUtils.toOllirType(childType)).append(SPACE).append("!.bool ").append(child.getCode()).append(END_STMT);
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitParenthesesExpr(JmmNode node, Void unused) {
@@ -82,10 +96,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE).append(rhs.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
-    }
-
-    private OllirExprResult visitLogicalExpr(JmmNode node, Void unused) {
-        return visitBinExpr(node, unused);
     }
 
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
@@ -186,6 +196,43 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             computation.append(tempVar).append(SPACE).append(ASSIGN).append(returnTypeString).append(SPACE);
         }
         computation.append(methodCallCode).append(END_STMT);
+
+        return new OllirExprResult(tempVar, computation.toString());
+    }
+
+    private OllirExprResult visitPropertyAccess(JmmNode node, Void unused) {
+        if (!node.get("name").equals("length")) return OllirExprResult.EMPTY; // Only length property is supported
+        StringBuilder code = new StringBuilder();
+        StringBuilder computation = new StringBuilder();
+        String intType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
+        String tempVar = OptUtils.getTemp() + intType;
+        JmmNode array = node.getJmmChild(0);
+        String arrayType = OptUtils.toOllirType(TypeUtils.getExprType(array, table));
+
+        code.append(tempVar);
+        computation.append(tempVar).append(ASSIGN).append(intType).append(" arraylength(").append(array.get("name")).append(arrayType).append(")").append(intType).append(END_STMT);
+
+        return new OllirExprResult(code.toString(), computation.toString());
+
+    }
+
+    private OllirExprResult visitNewArray(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+
+        // Visit the size of the array
+        OllirExprResult sizeExpr = visit(node.getJmmChild(1));
+        computation.append(sizeExpr.getComputation());
+
+        // Get the type of the array
+        Type arrayType = TypeUtils.getExprType(node, table);
+        String arrayTypeString = OptUtils.toOllirType(arrayType);
+
+        // Construct the array creation
+        String tempVar = OptUtils.getTemp() + arrayTypeString;
+        String arrayCreationCode = "new(array" + ", " + sizeExpr.getCode() + ")" + arrayTypeString;
+
+        // Store the result of the array creation in a temporary variable
+        computation.append(tempVar).append(SPACE).append(ASSIGN).append(arrayTypeString).append(SPACE).append(arrayCreationCode).append(END_STMT);
 
         return new OllirExprResult(tempVar, computation.toString());
     }

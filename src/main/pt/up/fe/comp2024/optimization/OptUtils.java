@@ -9,7 +9,8 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class OptUtils {
     private static int tempNumber = -1;
-    private static int if_then_number = -1;
+    private static int ifThenNumber = -1;
+    private static int whileNumber = -1;
 
     public static String getTemp() {
 
@@ -22,15 +23,16 @@ public class OptUtils {
     }
 
     public static int getNextTempNum() {
-
-        tempNumber += 1;
-        return tempNumber;
+        return ++tempNumber;
     }
 
     public static int getNextIfThenNum() {
 
-        if_then_number += 1;
-        return if_then_number;
+        return ++ifThenNumber;
+    }
+
+    public static int getNextWhileNum() {
+        return ++whileNumber;
     }
 
     public static String toOllirType(JmmNode typeNode) {
@@ -43,17 +45,19 @@ public class OptUtils {
         else if (Objects.equals(typeNode.getKind(), "booleanType")) BOOLEAN_TYPE.checkOrThrow(typeNode);
         else if (Objects.equals(typeNode.getKind(), "stringType")) STRING_TYPE.checkOrThrow(typeNode);
         else if (Objects.equals(typeNode.getKind(), "voidType")) VOID_TYPE.checkOrThrow(typeNode);
-        // else if (typeNode.getKind().equals("OtherType")) OTHER_TYPE.checkOrThrow(typeNode);
+        else if (Objects.equals(typeNode.getKind(), "arrayType")) ARRAY_TYPE.checkOrThrow(typeNode);
         // TODO -> add the other types
 
         String typeName;
         if (typeNode.getKind().equals("OtherType")) typeName = typeNode.get("name");
+        else if (typeNode.getKind().equals("ArrayType")) typeName = "array";
         else typeName = typeNode.get("value");
 
         return toOllirType(typeName);
     }
 
     public static String toOllirType(Type type) {
+        if (type.isArray()) return toOllirType("array");
         return toOllirType(type.getName());
     }
 
@@ -63,6 +67,7 @@ public class OptUtils {
             case "int" -> "i32";
             case "boolean" -> "bool";
             case "void" -> "V";
+            case "array" -> "array.i32";
             default -> typeName;
         };
     }

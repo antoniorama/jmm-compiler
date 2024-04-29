@@ -47,7 +47,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(EXPRESSION_STMT, this::visitExpressionStmt);
         addVisit(IF_STMT, this::visitIfStmt);
-        addVisit(BLOCK_STMT, this::defaultVisit);
+        addVisit(BLOCK_STMT, this::visitBlockStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -165,7 +166,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
-        var child = node.getJmmChild(0);
+        JmmNode child = node.getJmmChild(0);
+        if (child.getKind().equals("ArrayAccess")) child = child.getJmmChild(0);
         var lhs = exprVisitor.visit(child);
         var rhs = exprVisitor.visit(node.getJmmChild(1));
 
@@ -280,20 +282,41 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var elseStmt = node.getJmmChild(2);
         int ifThenNum = OptUtils.getNextIfThenNum();
 
-        code.append(condition.getComputation()).append("if(").append(condition.getCode()).append(")").append(" goto ").append("if_then_").append(ifThenNum).append(";\n");
-
+        code.append(condition.getComputation()).append("if(").append(condition.getCode()).append(")").append(" goto ").append("if").append(ifThenNum).append(";\n");
+        code.append(visit(elseStmt));
+        code.append("goto endif").append(ifThenNum).append(";\n");
+        code.append("if").append(ifThenNum).append(":\n");
         code.append(visit(thenStmt));
+        code.append("endif").append(ifThenNum).append(":\n");
 
-        if (elseStmt != null) {
-            code.append("goto if_end_").append(OptUtils.getNextIfThenNum()).append(";\n");
+        return code.toString();
+    }
+
+    private String visitBlockStmt(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        for (JmmNode child : node.getChildren()) {
+            var childCode = visit(child);
+            code.append(childCode);
         }
 
-        code.append("if_then_").append(OptUtils.getNextIfThenNum()).append(":\n");
+        return code.toString();
+    }
 
-        if (elseStmt != null) {
-            code.append(visit(elseStmt));
-            code.append("if_end_").append(OptUtils.getNextIfThenNum()).append(":\n");
-        }
+    private String visitWhileStmt(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        var condition = exprVisitor.visit(node.getJmmChild(0));
+        var stmt = node.getJmmChild(1);
+        int whileNum = OptUtils.getNextWhileNum();
+
+        code.append("whileCond").append(whileNum).append(":\n");
+        code.append(condition.getComputation()).append("if(").append(condition.getCode()).append(") goto whileLoop").append(whileNum).append(";\n");
+        code.append("goto whileEnd").append(whileNum).append(";\n");
+        code.append("whileLoop").append(whileNum).append(":\n");
+        code.append(visit(stmt));
+        code.append("goto whileCond").append(whileNum).append(";\n");
+        code.append("whileEnd").append(whileNum).append(":\n");
 
         return code.toString();
     }

@@ -9,6 +9,12 @@ class Test {
         } else {
             b = true;
         }
+
+        if (!b) {
+            b = false;
+        } else {
+            b = true;
+        }
         return 1;
     }
 }

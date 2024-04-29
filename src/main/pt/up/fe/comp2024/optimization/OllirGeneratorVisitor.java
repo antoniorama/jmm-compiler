@@ -46,6 +46,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(EXPRESSION_STMT, this::visitExpressionStmt);
+        addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(BLOCK_STMT, this::defaultVisit);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -268,6 +270,32 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String buildConstructor() {
         return ".construct " + table.getClassName() + "().V {\n" + "invokespecial(this, \"<init>\").V;\n" + "}\n";
+    }
+
+    private String visitIfStmt(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+
+        var condition = exprVisitor.visit(node.getJmmChild(0));
+        var thenStmt = node.getJmmChild(1);
+        var elseStmt = node.getJmmChild(2);
+        int ifThenNum = OptUtils.getNextIfThenNum();
+
+        code.append(condition.getComputation()).append("if(").append(condition.getCode()).append(")").append(" goto ").append("if_then_").append(ifThenNum).append(";\n");
+
+        code.append(visit(thenStmt));
+
+        if (elseStmt != null) {
+            code.append("goto if_end_").append(OptUtils.getNextIfThenNum()).append(";\n");
+        }
+
+        code.append("if_then_").append(OptUtils.getNextIfThenNum()).append(":\n");
+
+        if (elseStmt != null) {
+            code.append(visit(elseStmt));
+            code.append("if_end_").append(OptUtils.getNextIfThenNum()).append(":\n");
+        }
+
+        return code.toString();
     }
 
     private String defaultVisit(JmmNode node, Void unused) {

@@ -124,7 +124,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                     break;
                 }
             }
-
         }
         if (isField) {
             var temp = OptUtils.getTemp();

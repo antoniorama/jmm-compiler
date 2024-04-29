@@ -9,6 +9,7 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class OptUtils {
     private static int tempNumber = -1;
+    private static int if_then_number = -1;
 
     public static String getTemp() {
 
@@ -24,6 +25,12 @@ public class OptUtils {
 
         tempNumber += 1;
         return tempNumber;
+    }
+
+    public static int getNextIfThenNum() {
+
+        if_then_number += 1;
+        return if_then_number;
     }
 
     public static String toOllirType(JmmNode typeNode) {

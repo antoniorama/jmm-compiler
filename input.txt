@@ -2,12 +2,16 @@ import io;
 
 class A {
 
-    int a;
-    public int x(){
-
+    public int[] test() {
         int[] a;
         a = new int[10];
-        this.a;
+        return a;
+    }
+
+    public int nothing() {
+        int i;
+        int[] a;
+        this.test()[0] = 1;
         return 0;
     }
 }

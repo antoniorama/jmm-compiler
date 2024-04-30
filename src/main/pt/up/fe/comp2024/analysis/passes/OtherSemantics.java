@@ -200,6 +200,11 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 
+        if (arrayVar.getKind().equals("MethodCall")) {
+            var message = "Method call cannot be used as array";
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
+        }
+
         Type arrayVarType = TypeUtils.getExprType(arrayVar, table);
 
         // Error if variable isn't an array

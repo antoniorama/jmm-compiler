@@ -277,7 +277,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitNewClassInstance(JmmNode node, Void unused) {
         String className = node.get("name");
         String tempVar = OptUtils.getTemp() + "." + className;
-        String initializationCode = tempVar + " " + ASSIGN + "." + className + " " + "new(" + className + ")." + className
+        String initializationCode = tempVar + SPACE + ASSIGN + "." + className + SPACE + "new(" + className + ")." + className
                 + END_STMT + "invokespecial(" + tempVar + ", \"<init>\").V" + END_STMT;
         return new OllirExprResult(tempVar, initializationCode);
     }

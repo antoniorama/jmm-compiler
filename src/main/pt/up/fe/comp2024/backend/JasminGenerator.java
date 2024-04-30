@@ -196,7 +196,7 @@ public class JasminGenerator {
         var code = new StringBuilder();
         String acessModifier = field.getFieldAccessModifier() != AccessModifier.DEFAULT ?
                 field.getFieldAccessModifier().name().toLowerCase() + " " :
-                "private ";;
+                "private ";
 
         String fieldName = field.getFieldName();
 

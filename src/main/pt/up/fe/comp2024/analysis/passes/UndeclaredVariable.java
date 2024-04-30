@@ -73,6 +73,4 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
         return null;
     }
-
-
 }

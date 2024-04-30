@@ -1,16 +1,17 @@
-class Test {
+import io;
 
-    public int func(int a) {
+class A {
+    int a;
+
+    public int x(){
+        a = 10;
+        io.print(a);
         return a;
     }
 
-	public int test() {
-	    int[] a;
-        int i;
-        a = new int[10];
-        a[0] = 1;
-        i = this.func(1);
-        i = this.func(a[0]);
-        return i;
-	}
+    public static void main(String[] args){
+        A a;
+        a = new A();
+        a.x();
+    }
 }

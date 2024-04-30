@@ -499,12 +499,20 @@ public class OtherSemantics extends AnalysisVisitor {
                 .map(Symbol::getName)
                 .collect(Collectors.toSet());
 
+        Set<String> parameterNames = table.getParameters(mainMethod.get("name")).stream()
+                .map(Symbol::getName)
+                .collect(Collectors.toSet());
+
+        Set<String> localVariableNames = table.getLocalVariables(mainMethod.get("name")).stream()
+                .map(Symbol::getName)
+                .collect(Collectors.toSet());
+
         // Check if any var ref is a field
         List<JmmNode> varRefNodes = mainMethod.getDescendants(VAR_REF_EXPR);
         for (JmmNode varRef : varRefNodes) {
             String varName = varRef.get("name");
-            // If the variable name is in the set of fields, then it's a field reference
-            if (fieldNames.contains(varName)) {
+            // If the variable name is in the set of fields and it's not a local variable nor a parameter, add a report
+            if (fieldNames.contains(varName) && !parameterNames.contains(varName) && !localVariableNames.contains(varName)) {
                 // Variable reference is a field, add a report
                 String message = String.format("Variable reference '%s' in static main method cannot be a field", varName);
                 addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(varRef), NodeUtils.getColumn(varRef), message, null));

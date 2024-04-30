@@ -163,6 +163,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         boolean isAssign = false;
         boolean isStatic = false;
+        boolean isInsideMethodCall = false;
         JmmNode parent = node.getParent();
         JmmNode child = node.getJmmChild(0);
         Type childType = TypeUtils.getExprType(child, table);
@@ -170,7 +171,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
             if (parent.getKind().equals("AssignStmt")) {
                 isAssign = true;
-                break;
+            }
+            else if (parent.getKind().equals("MethodCall")) {
+                isInsideMethodCall = true;
             }
             parent = parent.getParent();
         }
@@ -188,15 +191,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         // Construct the method call
         String argsList = String.join(", ", argsCode);
         String tempVar = OptUtils.getTemp() + returnTypeString;
-        String methodCallCode =  (isStatic ? "invokestatic(" : "invokevirtual(") + ownerExpr.getCode() + ", \"" + methodName + "\""
+        String methodCallComputation =  (isStatic ? "invokestatic(" : "invokevirtual(") + ownerExpr.getCode() + ", \"" + methodName + "\""
                 + (argsCode.isEmpty() ? "" : ", " + argsList)
                 + ")" + returnTypeString;
 
         // Store the result of the method call in a temporary variable
-        if (isAssign) {
+        if (isAssign || isInsideMethodCall) {
             computation.append(tempVar).append(SPACE).append(ASSIGN).append(returnTypeString).append(SPACE);
         }
-        computation.append(methodCallCode).append(END_STMT);
+        computation.append(methodCallComputation).append(END_STMT);
 
         return new OllirExprResult(tempVar, computation.toString());
     }
@@ -242,13 +245,29 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
         JmmNode array = node.getJmmChild(0);
-        JmmNode index = node.getJmmChild(1);
-        OllirExprResult indexCode = visit(index);
-        String indexType = OptUtils.toOllirType(TypeUtils.getExprType(index, table));
+        OllirExprResult index = visit(node.getJmmChild(1));
+        String arrayType = OptUtils.toOllirType(TypeUtils.getExprType(array, table));
+        String intType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
+        String tempVar = OptUtils.getTemp() + intType;
 
-        code.append(indexCode.getComputation()).append(array.get("name")).append("[").append(indexCode.getCode()).append(indexType).append("]").append(indexType);
+        computation.append(index.getComputation());
 
-        return new OllirExprResult(code.toString());
+        boolean isInsideMethodCall = false;
+        JmmNode parent = node.getParent();
+        while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
+            if (parent.getKind().equals("MethodCall")) {
+                isInsideMethodCall = true;
+                break;
+            }
+            parent = parent.getParent();
+        }
+
+        if (isInsideMethodCall) {
+            computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(array.get("name")).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
+        }
+        code.append(isInsideMethodCall ? tempVar : array.get("name") + "[" + index.getCode() + "]" + arrayType);
+
+        return new OllirExprResult(code.toString(), computation.toString());
     }
 
     private OllirExprResult visitThis(JmmNode node, Void unused) {

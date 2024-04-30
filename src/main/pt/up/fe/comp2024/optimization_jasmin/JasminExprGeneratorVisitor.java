@@ -27,7 +27,7 @@ public class JasminExprGeneratorVisitor extends PostorderJmmVisitor<StringBuilde
     }
 
     private Void visitIntegerLiteral(JmmNode integerLiteral, StringBuilder code) {
-        code.append("ldc " + integerLiteral.get("value") + NL);
+        code.append("ldc ").append(integerLiteral.get("value")).append(NL);
         return null;
     }
 
@@ -38,7 +38,7 @@ public class JasminExprGeneratorVisitor extends PostorderJmmVisitor<StringBuilde
         var reg = currentRegisters.get(name);
         SpecsCheck.checkNotNull(reg, () -> "No register mapped for variable '" + name + "'");
 
-        code.append("iload " + reg + NL);
+        code.append("iload ").append(reg).append(NL);
 
         return null;
     }

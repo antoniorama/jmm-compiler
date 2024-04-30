@@ -54,11 +54,11 @@ public enum Kind {
 
     private final String name;
 
-    private Kind(String name) {
+    Kind(String name) {
         this.name = name;
     }
 
-    private Kind() {
+    Kind() {
         this.name = SpecsStrings.toCamelCase(name(), "_", true);
     }
 

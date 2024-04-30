@@ -1,9 +1,16 @@
-class ArrayAccess {
+class Test {
 
-	public int foo() {
-		int i;
-		int[] a;
-		a = new int[10];
-		return i;
+    public int func(int a) {
+        return a;
+    }
+
+	public int test() {
+	    int[] a;
+        int i;
+        a = new int[10];
+        a[0] = 1;
+        i = this.func(1);
+        i = this.func(a[0]);
+        return i;
 	}
 }

@@ -147,12 +147,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         // type
-        var retType = OptUtils.toOllirType(node.getJmmChild(0));
+        var retType = OptUtils.toOllirType(node.getChild(0));
         code.append(retType).append(L_BRACKET);
 
         // rest of its children stmts
         for (int i = paramCount + 1; i < node.getNumChildren(); i++) {
-            var child = node.getJmmChild(i);
+            var child = node.getChild(i);
             var childCode = visit(child);
             code.append(childCode);
         }
@@ -164,11 +164,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
-        JmmNode child = node.getJmmChild(0);
+        JmmNode child = node.getChild(0);
         boolean isArray = false;
         if (child.getKind().equals("ArrayAccess")) {
             isArray = true;
-            child = child.getJmmChild(0);
+            child = child.getChild(0);
         }
 
         StringBuilder code = new StringBuilder();
@@ -204,7 +204,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         var lhs = exprVisitor.visit(child);
-        var rhs = exprVisitor.visit(node.getJmmChild(1));
+        var rhs = exprVisitor.visit(node.getChild(1));
 
         Type thisType = TypeUtils.getExprType(child, table);
         String typeString = OptUtils.toOllirType(thisType);
@@ -235,7 +235,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var expr = OllirExprResult.EMPTY;
 
         if (node.getNumChildren() > 0) {
-            expr = exprVisitor.visit(node.getJmmChild(0));
+            expr = exprVisitor.visit(node.getChild(0));
         }
 
         code.append(expr.getComputation()).append("ret").append(OptUtils.toOllirType(retType)).append(SPACE).append(expr.getCode()).append(END_STMT);
@@ -246,7 +246,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitParam(JmmNode node, Void unused) {
 
-        var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
+        var typeCode = OptUtils.toOllirType(node.getChild(0));
         var id = node.get("name");
 
         return id + typeCode;
@@ -285,9 +285,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitIfStmt(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
 
-        var condition = exprVisitor.visit(node.getJmmChild(0));
-        var thenStmt = node.getJmmChild(1);
-        var elseStmt = node.getJmmChild(2);
+        var condition = exprVisitor.visit(node.getChild(0));
+        var thenStmt = node.getChild(1);
+        var elseStmt = node.getChild(2);
         int ifThenNum = OptUtils.getNextIfThenNum();
 
         code.append(condition.getComputation()).append("if(").append(condition.getCode()).append(")").append(" goto ").append("if").append(ifThenNum).append(";\n");
@@ -314,8 +314,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitWhileStmt(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
 
-        var condition = exprVisitor.visit(node.getJmmChild(0));
-        var stmt = node.getJmmChild(1);
+        var condition = exprVisitor.visit(node.getChild(0));
+        var stmt = node.getChild(1);
         int whileNum = OptUtils.getNextWhileNum();
 
         code.append("whileCond").append(whileNum).append(":\n");

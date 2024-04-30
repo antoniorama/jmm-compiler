@@ -63,7 +63,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitNotExpr(JmmNode node, Void unused) {
-        var child = visit(node.getJmmChild(0));
+        var child = visit(node.getChild(0));
         Type childType = TypeUtils.getExprType(node, table);
         StringBuilder computation = new StringBuilder();
         computation.append(child.getComputation());
@@ -73,13 +73,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitParenthesesExpr(JmmNode node, Void unused) {
-        return visit(node.getJmmChild(0));
+        return visit(node.getChild(0));
     }
 
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
 
-        var lhs = visit(node.getJmmChild(0));
-        var rhs = visit(node.getJmmChild(1));
+        var lhs = visit(node.getChild(0));
+        var rhs = visit(node.getChild(1));
 
         StringBuilder computation = new StringBuilder();
 
@@ -151,12 +151,12 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         List<String> argsCode = new ArrayList<>();
 
         // Visit the owner of the method (e.g., an instance of a class, or the class itself for static methods)
-        OllirExprResult ownerExpr = visit(node.getJmmChild(0));
+        OllirExprResult ownerExpr = visit(node.getChild(0));
         computation.append(ownerExpr.getComputation());
 
         // Handle each argument of the method
         for (int i = 1; i < node.getNumChildren(); i++) {
-            OllirExprResult argExpr = visit(node.getJmmChild(i));
+            OllirExprResult argExpr = visit(node.getChild(i));
             computation.append(argExpr.getComputation());
             argsCode.add(argExpr.getCode());
         }
@@ -165,7 +165,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         boolean isStatic = false;
         boolean isInsideMethodCall = false;
         JmmNode parent = node.getParent();
-        JmmNode child = node.getJmmChild(0);
+        JmmNode child = node.getChild(0);
         Type childType = TypeUtils.getExprType(child, table);
 
         while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
@@ -210,7 +210,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         StringBuilder computation = new StringBuilder();
         String intType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
         String tempVar = OptUtils.getTemp() + intType;
-        JmmNode array = node.getJmmChild(0);
+        JmmNode array = node.getChild(0);
         String arrayType = OptUtils.toOllirType(TypeUtils.getExprType(array, table));
 
         code.append(tempVar);
@@ -225,7 +225,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         StringBuilder computation = new StringBuilder();
 
         // Visit the size of the array
-        OllirExprResult sizeExpr = visit(node.getJmmChild(1));
+        OllirExprResult sizeExpr = visit(node.getChild(1));
         computation.append(sizeExpr.getComputation());
 
         // Get the type of the array
@@ -244,8 +244,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     private OllirExprResult visitArrayAccess(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
-        JmmNode array = node.getJmmChild(0);
-        OllirExprResult index = visit(node.getJmmChild(1));
+        JmmNode array = node.getChild(0);
+        OllirExprResult index = visit(node.getChild(1));
         String arrayType = OptUtils.toOllirType(TypeUtils.getExprType(array, table));
         String intType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
         String tempVar = OptUtils.getTemp() + intType;

@@ -1,10 +1,9 @@
-class Test {
-     public int test() {
-         int i;
-         int[] a;
-         i = 2;
-         a = new int[10];
-         a[0] = 1;
-         return i;
-     }
+class ArrayAccess {
+
+	public int foo() {
+		int i;
+		int[] a;
+		a = new int[10];
+		return i;
+	}
 }

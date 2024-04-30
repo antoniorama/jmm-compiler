@@ -41,6 +41,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(PROPERTY_ACCESS, this::visitPropertyAccess);
         addVisit(NEW_CLASS_INSTANCE, this::visitNewClassInstance);
         addVisit(NEW_ARRAY, this::visitNewArray);
+        addVisit(ARRAY_ACCESS, this::visitArrayAccess);
         addVisit(THIS, this::visitThis);
 
         setDefaultVisit(this::defaultVisit);
@@ -217,6 +218,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitNewArray(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
 
         // Visit the size of the array
@@ -228,13 +230,25 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String arrayTypeString = OptUtils.toOllirType(arrayType);
 
         // Construct the array creation
-        String tempVar = OptUtils.getTemp() + arrayTypeString;
         String arrayCreationCode = "new(array" + ", " + sizeExpr.getCode() + ")" + arrayTypeString;
 
         // Store the result of the array creation in a temporary variable
-        computation.append(tempVar).append(SPACE).append(ASSIGN).append(arrayTypeString).append(SPACE).append(arrayCreationCode).append(END_STMT);
+        code.append(arrayCreationCode);
 
-        return new OllirExprResult(tempVar, computation.toString());
+        return new OllirExprResult(code.toString(), computation.toString());
+    }
+
+    private OllirExprResult visitArrayAccess(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+        StringBuilder computation = new StringBuilder();
+        JmmNode array = node.getJmmChild(0);
+        JmmNode index = node.getJmmChild(1);
+        OllirExprResult indexCode = visit(index);
+        String indexType = OptUtils.toOllirType(TypeUtils.getExprType(index, table));
+
+        code.append(indexCode.getComputation()).append(array.get("name")).append("[").append(indexCode.getCode()).append(indexType).append("]").append(indexType);
+
+        return new OllirExprResult(code.toString());
     }
 
     private OllirExprResult visitThis(JmmNode node, Void unused) {

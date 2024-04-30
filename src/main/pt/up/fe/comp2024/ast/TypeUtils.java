@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static pt.up.fe.comp2024.ast.Kind.CLASS_DECL;
-
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
@@ -55,7 +53,7 @@ public class TypeUtils {
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
             case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);
             case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
-            case THIS -> getThisType(actualExpr, table);
+            case THIS -> getThisType(table);
             case PROPERTY_ACCESS -> getPropertyAccessType(actualExpr, table);
             case PARENTHESES_EXPRESSION -> getExprType(actualExpr.getJmmChild(0), table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
@@ -63,10 +61,10 @@ public class TypeUtils {
 
         // set custom attribute isVarArgs
         if (isVarArgs) {
+            assert type != null;
             type.putObject("isVarArgs", true);
         }
 
-        // System.out.println(type);
         return type;
     }
 
@@ -199,7 +197,7 @@ public class TypeUtils {
         return new Type("void", false);
     }
 
-    private static Type getThisType(JmmNode methodCall, SymbolTable table) {
+    private static Type getThisType(SymbolTable table) {
         return new Type(table.getClassName(), false);
     }
 

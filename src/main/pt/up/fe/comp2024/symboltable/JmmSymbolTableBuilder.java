@@ -42,11 +42,7 @@ public class JmmSymbolTableBuilder {
 
         for (JmmNode importDecl : children) {
             String rawNames = importDecl.get("name");
-            // System.out.println("Raw NAMES : " + rawNames);
-
             String formattedName = TypeUtils.convertImportName(rawNames);
-
-            // System.out.println("Formatted names : " + formattedName);
             imports.add(formattedName);
         }
 
@@ -135,13 +131,12 @@ public class JmmSymbolTableBuilder {
     }
 
     private static List<String> buildMethods(JmmNode classDecl) {
-        List<String> methodNames = Stream.concat(
-                        classDecl.getChildren(METHOD_DECL).stream(),
-                        classDecl.getChildren(MAIN_METHOD_DECL).stream())
+
+        return Stream.concat(
+                classDecl.getChildren(METHOD_DECL).stream(),
+                classDecl.getChildren(MAIN_METHOD_DECL).stream())
                 .map(method -> method.get("name"))
                 .collect(Collectors.toList());
-
-        return methodNames;
     }
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {

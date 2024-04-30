@@ -7,8 +7,6 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
-import java.util.Objects;
-
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -167,9 +165,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitAssignStmt(JmmNode node, Void unused) {
 
         JmmNode child = node.getJmmChild(0);
-        if (child.getKind().equals("ArrayAccess")) child = child.getJmmChild(0);
-        var lhs = exprVisitor.visit(child);
-        var rhs = exprVisitor.visit(node.getJmmChild(1));
+        boolean isArray = false;
+        if (child.getKind().equals("ArrayAccess")) {
+            isArray = true;
+            child = child.getJmmChild(0);
+        }
 
         StringBuilder code = new StringBuilder();
 
@@ -198,6 +198,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 }
             }
         }
+
+        if (isArray) {
+            child = node.getChild(0);
+        }
+
+        var lhs = exprVisitor.visit(child);
+        var rhs = exprVisitor.visit(node.getJmmChild(1));
 
         if (isFieldAssignment) {
             code.append("putfield(this, ").append(lhs.getCode()).append(", ").append(rhs.getCode()).append(").V;\n");

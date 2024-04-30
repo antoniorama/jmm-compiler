@@ -13,7 +13,7 @@ import java.util.List;
  */
 public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Void> implements AnalysisPass {
 
-    private List<Report> reports;
+    private final List<Report> reports;
 
     public AnalysisVisitor() {
         reports = new ArrayList<>();

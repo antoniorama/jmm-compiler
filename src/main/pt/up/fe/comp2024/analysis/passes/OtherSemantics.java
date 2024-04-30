@@ -128,7 +128,7 @@ public class OtherSemantics extends AnalysisVisitor {
         if (node.getKind().equals("BinaryExpr"))
             operator = node.get("op");
 
-        JmmNode leftNode = node.getJmmChild(0);
+        JmmNode leftNode = node.getChild(0);
 
         if (Objects.equals(operator, "ASSIGN") && (leftNode.getKind().equals("IntegerLiteral") || leftNode.getKind().equals("BooleanValue") || leftNode.getKind().equals("ExpressionSmt"))) {
             var message = "Can't assign to int literals";
@@ -137,9 +137,7 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         Type leftType = TypeUtils.getExprType(leftNode, table);
-        Type rightType = TypeUtils.getExprType(node.getJmmChild(1), table);
-
-
+        Type rightType = TypeUtils.getExprType(node.getChild(1), table);
 
         if (Objects.equals(operator, "op") && (!leftType.getName().equals("int") || !rightType.getName().equals("int"))) {
             var message = "Binary operator '" + operator + "' can only be used with integers";
@@ -154,28 +152,9 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
         }
 
-        // System.out.println("IMPORTS : " + table.getImports());
-        //System.out.println("RIGHT TYPE : " + rightType);
         if (rightType == null) {
             return null;
         }
-        // if (operator.equals("ASSIGN") && (rightType == null | table.getImports().contains(leftType.getName()) | (rightType != null && table.getImports().contains(rightType.getName())))) {
-
-       //     if (rightType != null && rightType.getName().equals(table.getClassName()) && !checkIfExtends(leftType.getName(), table)) {
-        //        var message = String.format("Incompatible types for operator '" + operator + "': '" + leftType + "' and '" + rightType + "'");
-        //        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-        //    }
-
-        //    return null;
-        //}
-
-
-        // TODO -> this can't be like this...
-        // Assign -> check if left type is allowed
-        // if (Objects.equals(operator, "ASSIGN") && !node.getJmmChild(0).getKind().equals("VarRefExpr") && (leftType.getName().equals("int") || leftType.getName().equals("boolean"))) {
-        //    var message = "Left assignment invalid!";
-        //    addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null));
-        //}
 
         // Arrays cannot be used in arithmetic operations
         if (!Objects.equals(operator, "ASSIGN") && (leftType.isArray() || rightType.isArray())) {
@@ -194,11 +173,6 @@ public class OtherSemantics extends AnalysisVisitor {
         return null;
     }
 
-    private boolean checkIfExtends(String methodName, SymbolTable table) {
-        if (table.getSuper() == null) return false; // there is no super
-        return table.getSuper().equals(methodName);
-    }
-
     private Void verifyReturnType(JmmNode returnNode, SymbolTable table){
         Type currentMethodReturnType = table.getReturnType(currentMethod);
         Type returnType = TypeUtils.getExprType(returnNode.getChild(0), table);
@@ -209,7 +183,7 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
         }
 
-        if(returnType != null && !returnType.equals(currentMethodReturnType)){
+        if (returnType != null && !returnType.equals(currentMethodReturnType)){
             var message = String.format("The return type '%s' does not match the method's return type '%s'.", returnType, currentMethodReturnType);
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(returnNode), NodeUtils.getColumn(returnNode), message, null));
         }
@@ -235,7 +209,7 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 
-        Type arrayVarType = TypeUtils.getExprType(arrayAccess.getJmmChild(0), table);
+        Type arrayVarType = TypeUtils.getExprType(arrayVar, table);
 
         // Error if variable isn't an array
         if (!arrayVarType.isArray()) {
@@ -243,13 +217,11 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 
-        //Error if accessing index out of bounds
-
         return null;
     }
 
     private Void visitArrayInit(JmmNode arrayInit, SymbolTable table) {
-        JmmNode expressionList = arrayInit.getJmmChild(0);
+        JmmNode expressionList = arrayInit.getChild(0);
         List<JmmNode> elements = expressionList.getChildren();
 
         // if array has length 0, then it's valid
@@ -279,7 +251,7 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         String callerName = determineCalledName(methodCall, table);
-        Type callerType = TypeUtils.getExprType(methodCall.getJmmChild(0), table);
+        Type callerType = TypeUtils.getExprType(methodCall.getChild(0), table);
 
         Type calledType = TypeUtils.getExprType(methodCall, table);
         String methodName = methodCall.get("methodName");
@@ -327,7 +299,7 @@ public class OtherSemantics extends AnalysisVisitor {
 
         // TODO -> verify that each varargs param has correct type
         // This would be implemented inside areArgumentTypesValid
-        if (!isVarArgs && !areArgumentTypesValid(argumentNodes, expectedParameters, table, methodCall)) {
+        if (!isVarArgs && !areArgumentTypesValid(argumentNodes, expectedParameters, table)) {
             reportIncorrectArgumentTypes(methodCall);
             return null;
         }
@@ -345,7 +317,7 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private String determineCalledName(JmmNode methodCall, SymbolTable table) {
-        JmmNode methodCaller = methodCall.getJmmChild(0);
+        JmmNode methodCaller = methodCall.getChild(0);
         if (methodCaller.getKind().equals("This")) return table.getClassName();
         if (methodCaller.getKind().equals("ParenthesesExpression")) return determineCalledName(methodCaller, table);
 
@@ -372,7 +344,7 @@ public class OtherSemantics extends AnalysisVisitor {
     private List<JmmNode> collectArgumentNodes(JmmNode methodCall) {
         List<JmmNode> arguments = new ArrayList<>();
         for (int i = 1; i < methodCall.getNumChildren(); i++) {
-            arguments.add(methodCall.getJmmChild(i));
+            arguments.add(methodCall.getChild(i));
         }
         return arguments;
     }
@@ -391,7 +363,7 @@ public class OtherSemantics extends AnalysisVisitor {
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(methodCall), NodeUtils.getColumn(methodCall), message, null));
     }
 
-    private boolean areArgumentTypesValid(List<JmmNode> arguments, List<Symbol> expectedParameters, SymbolTable table, JmmNode node) {
+    private boolean areArgumentTypesValid(List<JmmNode> arguments, List<Symbol> expectedParameters, SymbolTable table) {
         for (int i = 0; i < arguments.size(); i++) {
 
             Type expectedType = expectedParameters.get(i).getType();
@@ -438,11 +410,7 @@ public class OtherSemantics extends AnalysisVisitor {
 
         // ObjectAssignmentPassImports
         List<String> importedList = table.getImports();
-        if (importedList.contains(rightType.getName()) && importedList.contains(leftType.getName())) {
-            return true;
-        }
-
-        return false;
+        return importedList.contains(rightType.getName()) && importedList.contains(leftType.getName());
     }
 
     private Void verifyIfCondition(JmmNode ifNode, SymbolTable table) {
@@ -468,8 +436,8 @@ public class OtherSemantics extends AnalysisVisitor {
         }
 
         // Check local variables for varargs
-        if (currentMethod != null && checkForVarArgs(varName, table.getLocalVariables(currentMethod), varDeclNode)) {
-            return null;
+        if (currentMethod != null) {
+            checkForVarArgs(varName, table.getLocalVariables(currentMethod), varDeclNode);
         }
 
         return null;
@@ -511,7 +479,7 @@ public class OtherSemantics extends AnalysisVisitor {
         List<JmmNode> varRefNodes = mainMethod.getDescendants(VAR_REF_EXPR);
         for (JmmNode varRef : varRefNodes) {
             String varName = varRef.get("name");
-            // If the variable name is in the set of fields and it's not a local variable nor a parameter, add a report
+            // If the variable name is in the set of fields, and it's not a local variable nor a parameter, add a report
             if (fieldNames.contains(varName) && !parameterNames.contains(varName) && !localVariableNames.contains(varName)) {
                 // Variable reference is a field, add a report
                 String message = String.format("Variable reference '%s' in static main method cannot be a field", varName);
@@ -536,7 +504,7 @@ public class OtherSemantics extends AnalysisVisitor {
     }
 
     private Void visitNewArray(JmmNode newArrayNode, SymbolTable table) {
-        JmmNode lengthNode = newArrayNode.getJmmChild(1);
+        JmmNode lengthNode = newArrayNode.getChild(1);
 
         // Check if array is initialized with integer length
         if (!lengthNode.getKind().equals("IntegerLiteral")) {

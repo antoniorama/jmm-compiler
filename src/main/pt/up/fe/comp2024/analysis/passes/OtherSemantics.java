@@ -213,13 +213,7 @@ public class OtherSemantics extends AnalysisVisitor {
             var message = String.format("Variable " + arrayVarType.getName() + " is not an array.");
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
-
-        // Error if array is uninitialized
-        if (arrayVarType.getAttributes().isEmpty()) {
-            var message = "Array is uninitialized";
-            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
-        }
-
+        
         return null;
     }
 

@@ -200,6 +200,7 @@ public class OtherSemantics extends AnalysisVisitor {
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 
+        // Error if arrayVar is a method call
         if (arrayVar.getKind().equals("MethodCall")) {
             var message = "Method call cannot be used as array";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
@@ -210,6 +211,12 @@ public class OtherSemantics extends AnalysisVisitor {
         // Error if variable isn't an array
         if (!arrayVarType.isArray()) {
             var message = String.format("Variable " + arrayVarType.getName() + " is not an array.");
+            addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
+        }
+
+        // Error if array is uninitialized
+        if (arrayVarType.getAttributes().isEmpty()) {
+            var message = "Array is uninitialized";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(arrayAccess), NodeUtils.getColumn(arrayAccess), message, null));
         }
 

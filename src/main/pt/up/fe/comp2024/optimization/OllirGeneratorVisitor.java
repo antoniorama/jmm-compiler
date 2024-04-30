@@ -206,8 +206,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var lhs = exprVisitor.visit(child);
         var rhs = exprVisitor.visit(node.getJmmChild(1));
 
+        Type thisType = TypeUtils.getExprType(child, table);
+        String typeString = OptUtils.toOllirType(thisType);
+
         if (isFieldAssignment) {
-            code.append("putfield(this, ").append(lhs.getCode()).append(", ").append(rhs.getCode()).append(").V;\n");
+            code.append("putfield(this, ").append(child.get("name")).append(typeString).append(", ").append(rhs.getCode()).append(").V;\n");
             return code.toString();
         }
 
@@ -216,8 +219,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute self
         // statement has type of lhs
-        Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
-        String typeString = OptUtils.toOllirType(thisType);
 
         code.append(lhs.getCode()).append(SPACE).append(ASSIGN).append(typeString).append(SPACE).append(rhs.getCode()).append(END_STMT);
 

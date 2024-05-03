@@ -114,14 +114,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
+        boolean isVarArgs = false;
 
         if (isPublic) {
             code.append("public ");
         }
-
-        // name
-        var name = node.get("name");
-        code.append(name);
 
         // params
         int paramCount = 0;
@@ -135,10 +132,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                     paramsCode.append(", ");
                 }
 
+                if (child.getChild(0).getKind().equals("VarArgsType")) {
+                    isVarArgs = true;
+                }
+
                 var paramCode = visit(child);
                 paramsCode.append(paramCode);
             }
         }
+
+        if (isVarArgs) {
+            code.append("varargs ");
+        }
+
+        // name
+        var name = node.get("name");
+        code.append(name);
 
         if (!paramsCode.isEmpty()) {
             code.append("(").append(paramsCode).append(")");

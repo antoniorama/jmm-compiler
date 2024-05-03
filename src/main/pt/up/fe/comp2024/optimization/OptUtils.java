@@ -35,23 +35,25 @@ public class OptUtils {
         return ++whileNumber;
     }
 
-    public static String toOllirType(JmmNode typeNode) {
+    public static String toOllirType(JmmNode node) {
 
         // This logic had to be changed since we are treating Types in a different way in the Grammar!
+        String kind = node.getKind();
 
-        // TYPE.checkOrThrow(typeNode);
-
-        if (Objects.equals(typeNode.getKind(), "integerType")) INTEGER_TYPE.checkOrThrow(typeNode);
-        else if (Objects.equals(typeNode.getKind(), "booleanType")) BOOLEAN_TYPE.checkOrThrow(typeNode);
-        else if (Objects.equals(typeNode.getKind(), "stringType")) STRING_TYPE.checkOrThrow(typeNode);
-        else if (Objects.equals(typeNode.getKind(), "voidType")) VOID_TYPE.checkOrThrow(typeNode);
-        else if (Objects.equals(typeNode.getKind(), "arrayType")) ARRAY_TYPE.checkOrThrow(typeNode);
+        switch (kind) {
+            case "integerType" -> INTEGER_TYPE.checkOrThrow(node);
+            case "booleanType" -> BOOLEAN_TYPE.checkOrThrow(node);
+            case "stringType" -> STRING_TYPE.checkOrThrow(node);
+            case "voidType" -> VOID_TYPE.checkOrThrow(node);
+            case "arrayType" -> ARRAY_TYPE.checkOrThrow(node);
+        }
         // TODO -> add the other types
 
-        String typeName;
-        if (typeNode.getKind().equals("OtherType")) typeName = typeNode.get("name");
-        else if (typeNode.getKind().equals("ArrayType")) typeName = "array";
-        else typeName = typeNode.get("value");
+        String typeName = switch (kind) {
+            case "OtherType" -> node.get("name");
+            case "ArrayType", "VarArgsType" -> "array";
+            default -> node.get("value");
+        };
 
         return toOllirType(typeName);
     }

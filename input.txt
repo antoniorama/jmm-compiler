@@ -1,15 +1,11 @@
-import io;
-
 class A {
 
-    public int[] test() {
-        int[] a;
-        a = new int[10];
-        return a;
+    public int foo(int ... a) {
+        return 0;
     }
 
-    public int nothing() {
-        int[] a;
-        return a[0];
+    int bar() {
+        return this.foo(1, 2, 3);
     }
+
 }

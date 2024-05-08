@@ -3,8 +3,6 @@ package pt.up.fe.comp2024.optimization;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
-import java.util.Objects;
-
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class OptUtils {
@@ -12,28 +10,15 @@ public class OptUtils {
     private static int ifThenNumber = -1;
     private static int whileNumber = -1;
 
-    public static String getTemp() {
+    public static String getTemp() { return getTemp("tmp"); }
 
-        return getTemp("tmp");
-    }
+    public static String getTemp(String prefix) { return prefix + getNextTempNum(); }
 
-    public static String getTemp(String prefix) {
+    public static int getNextTempNum() { return ++tempNumber; }
 
-        return prefix + getNextTempNum();
-    }
+    public static int getNextIfThenNum() { return ++ifThenNumber; }
 
-    public static int getNextTempNum() {
-        return ++tempNumber;
-    }
-
-    public static int getNextIfThenNum() {
-
-        return ++ifThenNumber;
-    }
-
-    public static int getNextWhileNum() {
-        return ++whileNumber;
-    }
+    public static int getNextWhileNum() { return ++whileNumber; }
 
     public static String toOllirType(JmmNode node) {
 
@@ -73,6 +58,5 @@ public class OptUtils {
             default -> typeName;
         };
     }
-
 
 }

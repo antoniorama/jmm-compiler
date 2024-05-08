@@ -8,12 +8,8 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -194,7 +190,7 @@ public class JasminGenerator {
 
     private String generateField(Field field){
         var code = new StringBuilder();
-        String acessModifier = field.getFieldAccessModifier() != AccessModifier.DEFAULT ?
+        String accessModifier = field.getFieldAccessModifier() != AccessModifier.DEFAULT ?
                 field.getFieldAccessModifier().name().toLowerCase() + " " :
                 "private ";
 
@@ -202,7 +198,7 @@ public class JasminGenerator {
 
         String jasminType = ollirTypeToJasminType(field.getFieldType());
 
-        code.append("\n.field ").append(acessModifier).append(fieldName).append(" ").append(jasminType).append(NL);
+        code.append("\n.field ").append(accessModifier).append(fieldName).append(" ").append(jasminType).append(NL);
 
         return code.toString();
     }

@@ -192,8 +192,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String argsList = String.join(", ", argsCode);
         String tempVar = OptUtils.getTemp() + returnTypeString;
         String methodCallComputation =  (isStatic ? "invokestatic(" : "invokevirtual(") + ownerExpr.getCode() + ", \"" + methodName + "\""
-                + (argsCode.isEmpty() ? "" : ", " + argsList)
-                + ")" + returnTypeString;
+                                        + (argsCode.isEmpty() ? "" : ", " + argsList) + ")" + returnTypeString;
 
         // Store the result of the method call in a temporary variable
         if (isAssign || isInsideMethodCall) {

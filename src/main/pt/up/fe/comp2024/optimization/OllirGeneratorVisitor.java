@@ -197,7 +197,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
 
-
         // Check if it's a param
         if (isFieldAssignment) {
             for (var param : table.getParameters(parent.get("name"))) {

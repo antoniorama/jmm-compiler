@@ -1,11 +1,15 @@
 class A {
 
-    public int foo(int ... a) {
+    public int foo(int []a) {
         return 0;
     }
 
     int bar() {
-        return this.foo(1, 2, 3);
+        int []a;
+        int i;
+        i = this.foo(a);
+        this.foo(a);
+        return this.foo(a);
     }
 
 }

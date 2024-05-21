@@ -1,15 +1,19 @@
-class A {
+import io;
 
-    public int foo(int []a) {
-        return 0;
+class ArrayInitialization {
+
+    public static void main(String[] args) {
+        ArrayInitialization a;
+        a = new ArrayInitialization();
+
+        io.println(a.foo());
     }
 
-    int bar() {
-        int []a;
-        int i;
-        i = this.foo(a);
-        this.foo(a);
-        return this.foo(a);
-    }
+    int foo() {
+        int[] a;
 
+        a = [1, 2, 3, 4];
+
+        return a[2];
+    }
 }

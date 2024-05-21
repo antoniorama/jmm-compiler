@@ -116,7 +116,7 @@ public class OtherSemantics extends AnalysisVisitor {
         // this way we don't have to do two separate functions for handling BinaryExpr and AssignStmt
         // and we can use the same logic for TypeCompatibility
 
-        if (node.getKind().equals("BinaryExpr"))
+        if (node.getKind().equals("BinaryExpr") || node.getKind().equals("LogicalExpression") || node.getKind().equals("RelationalExpression"))
             operator = node.get("op");
 
         JmmNode leftNode = node.getChild(0);
@@ -380,10 +380,12 @@ public class OtherSemantics extends AnalysisVisitor {
 
     private boolean areTypesCompatible(String operator, Type leftType, Type rightType, SymbolTable table) {
         String intTypeName = TypeUtils.getIntTypeName();
+        String booleanTypeName = TypeUtils.getBooleanTypeName();
 
         return switch (operator) {
             case "+", "*", "/", "-" -> leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName);
             case "ASSIGN" -> isAssignValid(leftType, rightType, table);
+            case "&&" -> leftType.getName().equals(booleanTypeName) && rightType.getName().equals(booleanTypeName);
             default -> false;
         };
     }

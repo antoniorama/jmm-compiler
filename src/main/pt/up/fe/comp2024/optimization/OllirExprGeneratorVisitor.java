@@ -252,20 +252,20 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
         computation.append(index.getComputation());
 
-        boolean isInsideMethodCall = false;
+        boolean needTempVar = false;
         JmmNode parent = node.getParent();
         while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
-            if (parent.getKind().equals("MethodCall")) {
-                isInsideMethodCall = true;
+            if (parent.getKind().equals("MethodCall") || parent.getKind().equals("ReturnStmt")) {
+                needTempVar = true;
                 break;
             }
             parent = parent.getParent();
         }
 
-        if (isInsideMethodCall) {
+        if (needTempVar) {
             computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(array.get("name")).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
         }
-        code.append(isInsideMethodCall ? tempVar : array.get("name") + "[" + index.getCode() + "]" + arrayType);
+        code.append(needTempVar ? tempVar : array.get("name") + "[" + index.getCode() + "]" + arrayType);
 
         return new OllirExprResult(code.toString(), computation.toString());
     }

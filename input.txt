@@ -1,19 +1,13 @@
-import io;
 
-class ArrayInitialization {
+import Other;
+// import Person;
 
-    public static void main(String[] args) {
-        ArrayInitialization a;
-        a = new ArrayInitialization();
+class BasicMethods extends Other {
 
-        io.println(a.foo());
+    public int[] func4(){
+        int[] k;
+        k = new int[1];
+        return k;
     }
 
-    int foo() {
-        int[] a;
-
-        a = [1, 2, 3, 4];
-
-        return a[2];
-    }
 }

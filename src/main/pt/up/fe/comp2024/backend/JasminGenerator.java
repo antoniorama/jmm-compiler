@@ -53,6 +53,9 @@ public class JasminGenerator {
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
         generators.put(PutFieldInstruction.class, this::generatePutFieldInstruction);
         generators.put(CallInstruction.class, this::generateCall);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCondInstruction);
+        generators.put(GotoInstruction.class, this::generateGoToInstruction);
+        generators.put(OpCondInstruction.class, this::generateOpCondInstruction);
     }
 
     public List<Report> getReports() {
@@ -304,8 +307,10 @@ public class JasminGenerator {
         String invocationCode = "";
 
         Operand caller = (Operand) callInstruction.getCaller();
+        System.out.println("HERE2 " + callInstruction);
         String callerName = caller.getName();
 
+        System.out.println("HERE " + caller);
         ClassType callerClass = (ClassType) caller.getType();
         String callerType = getFullName(callerClass.getName());
 
@@ -377,5 +382,36 @@ public class JasminGenerator {
         }
 
         return shortName;
+    }
+
+    // TODO
+    private String generateSingleOpCondInstruction(SingleOpCondInstruction instruction) {
+        return "SINGLEOPCONDINSTRUCTION" + instruction.getLabel();
+    }
+
+    // TODO
+    private String generateGoToInstruction(GotoInstruction instruction) {
+        return "goto " + instruction;
+    }
+
+    // TODO
+    private String generateOpCondInstruction(OpCondInstruction instruction) {
+        StringBuilder code = new StringBuilder();
+
+        // Generate code for both sides of the operation
+        code.append(generators.apply(instruction.getOperands().get(0)));
+        code.append(generators.apply(instruction.getOperands().get(1)));
+
+        OperationType opType = instruction.getCondition().getOperation().getOpType();
+        System.out.println("opType " + opType);
+
+        String jumpInstruction = switch (opType) {
+            case LTH -> "if_icmplt ";
+            default -> "NOT DEFINED ";
+        };
+
+        code.append(jumpInstruction).append(instruction.getLabel()).append(NL);
+
+        return code.toString();
     }
 }

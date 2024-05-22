@@ -147,6 +147,12 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (Instruction inst : method.getInstructions()) {
+            List<String> label = method.getLabels(inst);
+
+            if (label != null) {
+                for (String l : label) code.append(l).append(":").append(NL);
+            }
+
             String instCode = StringLines.getLines(generators.apply(inst)).stream().collect(Collectors.joining(NL + TAB, TAB, NL));
 
             code.append(instCode);
@@ -386,12 +392,13 @@ public class JasminGenerator {
 
     // TODO
     private String generateSingleOpCondInstruction(SingleOpCondInstruction instruction) {
-        return "SINGLEOPCONDINSTRUCTION" + instruction.getLabel();
+        return "";
+        // return "SINGLEOPCONDINSTRUCTION " + instruction;
     }
 
     // TODO
     private String generateGoToInstruction(GotoInstruction instruction) {
-        return "goto " + instruction;
+        return "goto " + instruction.getLabel() + NL;
     }
 
     // TODO

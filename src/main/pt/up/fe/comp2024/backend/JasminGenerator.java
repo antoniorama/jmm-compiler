@@ -29,6 +29,8 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
+    int currentStack;
+    int maxStack;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -126,6 +128,7 @@ public class JasminGenerator {
         // set method
         currentMethod = method;
         var code = new StringBuilder();
+        StringBuilder methodBody = new StringBuilder();
 
         // calculate modifier
         var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
@@ -143,26 +146,28 @@ public class JasminGenerator {
         String returnType = ollirTypeToJasminType(method.getReturnType());
         code.append(")").append(returnType).append(NL);
 
-        // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
-
         for (Instruction inst : method.getInstructions()) {
             List<String> label = method.getLabels(inst);
 
             if (label != null) {
-                for (String l : label) code.append(l).append(":").append(NL);
+                for (String l : label) methodBody.append(l).append(":").append(NL);
             }
 
             String instCode = StringLines.getLines(generators.apply(inst)).stream().collect(Collectors.joining(NL + TAB, TAB, NL));
 
-            code.append(instCode);
+            methodBody.append(instCode);
 
             if (inst instanceof CallInstruction callInstruction && !callInstruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
                 code.append(TAB + "pop" + NL);
             }
         }
 
+        var varTable = method.getVarTable();
+        int numOfVars = varTable.size();
+
+        code.append(".limit stack ").append(this.maxStack).append(NL);
+        code.append(".limit locals ").append(numOfVars).append(NL);
+        code.append(methodBody);
         code.append(".end method\n");
 
         // unset method
@@ -255,6 +260,7 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
+        updateStack(1);
         return "ldc " + literal.getLiteral() + NL;
     }
 
@@ -442,5 +448,10 @@ public class JasminGenerator {
         code.append(jumpInstruction).append(instruction.getLabel()).append(NL);
 
         return code.toString();
+    }
+
+    private void updateStack(int value) {
+        this.currentStack += value;
+        if (this.currentStack > this.maxStack) this.maxStack = this.currentStack;
     }
 }

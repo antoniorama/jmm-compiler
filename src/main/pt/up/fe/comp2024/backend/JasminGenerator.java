@@ -397,9 +397,9 @@ public class JasminGenerator {
         System.out.println("SINGLEOPCONDINSTRUCTION " + instruction);
 
         // verify if the condition is true or false
-        // code.append(instruction.getCondition().getSingleOperand());
-        code.append("ldc 0").append(NL);
-        code.append("ifeq ").append(instruction.getLabel());
+        String condCode = StringLines.getLines(generators.apply(instruction.getCondition())).stream().collect(Collectors.joining(NL, TAB, NL));
+        code.append(condCode);
+        code.append("ifne ").append(instruction.getLabel());
 
         return code.toString();
     }

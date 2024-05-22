@@ -47,6 +47,7 @@ public class JasminGenerator {
         generators.put(SingleOpInstruction.class, this::generateSingleOp);
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
+        generators.put(ArrayOperand.class, this::generateArrayOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(UnaryOpInstruction.class, this::generateUnaryOpInstruction);
         generators.put(ReturnInstruction.class, this::generateReturn);
@@ -315,9 +316,18 @@ public class JasminGenerator {
         return switch (operand.getType().getTypeOfElement()) {
             case BOOLEAN, INT32 -> "iload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
             default -> "aload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
-
         };
     }
+
+    private String generateArrayOperand(ArrayOperand arrOp){
+        System.out.println("fodasi");
+        var code = new StringBuilder();
+        var reg = currentMethod.getVarTable().get(arrOp.getName()).getVirtualReg();
+        code.append("aload").append(reg).append(NL);
+        //code.append(generators.apply(arrOp.getIndexOperands().get(0))).append(NL).append("iaload");
+        return code.toString();
+    }
+
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
@@ -387,7 +397,7 @@ public class JasminGenerator {
             callerType = getFullName(callerClass.getName());
         }
         else if (caller.getType() instanceof ArrayType) {
-            callerType = getFullName("int[]");
+            callerType = "int";
         }
 
         CallType invocationType = callInstruction.getInvocationType();
@@ -416,7 +426,19 @@ public class JasminGenerator {
                 break;
 
             case NEW:
-                code.append("new ").append(callerType).append(NL).append("dup").append(NL);
+                if (callerType.equals("int")) {
+                    //TODO need to change type utils or kind to recognize ARRAYOPERAND probablyy
+                    for (Element element : callInstruction.getOperands()) {
+                        if (element instanceof ArrayOperand arrayOperand) {
+                            code.append(generators.apply(arrayOperand));
+                        } else {
+                            throw new ClassCastException("Expected ArrayOperand but got " + element.getClass().getSimpleName());
+                        }
+                    }
+                    code.append("newarray int").append(NL);
+                } else {
+                    code.append("new ").append(callerType).append(NL).append("dup").append(NL);
+                }
                 break;
         }
 
@@ -476,7 +498,6 @@ public class JasminGenerator {
         return "goto " + instruction.getLabel() + NL;
     }
 
-    // TODO
     private String generateOpCondInstruction(OpCondInstruction instruction) {
         StringBuilder code = new StringBuilder();
 
@@ -489,8 +510,14 @@ public class JasminGenerator {
 
         String jumpInstruction = switch (opType) {
             case LTH -> "if_icmplt ";
-            default -> "NOT DEFINED ";
+            case GTH -> "if_icmpgt ";
+            case LTE -> "if_icmple ";
+            case GTE -> "if_icmpge ";
+            case EQ -> "if_icmpeq ";
+            case NEQ -> "if_icmpne ";
+            default -> throw new UnsupportedOperationException("Operation type " + opType + " not supported.");
         };
+
 
         code.append(jumpInstruction).append(instruction.getLabel()).append(NL);
 

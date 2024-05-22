@@ -219,7 +219,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             }
         }
 
-
         // Handle each argument of the method
         for (int i = 1; i < node.getNumChildren(); i++) {
 
@@ -325,14 +324,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         // Get the type of the array
         Type arrayType = TypeUtils.getExprType(node, table);
         String arrayTypeString = OptUtils.toOllirType(arrayType);
+        String tempVar = OptUtils.getTemp() + arrayTypeString;
 
         // Construct the array creation
         String arrayCreationCode = "new(array" + ", " + sizeExpr.getCode() + ")" + arrayTypeString;
 
         // Store the result of the array creation in a temporary variable
-        code.append(arrayCreationCode);
+        computation.append(tempVar).append(SPACE).append(ASSIGN).append(arrayTypeString).append(SPACE).append(arrayCreationCode).append(END_STMT);
+        code.append(tempVar);
 
-        return new OllirExprResult(code.toString(), computation.toString());
+        return new OllirExprResult(code.toString(), computation);
     }
 
     private OllirExprResult visitArrayAccess(JmmNode node, Void unused) {

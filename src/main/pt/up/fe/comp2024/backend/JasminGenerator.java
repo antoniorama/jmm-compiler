@@ -392,8 +392,16 @@ public class JasminGenerator {
 
     // TODO
     private String generateSingleOpCondInstruction(SingleOpCondInstruction instruction) {
-        return "";
-        // return "SINGLEOPCONDINSTRUCTION " + instruction;
+        StringBuilder code = new StringBuilder();
+
+        System.out.println("SINGLEOPCONDINSTRUCTION " + instruction);
+
+        // verify if the condition is true or false
+        // code.append(instruction.getCondition().getSingleOperand());
+        code.append("ldc 0").append(NL);
+        code.append("ifeq ").append(instruction.getLabel());
+
+        return code.toString();
     }
 
     // TODO

@@ -155,9 +155,11 @@ public class JasminGenerator {
 
             methodBody.append(instCode);
 
+            /*
             if (inst instanceof CallInstruction callInstruction && !callInstruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
                 code.append(TAB + "pop" + NL);
             }
+             */
         }
 
         var varTable = method.getVarTable();

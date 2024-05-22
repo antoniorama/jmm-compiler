@@ -30,12 +30,12 @@ public class TypeUtils {
         JmmNode actualExpr = expr;
         boolean isArray = false;
         boolean isVarArgs = false;
-        if (expr.getKind().equals("ArrayType")) {
+        if (expr.getKind().equals(Kind.ARRAY_TYPE.toString())) {
             actualExpr = expr.getJmmChild(0); // update actualExpr to correct one
             isArray = true;
         }
 
-        else if (expr.getKind().equals("VarArgsType")) {
+        else if (expr.getKind().equals(Kind.VAR_ARGS_TYPE.toString())) {
             actualExpr = expr.getJmmChild(0); // update actualExpr to correct one
             isArray = true;
             isVarArgs = true;

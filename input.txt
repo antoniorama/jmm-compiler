@@ -1,17 +1,27 @@
-import io;
+import ioPlus;
+class ComplexArrayAccess {
 
-class Arithmetic_and {
+    public int func(int a) {
+        return a;
+    }
+
 	public static void main(String[] args) {
-		boolean a;
-		Arithmetic_and c;
+	    int[] a;
+        int i;
+        ComplexArrayAccess d;
+        d = new ComplexArrayAccess();
+        a = new int[5];
+        a[0] = 1;
+		a[1] = 2;
+		a[2] = 3;
+		a[3] = 4;
+		a[4] = 5;
+        i = 1;
+        ioPlus.printResult(a[d.func(0)]);
+        ioPlus.printResult(a[i]);
+        ioPlus.printResult(a[4/2]);
+        ioPlus.printResult(a[a[2]]);
+        ioPlus.printResult(a[a.length -1 ]);
 
-		c = new Arithmetic_and();
-
-		a = true && c.p(1);
 	}
-
-	boolean p(int value) {
-   	    io.print(value);
-   	    return true;
-   	}
 }

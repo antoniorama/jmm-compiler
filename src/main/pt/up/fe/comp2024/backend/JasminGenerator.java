@@ -374,7 +374,7 @@ public class JasminGenerator {
 
             case NEW:
                 if (callerType.equals("int")) {
-                    //TODO need to change type utils or kind to recognize ARRAYOPERAND probably
+                    //TODO need to change type utils or kind to recognize ARRAYOPERAND probablyy
                     for (Element element : callInstruction.getOperands()) {
                         if (element instanceof ArrayOperand arrayOperand) {
                             code.append(generators.apply(arrayOperand));

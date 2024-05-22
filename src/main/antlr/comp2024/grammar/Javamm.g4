@@ -24,9 +24,7 @@ SUB : '-';
 DOT : '.' ;
 NOT : '!' ;
 LESS : '<' ;
-GREATER : '>' ;
 AND : '&&' ;
-OR : '||' ;
 SINGLE_COMMENT : '//' .*? '\n' -> skip ;
 MULTI_COMMENT :  '/*' .*? '*/'  '\n' -> skip ;
 
@@ -128,8 +126,8 @@ expr
     | LPAREN expr RPAREN #ParenthesesExpression
     | expr op=(MUL | DIVISION) expr #BinaryExpr
     | expr op=(ADD | SUB) expr #BinaryExpr
-    | expr op=(GREATER | LESS) expr #RelationalExpression
-    | expr op=(AND | OR) expr #LogicalExpression
+    | expr op=LESS expr #RelationalExpression
+    | expr op=AND expr #LogicalExpression
     | NOT expr #NotExpression
     | NEW type LRECT expr RRECT #NewArray
     | LRECT exprList? RRECT #ArrayInit

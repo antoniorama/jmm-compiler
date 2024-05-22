@@ -29,8 +29,6 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
-    int currentStack;
-    int maxStack;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -165,8 +163,8 @@ public class JasminGenerator {
         var varTable = method.getVarTable();
         int numOfVars = varTable.size();
 
-        code.append(".limit stack ").append(this.maxStack).append(NL);
-        code.append(".limit locals ").append(numOfVars).append(NL);
+        code.append(".limit stack ").append(getStackLimit(methodBody.toString())).append(NL);
+        code.append(".limit locals ").append(numOfVars + 1).append(NL);
         code.append(methodBody);
         code.append(".end method\n");
 
@@ -174,6 +172,54 @@ public class JasminGenerator {
         currentMethod = null;
 
         return code.toString();
+    }
+
+    private int getStackLimit(String jasminCode) {
+        int currentStack = 0;
+        int maxStack = 0;
+
+        // Split the input code into individual lines/instructions
+        String[] lines = jasminCode.split("\n");
+
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            if (trimmedLine.isEmpty()) continue;
+
+            if (trimmedLine.startsWith("aload") || trimmedLine.startsWith("iload") || trimmedLine.startsWith("fload") || trimmedLine.startsWith("dload") ||
+                    trimmedLine.startsWith("ldc") || trimmedLine.startsWith("new") || trimmedLine.startsWith("dup")) {
+                currentStack += 1;
+            } else if (trimmedLine.startsWith("istore") || trimmedLine.startsWith("fstore") || trimmedLine.startsWith("dstore") ||
+                    trimmedLine.startsWith("astore") || trimmedLine.startsWith("pop")) {
+                currentStack -= 1;
+            } else if (trimmedLine.startsWith("iadd") || trimmedLine.startsWith("isub") || trimmedLine.startsWith("imul") || trimmedLine.startsWith("idiv") ||
+                    trimmedLine.startsWith("fadd") || trimmedLine.startsWith("fsub") || trimmedLine.startsWith("fmul") || trimmedLine.startsWith("fdiv")) {
+                currentStack -= 1;
+            } else if (trimmedLine.startsWith("invokevirtual") || trimmedLine.startsWith("invokestatic") || trimmedLine.startsWith("invokespecial")) {
+                int numArgs = countMethodArgs(trimmedLine);
+                currentStack -= numArgs;
+                if (!methodReturnsVoid(trimmedLine)) {
+                    currentStack += 1;
+                }
+            } else if (trimmedLine.startsWith("ireturn") || trimmedLine.startsWith("freturn") || trimmedLine.startsWith("dreturn") ||
+                    trimmedLine.startsWith("areturn")) {
+                currentStack -= 1;
+            }
+
+            if (currentStack > maxStack) {
+                maxStack = currentStack;
+            }
+        }
+
+        return maxStack;
+    }
+
+    private int countMethodArgs(String invokeInstruction) {
+        String descriptor = invokeInstruction.substring(invokeInstruction.indexOf("(") + 1, invokeInstruction.indexOf(")"));
+        return (int) descriptor.chars().filter(ch -> ch == 'I' || ch == 'F' || ch == 'D' || ch == 'L').count();
+    }
+
+    private boolean methodReturnsVoid(String invokeInstruction) {
+        return invokeInstruction.contains(")V");
     }
 
     private String generateAssign(AssignInstruction assign) {
@@ -260,7 +306,6 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        updateStack(1);
         return "ldc " + literal.getLiteral() + NL;
     }
 
@@ -448,10 +493,5 @@ public class JasminGenerator {
         code.append(jumpInstruction).append(instruction.getLabel()).append(NL);
 
         return code.toString();
-    }
-
-    private void updateStack(int value) {
-        this.currentStack += value;
-        if (this.currentStack > this.maxStack) this.maxStack = this.currentStack;
     }
 }

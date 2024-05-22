@@ -1,7 +1,15 @@
-class Test {
-    public int test() {
-        int[] a;
-        a = new int[10 + 5];
-        return a[0];
-    }
+class ArrayAccess {
+
+	public int foo() {
+		int result;
+		int[] a;
+
+		result = a[0];
+		a[0] = result;
+
+        return 1;
+
+	}
+
+
 }

@@ -346,26 +346,31 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         JmmNode array = node.getChild(0);
         var arrayVisit = visit(array);
         OllirExprResult index = visit(node.getChild(1));
-        String arrayType = OptUtils.toOllirType(TypeUtils.getExprType(array, table));
         String intType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
         String tempVar = OptUtils.getTemp() + intType;
 
         computation.append(index.getComputation()).append(arrayVisit.getComputation());
 
-        boolean needTempVar = false;
+        boolean onLeftSideOfAssign = false;
+
         JmmNode parent = node.getParent();
         while (!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
-            if (parent.getKind().equals("MethodCall") || parent.getKind().equals("ReturnStmt")) {
-                needTempVar = true;
+            if (parent.getKind().equals("AssignStmt")) {
+                if (parent.getChild(0).equals(node)) onLeftSideOfAssign = true;
                 break;
             }
             parent = parent.getParent();
         }
 
-        if (needTempVar) {
-            computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
+        computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
+        code.append(tempVar);
+
+        if (onLeftSideOfAssign) {
+            code = new StringBuilder();
+            code.append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType);
+
+            computation = new StringBuilder();
         }
-        code.append(needTempVar ? tempVar : array.get("name") + "[" + index.getCode() + "]" + arrayType);
 
         return new OllirExprResult(code.toString(), computation.toString());
     }

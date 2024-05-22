@@ -1,15 +1,13 @@
-import io;
 
-class Arithmetic_less {
-	public static void main(String[] args) {
-		boolean a;
+import Other;
+// import Person;
 
-		a = 10 < 20;
+class BasicMethods extends Other {
 
-		if(a) {
-			io.print(1);
-		} else {
-			io.print(0);
-		}
-	}
+    public int[] func4(){
+        int[] k;
+        k = new int[1];
+        return k;
+    }
+
 }

@@ -340,12 +340,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
         JmmNode array = node.getChild(0);
+        var arrayVisit = visit(array);
         OllirExprResult index = visit(node.getChild(1));
         String arrayType = OptUtils.toOllirType(TypeUtils.getExprType(array, table));
         String intType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
         String tempVar = OptUtils.getTemp() + intType;
 
-        computation.append(index.getComputation());
+        computation.append(index.getComputation()).append(arrayVisit.getComputation());
 
         boolean needTempVar = false;
         JmmNode parent = node.getParent();
@@ -358,7 +359,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         if (needTempVar) {
-            computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(array.get("name")).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
+            computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
         }
         code.append(needTempVar ? tempVar : array.get("name") + "[" + index.getCode() + "]" + arrayType);
 

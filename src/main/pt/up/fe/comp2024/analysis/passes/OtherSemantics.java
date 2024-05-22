@@ -506,7 +506,7 @@ public class OtherSemantics extends AnalysisVisitor {
         JmmNode lengthNode = newArrayNode.getChild(1);
 
         // Check if array is initialized with integer length
-        if (!lengthNode.getKind().equals("IntegerLiteral")) {
+        if (!TypeUtils.getExprType(lengthNode, table).getName().equals("int")) {
             String message = "Array must have integer length";
             addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(newArrayNode), NodeUtils.getColumn(newArrayNode), message, null));
         }

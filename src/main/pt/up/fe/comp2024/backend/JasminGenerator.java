@@ -394,9 +394,6 @@ public class JasminGenerator {
     private String generateSingleOpCondInstruction(SingleOpCondInstruction instruction) {
         StringBuilder code = new StringBuilder();
 
-        System.out.println("SINGLEOPCONDINSTRUCTION " + instruction);
-
-        // verify if the condition is true or false
         String condCode = StringLines.getLines(generators.apply(instruction.getCondition())).stream().collect(Collectors.joining(NL, TAB, NL));
         code.append(condCode);
         code.append("ifne ").append(instruction.getLabel());

@@ -362,14 +362,13 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             parent = parent.getParent();
         }
 
-        computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
-        code.append(tempVar);
-
         if (onLeftSideOfAssign) {
-            code = new StringBuilder();
             code.append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType);
+        }
 
-            computation = new StringBuilder();
+        else {
+            computation.append(tempVar).append(SPACE).append(ASSIGN).append(intType).append(SPACE).append(arrayVisit.getCode()).append("[").append(index.getCode()).append("]").append(intType).append(END_STMT);
+            code.append(tempVar);
         }
 
         return new OllirExprResult(code.toString(), computation.toString());

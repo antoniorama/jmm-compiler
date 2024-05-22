@@ -1,9 +1,14 @@
 import io;
 class A {
 
-    int[] i;
+    int i;
+
+    public int nothing(int i) {
+        return i;
+    }
 
     public int foo() {
-        return i[0];
+        int j;
+        return this.nothing(j);
     }
 }

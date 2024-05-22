@@ -248,6 +248,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         boolean isAssign = false;
         boolean isStatic = false;
         boolean isInsideMethodCall = false;
+        boolean isInsideReturn = false;
         JmmNode parent = node.getParent();
         JmmNode child = node.getChild(0);
         Type childType = TypeUtils.getExprType(child, table);
@@ -258,6 +259,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             }
             else if (parent.getKind().equals("MethodCall")) {
                 isInsideMethodCall = true;
+            }
+            else if (parent.getKind().equals("ReturnStmt")) {
+                isInsideReturn = true;
             }
             parent = parent.getParent();
         }
@@ -277,7 +281,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
                                         + (argsCode.isEmpty() ? "" : ", " + argsList) + ")" + returnTypeString;
 
         // Store the result of the method call in a temporary variable
-        if (isAssign || isInsideMethodCall) {
+        if (isAssign || isInsideMethodCall || isInsideReturn) {
             computation.append(tempVar).append(SPACE).append(ASSIGN).append(returnTypeString).append(SPACE);
         }
         computation.append(methodCallComputation).append(END_STMT);

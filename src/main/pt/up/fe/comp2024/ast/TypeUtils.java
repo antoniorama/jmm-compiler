@@ -27,35 +27,34 @@ public class TypeUtils {
     public static Type getExprType(JmmNode expr, SymbolTable table) {
 
         // Check for Array and VarArgs
-        JmmNode actualExpr = expr;
         boolean isArray = false;
         boolean isVarArgs = false;
         if (expr.getKind().equals("ArrayType")) {
-            actualExpr = expr.getJmmChild(0); // update actualExpr to correct one
+            expr = expr.getJmmChild(0); // update actualExpr to correct one
             isArray = true;
         }
 
         else if (expr.getKind().equals("VarArgsType")) {
-            actualExpr = expr.getJmmChild(0); // update actualExpr to correct one
+            expr = expr.getJmmChild(0); // update actualExpr to correct one
             isArray = true;
             isVarArgs = true;
         }
 
-        var kind = Kind.fromString(actualExpr.getKind());
+        var kind = Kind.fromString(expr.getKind());
 
         Type type = switch (kind) {
-            case BINARY_EXPR -> getBinExprType(actualExpr);
-            case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(actualExpr);
-            case ARRAY_INIT -> getArrayType(actualExpr, table);
-            case NEW_ARRAY, ARRAY_TYPE -> getNewArrayType(actualExpr);
+            case BINARY_EXPR -> getBinExprType(expr);
+            case OTHER_TYPE, NEW_CLASS_INSTANCE -> getNewVarType(expr);
+            case ARRAY_INIT -> getArrayType(expr, table);
+            case NEW_ARRAY -> getNewArrayType(expr);
             case INTEGER_TYPE, INTEGER_LITERAL, ARRAY_ACCESS -> new Type(INT_TYPE_NAME, isArray);
             case BOOLEAN_TYPE, BOOLEAN_VALUE, LOGICAL_EXPRESSION, RELATIONAL_EXPRESSION, NOT_EXPRESSION -> new Type(BOOLEAN_TYPE_NAME, isArray);
             case VOID_TYPE -> new Type(VOID_TYPE_NAME, isArray);
-            case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(actualExpr, table);
-            case VAR_REF_EXPR -> getVarRefType(actualExpr, table);
+            case METHOD_CALL_ON_ASSIGN, METHOD_CALL -> getMethodCallType(expr, table);
+            case VAR_REF_EXPR -> getVarRefType(expr, table);
             case THIS -> getThisType(table);
-            case PROPERTY_ACCESS -> getPropertyAccessType(actualExpr, table);
-            case PARENTHESES_EXPRESSION -> getExprType(actualExpr.getJmmChild(0), table);
+            case PROPERTY_ACCESS -> getPropertyAccessType(expr, table);
+            case PARENTHESES_EXPRESSION -> getExprType(expr.getJmmChild(0), table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -161,6 +160,10 @@ public class TypeUtils {
         Type returnType = table.getReturnType(methodCall.get("methodName"));
         Type childType = getExprType(child, table);
 
+        if (returnType == null && parent.getKind().equals("PropertyAccess") && parent.get("name").equals("length")) {
+            return new Type(INT_TYPE_NAME, true);
+        }
+
         while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
             if (parent.getKind().equals("AssignStmt")) {
                 isAssign = true;
@@ -184,17 +187,17 @@ public class TypeUtils {
         if (isAssign) return returnType;
 
         // Return void
-        if (isImported && isStatic && returnType == null) return new Type("void", false);
+        if (isImported && isStatic && returnType == null) return new Type(VOID_TYPE_NAME, false);
 
         // Found a method call with the same name, return that type
         if (isImported && isStatic) return returnType;
 
         // Return the type of the child (imported class)
-        if (isImported) return new Type("void", false);
+        if (isImported) return new Type(VOID_TYPE_NAME, false);
 
         if (!isStatic) return returnType;
 
-        return new Type("void", false);
+        return new Type(VOID_TYPE_NAME, false);
     }
 
     private static Type getThisType(SymbolTable table) {

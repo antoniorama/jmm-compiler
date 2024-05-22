@@ -1,13 +1,10 @@
+import io;
+class A {
 
-import Other;
-// import Person;
+    int[] i;
 
-class BasicMethods extends Other {
-
-    public int[] func4(){
-        int[] k;
-        k = new int[1];
-        return k;
+    public int foo() {
+        i = new int[10];
+        return i[0];
     }
-
 }

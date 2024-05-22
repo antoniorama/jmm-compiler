@@ -294,12 +294,13 @@ public class JasminGenerator {
         var reg = field.getParamId();
         currentMethod.getVarTable().get(field.getName()).setVirtualReg(reg);
 
-        var fieldName = field.getName();
+        /*var fieldName = field.getName();
         var fieldType = ollirTypeToJasminType(field.getType());
 
         code.append("aload ").append(reg).append(NL);
         code.append("getfield ").append(currentMethod.getOllirClass().getClassName())
                 .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
+        */
 
         return code.toString();
     }
@@ -320,11 +321,10 @@ public class JasminGenerator {
     }
 
     private String generateArrayOperand(ArrayOperand arrOp){
-        System.out.println("fodasi");
         var code = new StringBuilder();
         var reg = currentMethod.getVarTable().get(arrOp.getName()).getVirtualReg();
         code.append("aload").append(reg).append(NL);
-        //code.append(generators.apply(arrOp.getIndexOperands().get(0))).append(NL).append("iaload");
+        code.append(generators.apply(arrOp.getIndexOperands().get(0))).append(NL).append("iaload");
         return code.toString();
     }
 
@@ -426,6 +426,7 @@ public class JasminGenerator {
                 break;
 
             case NEW:
+                /*
                 if (callerType.equals("int")) {
                     //TODO need to change type utils or kind to recognize ARRAYOPERAND probablyy
                     for (Element element : callInstruction.getOperands()) {
@@ -438,7 +439,8 @@ public class JasminGenerator {
                     code.append("newarray int").append(NL);
                 } else {
                     code.append("new ").append(callerType).append(NL).append("dup").append(NL);
-                }
+                }*/
+                code.append("new ").append(callerType).append(NL).append("dup").append(NL);
                 break;
         }
 

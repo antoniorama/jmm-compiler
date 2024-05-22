@@ -383,7 +383,7 @@ public class OtherSemantics extends AnalysisVisitor {
         String booleanTypeName = TypeUtils.getBooleanTypeName();
 
         return switch (operator) {
-            case "+", "*", "/", "-" -> leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName);
+            case "+", "*", "/", "-", "<" -> leftType.getName().equals(intTypeName) && rightType.getName().equals(intTypeName);
             case "ASSIGN" -> isAssignValid(leftType, rightType, table);
             case "&&" -> leftType.getName().equals(booleanTypeName) && rightType.getName().equals(booleanTypeName);
             default -> false;

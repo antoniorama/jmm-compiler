@@ -33,7 +33,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         addVisit(PARENTHESES_EXPRESSION, this::visitParenthesesExpr);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(LOGICAL_EXPRESSION, this::visitLogicalExpr);
-        addVisit(RELATIONAL_EXPRESSION, this::visitBinExpr);
+        addVisit(RELATIONAL_EXPRESSION, this::visitRelationalExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(BOOLEAN_VALUE, this::visitBoolean);
         addVisit(NOT_EXPRESSION, this::visitNotExpr);
@@ -79,8 +79,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
     }
 
     private OllirExprResult visitLogicalExpr(JmmNode node, Void unused) {
-        String operator = node.get("op");
-        if (!operator.equals("&&")) return visitBinExpr(node, unused);
 
         StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
@@ -97,6 +95,31 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         computation.append("goto end_").append(ifThenNum).append(END_STMT).append("true_").append(ifThenNum).append(":\n");
         computation.append(rhs.getComputation());
         computation.append(tempVar).append(" :=.bool ").append(rhs.getCode()).append(END_STMT);
+        computation.append("end_").append(ifThenNum).append(":\n");
+
+        code.append(tempVar);
+
+        return new OllirExprResult(code.toString(), computation);
+    }
+
+    private OllirExprResult visitRelationalExpr(JmmNode node, Void unused) {
+
+        String operator = node.get("op");
+        StringBuilder code = new StringBuilder();
+        StringBuilder computation = new StringBuilder();
+        String ollirBoolType = OptUtils.toOllirType(new Type(TypeUtils.getBooleanTypeName(), false));
+        String tempVar = OptUtils.getTemp() + ollirBoolType;
+
+        var lhs = visit(node.getChild(0));
+        var rhs = visit(node.getChild(1));
+        int ifThenNum = OptUtils.getNextIfThenNum();
+
+        computation.append(lhs.getComputation()).append(rhs.getComputation());
+
+        computation.append("if(").append(lhs.getCode()).append(operator).append(ollirBoolType).append(SPACE).append(rhs.getCode()).append(") goto true_").append(ifThenNum).append(END_STMT);
+        computation.append(tempVar).append(" :=.bool 0.bool").append(END_STMT);
+        computation.append("goto end_").append(ifThenNum).append(END_STMT).append("true_").append(ifThenNum).append(":\n");
+        computation.append(tempVar).append(" :=.bool 1.bool").append(END_STMT);
         computation.append("end_").append(ifThenNum).append(":\n");
 
         code.append(tempVar);

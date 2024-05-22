@@ -294,13 +294,13 @@ public class JasminGenerator {
         var reg = field.getParamId();
         currentMethod.getVarTable().get(field.getName()).setVirtualReg(reg);
 
-        /*var fieldName = field.getName();
+        var fieldName = field.getName();
         var fieldType = ollirTypeToJasminType(field.getType());
 
         code.append("aload ").append(reg).append(NL);
         code.append("getfield ").append(currentMethod.getOllirClass().getClassName())
                 .append("/").append(fieldName).append(" ").append(fieldType).append(NL);
-        */
+
 
         return code.toString();
     }

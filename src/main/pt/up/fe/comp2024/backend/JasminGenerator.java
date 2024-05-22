@@ -48,6 +48,7 @@ public class JasminGenerator {
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOpInstruction);
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(Field.class, this::generateField);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
@@ -125,6 +126,7 @@ public class JasminGenerator {
         // set method
         currentMethod = method;
         var code = new StringBuilder();
+        StringBuilder methodBody = new StringBuilder();
 
         // calculate modifier
         var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
@@ -138,36 +140,86 @@ public class JasminGenerator {
             Type type = param.getType();
             code.append(ollirTypeToJasminType(type));
         }
-
+        //System.out.println(((ArrayType) method.getReturnType()).getElementType().toString());
         String returnType = ollirTypeToJasminType(method.getReturnType());
         code.append(")").append(returnType).append(NL);
-
-        // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
 
         for (Instruction inst : method.getInstructions()) {
             List<String> label = method.getLabels(inst);
 
             if (label != null) {
-                for (String l : label) code.append(l).append(":").append(NL);
+                for (String l : label) methodBody.append(l).append(":").append(NL);
             }
 
             String instCode = StringLines.getLines(generators.apply(inst)).stream().collect(Collectors.joining(NL + TAB, TAB, NL));
 
-            code.append(instCode);
+            methodBody.append(instCode);
 
             if (inst instanceof CallInstruction callInstruction && !callInstruction.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
                 code.append(TAB + "pop" + NL);
             }
         }
 
+        var varTable = method.getVarTable();
+        int numOfVars = varTable.size();
+
+        code.append(".limit stack ").append(getStackLimit(methodBody.toString())).append(NL);
+        code.append(".limit locals ").append(numOfVars + 1).append(NL);
+        code.append(methodBody);
         code.append(".end method\n");
 
         // unset method
         currentMethod = null;
 
         return code.toString();
+    }
+
+    private int getStackLimit(String jasminCode) {
+        int currentStack = 0;
+        int maxStack = 0;
+
+        // Split the input code into individual lines/instructions
+        String[] lines = jasminCode.split("\n");
+
+        for (String line : lines) {
+            String trimmedLine = line.trim();
+            if (trimmedLine.isEmpty()) continue;
+
+            if (trimmedLine.startsWith("aload") || trimmedLine.startsWith("iload") || trimmedLine.startsWith("fload") || trimmedLine.startsWith("dload") ||
+                    trimmedLine.startsWith("ldc") || trimmedLine.startsWith("new") || trimmedLine.startsWith("dup")) {
+                currentStack += 1;
+            } else if (trimmedLine.startsWith("istore") || trimmedLine.startsWith("fstore") || trimmedLine.startsWith("dstore") ||
+                    trimmedLine.startsWith("astore") || trimmedLine.startsWith("pop")) {
+                currentStack -= 1;
+            } else if (trimmedLine.startsWith("iadd") || trimmedLine.startsWith("isub") || trimmedLine.startsWith("imul") || trimmedLine.startsWith("idiv") ||
+                    trimmedLine.startsWith("fadd") || trimmedLine.startsWith("fsub") || trimmedLine.startsWith("fmul") || trimmedLine.startsWith("fdiv")) {
+                currentStack -= 1;
+            } else if (trimmedLine.startsWith("invokevirtual") || trimmedLine.startsWith("invokestatic") || trimmedLine.startsWith("invokespecial")) {
+                int numArgs = countMethodArgs(trimmedLine);
+                currentStack -= numArgs;
+                if (!methodReturnsVoid(trimmedLine)) {
+                    currentStack += 1;
+                }
+            } else if (trimmedLine.startsWith("ireturn") || trimmedLine.startsWith("freturn") || trimmedLine.startsWith("dreturn") ||
+                    trimmedLine.startsWith("areturn")) {
+                currentStack -= 1;
+            }
+
+            if (currentStack > maxStack) {
+                maxStack = currentStack;
+            }
+        }
+
+        return maxStack;
+    }
+
+    private int countMethodArgs(String invokeInstruction) {
+        String descriptor = invokeInstruction.substring(invokeInstruction.indexOf("(") + 1, invokeInstruction.indexOf(")"));
+        return (int) descriptor.chars().filter(ch -> ch == 'I' || ch == 'F' || ch == 'D' || ch == 'L').count();
+    }
+
+    private boolean methodReturnsVoid(String invokeInstruction) {
+        return invokeInstruction.contains(")V");
     }
 
     private String generateAssign(AssignInstruction assign) {
@@ -290,6 +342,17 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String generateUnaryOpInstruction(UnaryOpInstruction unaryOp){
+        var code = new StringBuilder();
+        code.append("ldc 1").append(NL);
+        code.append(generators.apply(unaryOp.getOperand()));
+
+        code.append("ixor").append(NL);
+
+        return code.toString();
+
+    }
+
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
 
@@ -313,12 +376,17 @@ public class JasminGenerator {
         String invocationCode = "";
 
         Operand caller = (Operand) callInstruction.getCaller();
-        System.out.println("HERE2 " + callInstruction);
         String callerName = caller.getName();
 
-        System.out.println("HERE " + caller);
-        ClassType callerClass = (ClassType) caller.getType();
-        String callerType = getFullName(callerClass.getName());
+        String callerType = "";
+
+        if (caller.getType() instanceof ClassType){
+            ClassType callerClass = (ClassType) caller.getType();
+            callerType = getFullName(callerClass.getName());
+        }
+        else if (caller.getType() instanceof ArrayType) {
+            callerType = getFullName("int[]");
+        }
 
         CallType invocationType = callInstruction.getInvocationType();
 
@@ -346,7 +414,7 @@ public class JasminGenerator {
                 break;
 
             case NEW:
-                code.append("new ").append(callerType).append(NL).append("dup");
+                code.append("new ").append(callerType).append(NL).append("dup").append(NL);
                 break;
         }
 
@@ -375,7 +443,7 @@ public class JasminGenerator {
             case STRING -> "Ljava/lang/String;";
             case VOID -> "V";
             case THIS -> null;
-            case ARRAYREF -> "[Ljava/lang/String;";
+            case ARRAYREF -> ((ArrayType) type).getElementType().toString().equals("INT32") ? "[INT32" : "[Ljava/lang/String;" ;
             case OBJECTREF, CLASS -> "L" + getFullName(((ClassType) type).getName()) + ";";
             };
         }

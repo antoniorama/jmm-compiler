@@ -48,6 +48,7 @@ public class JasminGenerator {
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOpInstruction);
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(Field.class, this::generateField);
         generators.put(GetFieldInstruction.class, this::generateGetFieldInstruction);
@@ -288,6 +289,17 @@ public class JasminGenerator {
         code.append(op).append(NL);
 
         return code.toString();
+    }
+
+    private String generateUnaryOpInstruction(UnaryOpInstruction unaryOp){
+        var code = new StringBuilder();
+        code.append("ldc 1").append(NL);
+        code.append(generators.apply(unaryOp.getOperand()));
+
+        code.append("ixor").append(NL);
+
+        return code.toString();
+
     }
 
     private String generateReturn(ReturnInstruction returnInst) {

@@ -436,8 +436,14 @@ public class JasminGenerator {
 
         String jumpInstruction = switch (opType) {
             case LTH -> "if_icmplt ";
-            default -> "NOT DEFINED ";
+            case GTH -> "if_icmpgt ";
+            case LTE -> "if_icmple ";
+            case GTE -> "if_icmpge ";
+            case EQ -> "if_icmpeq ";
+            case NEQ -> "if_icmpne ";
+            default -> throw new UnsupportedOperationException("Operation type " + opType + " not supported.");
         };
+
 
         code.append(jumpInstruction).append(instruction.getLabel()).append(NL);
 

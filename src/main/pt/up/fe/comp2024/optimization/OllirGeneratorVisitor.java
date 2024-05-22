@@ -218,7 +218,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String typeString = OptUtils.toOllirType(thisType);
 
         if (isFieldAssignment) {
-            code.append("putfield(this, ").append(child.get("name")).append(typeString).append(", ").append(rhs.getCode()).append(").V;\n");
+            code.append(rhs.getComputation()).append("putfield(this, ").append(child.get("name")).append(typeString).append(", ").append(rhs.getCode()).append(").V;\n");
             return code.toString();
         }
 

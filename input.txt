@@ -4,7 +4,8 @@ class A {
     int[] i;
 
     public int foo() {
-        i = new int[10];
+        int[] j;
+        j = i;
         return i[0];
     }
 }

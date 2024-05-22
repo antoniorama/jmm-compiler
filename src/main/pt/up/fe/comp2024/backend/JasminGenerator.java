@@ -139,7 +139,7 @@ public class JasminGenerator {
             Type type = param.getType();
             code.append(ollirTypeToJasminType(type));
         }
-
+        //System.out.println(((ArrayType) method.getReturnType()).getElementType().toString());
         String returnType = ollirTypeToJasminType(method.getReturnType());
         code.append(")").append(returnType).append(NL);
 
@@ -325,12 +325,17 @@ public class JasminGenerator {
         String invocationCode = "";
 
         Operand caller = (Operand) callInstruction.getCaller();
-        System.out.println("HERE2 " + callInstruction);
         String callerName = caller.getName();
 
-        System.out.println("HERE " + caller);
-        ClassType callerClass = (ClassType) caller.getType();
-        String callerType = getFullName(callerClass.getName());
+        String callerType = "";
+
+        if (caller.getType() instanceof ClassType){
+            ClassType callerClass = (ClassType) caller.getType();
+            callerType = getFullName(callerClass.getName());
+        }
+        else if (caller.getType() instanceof ArrayType) {
+            callerType = getFullName("int[]");
+        }
 
         CallType invocationType = callInstruction.getInvocationType();
 
@@ -358,7 +363,7 @@ public class JasminGenerator {
                 break;
 
             case NEW:
-                code.append("new ").append(callerType).append(NL).append("dup");
+                code.append("new ").append(callerType).append(NL).append("dup").append(NL);
                 break;
         }
 
@@ -387,7 +392,7 @@ public class JasminGenerator {
             case STRING -> "Ljava/lang/String;";
             case VOID -> "V";
             case THIS -> null;
-            case ARRAYREF -> "[Ljava/lang/String;";
+            case ARRAYREF -> ((ArrayType) type).getElementType().toString().equals("INT32") ? "[INT32" : "[Ljava/lang/String;" ;
             case OBJECTREF, CLASS -> "L" + getFullName(((ClassType) type).getName()) + ";";
             };
         }

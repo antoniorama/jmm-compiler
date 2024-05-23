@@ -535,11 +535,11 @@ public class JasminGenerator {
         OperationType opType = instruction.getCondition().getOperation().getOpType();
         System.out.println("opType " + opType);
 
+        if (opType == OperationType.LTH || opType == OperationType.GTH) code.append("isub").append(NL);
+
         String jumpInstruction = switch (opType) {
-            case LTH -> "if_icmplt ";
-            case GTH -> "if_icmpgt ";
-            case LTE -> "if_icmple ";
-            case GTE -> "if_icmpge ";
+            case LTH -> "iflt ";
+            case GTH -> "ifgt ";
             case EQ -> "if_icmpeq ";
             case NEQ -> "if_icmpne ";
             default -> throw new UnsupportedOperationException("Operation type " + opType + " not supported.");

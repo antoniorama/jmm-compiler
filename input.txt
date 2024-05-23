@@ -1,18 +1,12 @@
-import io;
+class InstSelection_if_lt {
+	public static void main(String[] args) {
+	    int a;
+        a = 0;
 
-class ArrayVarargs {
-
-
-    int foo(int i, int... a) {
-        return a[0];
-    }
-
-    int bar() {
-        int res;
-
-        res = this.foo(3, 20, this.foo(5,1,2,3,4,5) , 40);
-
-        return res;
-    }
-
+		if(a < 10) {
+			a = 1;
+		} else {
+			a = 2;
+		}
+	}
 }

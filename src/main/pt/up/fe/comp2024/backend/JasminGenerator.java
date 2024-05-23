@@ -189,7 +189,8 @@ public class JasminGenerator {
             if (trimmedLine.isEmpty()) continue;
 
             if (trimmedLine.startsWith("aload") || trimmedLine.startsWith("iload") || trimmedLine.startsWith("fload") || trimmedLine.startsWith("dload") ||
-                    trimmedLine.startsWith("ldc") || trimmedLine.startsWith("new") || trimmedLine.startsWith("dup") || trimmedLine.startsWith("iconst")) {
+                    trimmedLine.startsWith("ldc") || trimmedLine.startsWith("new") || trimmedLine.startsWith("dup") || trimmedLine.startsWith("iconst") ||
+                    trimmedLine.startsWith("bipush") || trimmedLine.startsWith("sipush")) {
                 currentStack += 1;
             } else if (trimmedLine.startsWith("istore") || trimmedLine.startsWith("fstore") || trimmedLine.startsWith("dstore") ||
                     trimmedLine.startsWith("astore") || trimmedLine.startsWith("pop")) {
@@ -315,8 +316,12 @@ public class JasminGenerator {
 
         try {
             int literalValue = Integer.parseInt(literalString);
-            if (literalValue >= 0 && literalValue <= 5) {
+            if (literalValue <= 5) {
                 instruction = "iconst_";
+            } else if (literalValue <= 127) {
+                instruction = "bipush ";
+            } else if (literalValue <= 32767) {
+                instruction = "sipush ";
             }
         } catch (NumberFormatException e) {
             System.out.println("The string is not a valid integer");

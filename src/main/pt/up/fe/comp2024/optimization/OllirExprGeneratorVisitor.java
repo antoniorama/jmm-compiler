@@ -220,7 +220,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         // Handle each argument of the method
-        for (int i = 1; i <= node.getNumChildren(); i++) {
+        for (int i = 1; i < node.getNumChildren(); i++) {
 
             if (isVarArgs && index == i - 1) {
 

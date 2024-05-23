@@ -1,11 +1,12 @@
-import io;
-class IfElseInMain {
+class Test {
 
-    int[] a;
-    int i;
+    public int foo(int i, int ... maybe) {
+        return maybe[0];
+    }
 
     public int nothing() {
-        a = new int[10];
-        return 0;
+        int i;
+        i = this.foo(3, 20, this.foo(5,1,2,3,4,5) , 40);
+        return i;
     }
 }

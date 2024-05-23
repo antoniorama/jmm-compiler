@@ -1,15 +1,14 @@
-class ArrayAccess {
+import io;
+class ComplexArrayAccess {
 
-	public int foo() {
-		int result;
-		int[] a;
+    int i;
 
-		result = a[0];
-		a[0] = result;
+    public int foo(int a) {
+        return 0;
+    }
 
-        return 1;
+    public int func(int a) {
 
-	}
-
-
+        return io.foo(io.get());
+    }
 }

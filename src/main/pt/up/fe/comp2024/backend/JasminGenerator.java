@@ -243,12 +243,17 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
+        String instAppend = " ";
+        if (reg <= 3) {
+            instAppend = "_";
+        }
+
         String storeInstruction = switch(operand.getType().getTypeOfElement()){
-            case INT32, BOOLEAN -> "istore ";
-            case ARRAYREF, OBJECTREF, CLASS, STRING -> "astore ";
+            case INT32, BOOLEAN -> "istore";
+            case ARRAYREF, OBJECTREF, CLASS, STRING -> "astore";
             case THIS, VOID -> null;
         };
-        code.append(storeInstruction).append(reg).append(NL);
+        code.append(storeInstruction).append(instAppend).append(reg).append(NL);
         return code.toString();
     }
 
@@ -331,9 +336,12 @@ public class JasminGenerator {
     }
 
     private String generateOperand(Operand operand) {
+        int value = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        String instAppend = " ";
+        if (value <= 3) instAppend = "_";
         return switch (operand.getType().getTypeOfElement()) {
-            case BOOLEAN, INT32 -> "iload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
-            default -> "aload " + currentMethod.getVarTable().get(operand.getName()).getVirtualReg() + NL;
+            case BOOLEAN, INT32 -> "iload" + instAppend + value + NL;
+            default -> "aload" + instAppend + value + NL;
         };
     }
 

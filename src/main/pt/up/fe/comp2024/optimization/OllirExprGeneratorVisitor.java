@@ -219,33 +219,39 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
             }
         }
 
+        String ollirIntType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
+        String tempVarForVarArgs = "";
+        String arrayType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), true));
+        int numArgs = node.getNumChildren() - 1;
+
+        if (isVarArgs) {
+            tempVarForVarArgs = OptUtils.getTemp();
+            computation.append(tempVarForVarArgs).append(arrayType).append(SPACE).append(ASSIGN).append(arrayType).append(SPACE).append("new(array, ").append(numArgs - index).append(ollirIntType).append(")").append(arrayType).append(END_STMT);
+        }
+
         // Handle each argument of the method
         for (int i = 1; i < node.getNumChildren(); i++) {
 
-            if (isVarArgs && index == i - 1) {
+            if (!isVarArgs || index > i - 1) {
+                OllirExprResult argExpr = visit(node.getChild(i));
+                computation.append(argExpr.getComputation());
+                argsCode.add(argExpr.getCode());
+            }
 
-                String ollirIntType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), false));
-                String tempVar = OptUtils.getTemp();
-                String arrayType = OptUtils.toOllirType(new Type(TypeUtils.getIntTypeName(), true));
-                computation.append(tempVar).append(arrayType).append(SPACE).append(ASSIGN).append(arrayType).append(SPACE).append("new(array, ").append(node.getNumChildren() - i).append(ollirIntType).append(")").append(arrayType).append(END_STMT);
+            else if (index == i - 1) {
 
                 int indexVarArgs = 0;
                 for (int j = i; j < node.getNumChildren(); j++) {
                     OllirExprResult argExpr = visit(node.getChild(j));
                     computation.append(argExpr.getComputation());
-                    computation.append(tempVar).append("[").append(indexVarArgs).append(ollirIntType).append("]").append(ollirIntType).append(SPACE).append(ASSIGN).append(ollirIntType).append(SPACE).append(argExpr.getCode()).append(END_STMT);
+                    computation.append(tempVarForVarArgs).append("[").append(indexVarArgs).append(ollirIntType).append("]").append(ollirIntType).append(SPACE).append(ASSIGN).append(ollirIntType).append(SPACE).append(argExpr.getCode()).append(END_STMT);
                     indexVarArgs++;
                 }
-
-                argsCode.add(tempVar + arrayType);
-            }
-
-            else if (!isVarArgs || index > i - 1) {
-                OllirExprResult argExpr = visit(node.getChild(i));
-                computation.append(argExpr.getComputation());
-                argsCode.add(argExpr.getCode());
             }
         }
+
+        if (isVarArgs) argsCode.add(tempVarForVarArgs + arrayType);
+
 
         boolean isAssign = false;
         boolean isStatic = false;

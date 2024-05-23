@@ -220,7 +220,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         }
 
         // Handle each argument of the method
-        for (int i = 1; i < node.getNumChildren(); i++) {
+        for (int i = 1; i <= node.getNumChildren(); i++) {
 
             if (isVarArgs && index == i - 1) {
 
@@ -231,7 +231,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
 
                 int indexVarArgs = 0;
                 for (int j = i; j < node.getNumChildren(); j++) {
-                    computation.append(tempVar).append("[").append(indexVarArgs).append(ollirIntType).append("]").append(ollirIntType).append(SPACE).append(ASSIGN).append(ollirIntType).append(SPACE).append(visit(node.getChild(j)).getCode()).append(END_STMT);
+                    OllirExprResult argExpr = visit(node.getChild(j));
+                    computation.append(argExpr.getComputation());
+                    computation.append(tempVar).append("[").append(indexVarArgs).append(ollirIntType).append("]").append(ollirIntType).append(SPACE).append(ASSIGN).append(ollirIntType).append(SPACE).append(argExpr.getCode()).append(END_STMT);
                     indexVarArgs++;
                 }
 

@@ -1,14 +1,11 @@
 import io;
-class ComplexArrayAccess {
+class IfElseInMain {
 
+    int[] a;
     int i;
 
-    public int foo(int a) {
+    public int nothing() {
+        a = new int[10];
         return 0;
-    }
-
-    public int func(int a) {
-
-        return io.foo(io.get());
     }
 }

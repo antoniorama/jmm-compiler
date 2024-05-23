@@ -173,9 +173,11 @@ public class TypeUtils {
         while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
             if (parent.getKind().equals("AssignStmt")) {
                 isAssign = true;
+                break;
             }
             else if (parent.getKind().equals("ReturnStmt")) {
                 isInsideReturn = true;
+                break;
             }
             else if (parent.getKind().equals("MethodCall")) {
                 break;

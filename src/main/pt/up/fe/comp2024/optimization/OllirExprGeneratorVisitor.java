@@ -171,7 +171,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Void, OllirExprResult
         String methodName = parent.get("name");
 
         for (var local : table.getLocalVariables(methodName)) {
-            if (local.getName().equals(node.get("name"))) {
+            if (local.getName().equals(id)) {
                 isField = false;
                 break;
             }

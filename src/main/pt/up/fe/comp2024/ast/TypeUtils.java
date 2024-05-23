@@ -150,11 +150,19 @@ public class TypeUtils {
         return new Type(typeNode.get("value"), true);
     }
 
+    private static boolean isMethodCallImported(JmmNode methodCall, SymbolTable table) {
+        JmmNode child = methodCall.getJmmChild(0);
+        Type childType = getExprType(child, table);
+        return !(child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName())));
+    }
+
     private static Type getMethodCallType(JmmNode methodCall, SymbolTable table) {
 
         boolean isAssign = false;
         boolean isImported = true;
         boolean isStatic = false;
+        boolean isInsideReturn = false;
+        boolean isInsideMethodCall = false;
         JmmNode parent = methodCall.getParent();
         JmmNode child = methodCall.getJmmChild(0);
         Type returnType = table.getReturnType(methodCall.get("methodName"));
@@ -167,13 +175,45 @@ public class TypeUtils {
         while(!parent.getKind().equals("MethodDecl") && !parent.getKind().equals("MainMethodDecl")) {
             if (parent.getKind().equals("AssignStmt")) {
                 isAssign = true;
+            }
+            else if (parent.getKind().equals("ReturnStmt")) {
+                isInsideReturn = true;
+            }
+            else if (parent.getKind().equals("MethodCall")) {
+                isInsideMethodCall = true;
                 break;
             }
+
             parent = parent.getParent();
         }
 
-        if (child.getKind().equals("This") || (childType != null && Objects.equals(childType.getName(), table.getClassName()))) {
-            isImported = false;
+        isImported = isMethodCallImported(methodCall, table);
+
+        if (isImported && isInsideReturn) {
+            return table.getReturnType(parent.get("name"));
+        }
+
+        if (isImported && isInsideMethodCall && !isMethodCallImported(parent, table)) {
+            int index = 0;
+            String parentMethod = parent.get("methodName");
+
+            for (int i = 1; i < parent.getNumChildren(); i++) {
+                if (parent.getJmmChild(i).equals(methodCall)) {
+                    break;
+                }
+                index++;
+            }
+
+            if (table.getMethods().contains(parentMethod)) {
+                int paramIndex = 0;
+                for (var param : table.getParameters(parentMethod)) {
+                    if (paramIndex == index) {
+
+                        return param.getType();
+                    }
+                    index++;
+                }
+            }
         }
 
         if (childType == null) {

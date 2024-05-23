@@ -1,12 +1,18 @@
-class Test {
+import io;
 
-    public int foo(int i, int ... maybe) {
-        return maybe[0];
+class ArrayVarargs {
+
+
+    int foo(int i, int... a) {
+        return a[0];
     }
 
-    public int nothing() {
-        int i;
-        i = this.foo(3, 20, this.foo(5,1,2,3,4,5) , 40);
-        return i;
+    int bar() {
+        int res;
+
+        res = this.foo(3, 20, this.foo(5,1,2,3,4,5) , 40);
+
+        return res;
     }
+
 }

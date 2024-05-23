@@ -229,58 +229,33 @@ public class JasminGenerator {
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
-        // Check if this is a simple increment case
-        if (isSimpleIncrement(assign)) {
-            BinaryOpInstruction boInst = (BinaryOpInstruction) assign.getRhs();
-            Operand operand = (Operand) boInst.getOperands().get(0);
-            LiteralElement element = (LiteralElement) boInst.getOperands().get(1);
-
-            Descriptor varName = currentMethod.getVarTable().get(operand.getName());
-
-            // Check if the variable name does not start with "tmp"
-            // This could be a problem if a jmm var starts with tmp -> TODO
-            if (!varName.toString().startsWith("tmp")) {
-                code.append("iinc ").append(varName.getVirtualReg()).append(" ").append(element.getLiteral()).append(NL);
-                return code.toString();
-            }
-        }
-
-        appendGenericAssign(code, assign);
-        return code.toString();
-    }
-
-    private boolean isSimpleIncrement(AssignInstruction assign) {
-        // if 'Y = i + X'
-        // THAT IS:
-        // if right side is a binary operation (boInst)
-        // AND boInst size is 2
-        // AND boInst left side is variable
-        // AND boInst right side is literal
-        if (!(assign.getRhs() instanceof BinaryOpInstruction boInst)) return false;
-        if (boInst.getOperands().size() != 2) return false;
-        return boInst.getOperands().get(0) instanceof Operand && boInst.getOperands().get(1) instanceof LiteralElement;
-    }
-
-    private void appendGenericAssign(StringBuilder code, AssignInstruction assign) {
+        // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
-        // Retrieve and store value
+        // store value in the stack in destination
         var lhs = assign.getDest();
+
         if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
 
+
+        // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        String instAppend = reg <= 3 ? "_" : " ";
-        String storeInstruction = switch (operand.getType().getTypeOfElement()) {
+
+        String instAppend = " ";
+        if (reg <= 3) {
+            instAppend = "_";
+        }
+
+        String storeInstruction = switch(operand.getType().getTypeOfElement()){
             case INT32, BOOLEAN -> "istore";
             case ARRAYREF, OBJECTREF, CLASS, STRING -> "astore";
-            case THIS, VOID -> throw new IllegalStateException("Unsupported type for storage");
+            case THIS, VOID -> null;
         };
-
         code.append(storeInstruction).append(instAppend).append(reg).append(NL);
+        return code.toString();
     }
-
 
 
     private String generateField(Field field){

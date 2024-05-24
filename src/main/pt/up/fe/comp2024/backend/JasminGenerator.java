@@ -229,33 +229,63 @@ public class JasminGenerator {
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
 
-        // generate code for loading what's on the right
+        // Check if this is a simple increment case
+        if (isSimpleIncrement(assign)) {
+            BinaryOpInstruction boInst = (BinaryOpInstruction) assign.getRhs();
+            Operand operand = (Operand) boInst.getOperands().get(0);
+            LiteralElement element = (LiteralElement) boInst.getOperands().get(1);
+
+            Descriptor varName = currentMethod.getVarTable().get(operand.getName());
+
+            // Check if the variable name does not start with "tmp"
+            // This could be a problem if a jmm var starts with tmp -> TODO
+            if (!operand.getName().startsWith("tmp")) {
+                code.append("iinc ").append(varName.getVirtualReg()).append(" ").append(element.getLiteral()).append(NL);
+                return code.toString();
+            }
+        }
+
+        appendGenericAssign(code, assign);
+        return code.toString();
+    }
+
+    private boolean isSimpleIncrement(AssignInstruction assign) {
+        // if 'Y = i + X'
+        // THAT IS:
+        // if right side is a binary operation (boInst)
+        // AND boInst size is 2
+        // AND boInst left side is variable
+        // AND boInst right side is literal
+        if (!(assign.getRhs() instanceof BinaryOpInstruction boInst)) return false;
+        if (!(boInst.getOperands().get(0) instanceof Operand operand)) return false;
+        if (!(assign.getDest() instanceof Operand operand2)) return false;
+        String assignRightVarName = operand.getName();
+        String destVarName = operand2.getName();
+        if (!destVarName.equals(assignRightVarName)) return false; // check if Y and i have the same name
+        if (boInst.getOperands().size() != 2) return false;
+        return boInst.getOperands().get(1) instanceof LiteralElement;
+    }
+
+    private void appendGenericAssign(StringBuilder code, AssignInstruction assign) {
         code.append(generators.apply(assign.getRhs()));
 
-        // store value in the stack in destination
+        // Retrieve and store value
         var lhs = assign.getDest();
-
         if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
 
-
-        // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-
-        String instAppend = " ";
-        if (reg <= 3) {
-            instAppend = "_";
-        }
-
-        String storeInstruction = switch(operand.getType().getTypeOfElement()){
+        String instAppend = reg <= 3 ? "_" : " ";
+        String storeInstruction = switch (operand.getType().getTypeOfElement()) {
             case INT32, BOOLEAN -> "istore";
             case ARRAYREF, OBJECTREF, CLASS, STRING -> "astore";
-            case THIS, VOID -> null;
+            case THIS, VOID -> throw new IllegalStateException("Unsupported type for storage");
         };
+
         code.append(storeInstruction).append(instAppend).append(reg).append(NL);
-        return code.toString();
     }
+
 
 
     private String generateField(Field field){

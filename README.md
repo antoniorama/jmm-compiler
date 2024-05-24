@@ -1,3 +1,5 @@
 # Comp2024 Project
 
-Contains a reference implementation for an initial version of the project that supports a small portion of Java--.
+## Optimizations
+
+- Low cost JVM instructions (iflt, ifne, iinc, iload_x, iconst_x, bipush, ...)

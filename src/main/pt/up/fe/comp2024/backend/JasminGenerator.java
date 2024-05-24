@@ -239,7 +239,7 @@ public class JasminGenerator {
 
             // Check if the variable name does not start with "tmp"
             // This could be a problem if a jmm var starts with tmp -> TODO
-            if (!varName.toString().startsWith("tmp")) {
+            if (!operand.getName().startsWith("tmp")) {
                 code.append("iinc ").append(varName.getVirtualReg()).append(" ").append(element.getLiteral()).append(NL);
                 return code.toString();
             }
@@ -257,8 +257,13 @@ public class JasminGenerator {
         // AND boInst left side is variable
         // AND boInst right side is literal
         if (!(assign.getRhs() instanceof BinaryOpInstruction boInst)) return false;
+        if (!(boInst.getOperands().get(0) instanceof Operand operand)) return false;
+        if (!(assign.getDest() instanceof Operand operand2)) return false;
+        String assignRightVarName = operand.getName();
+        String destVarName = operand2.getName();
+        if (!destVarName.equals(assignRightVarName)) return false; // check if Y and i have the same name
         if (boInst.getOperands().size() != 2) return false;
-        return boInst.getOperands().get(0) instanceof Operand && boInst.getOperands().get(1) instanceof LiteralElement;
+        return boInst.getOperands().get(1) instanceof LiteralElement;
     }
 
     private void appendGenericAssign(StringBuilder code, AssignInstruction assign) {
